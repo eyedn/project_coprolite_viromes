@@ -18,7 +18,7 @@ assemble_libraries() {
 	local num_cores=$4
 
 	# identyify all libraries
-	python3 $HOME/project_coprolite_viromes/assembly/identify_fastq_files.py $fastq_trimmed_dir > $assembly_dir/id_paths.txt
+	python3 $HOME/project_coprolite_viromes/megahit_assembly/identify_fastq_files.py $fastq_trimmed_dir > $assembly_dir/id_paths.txt
 	single_end_data="$(head -n 1 $assembly_dir/id_paths.txt | cut -f 1)"
 	paired_end_data_1="$(head -n 1 $assembly_dir/id_paths.txt | cut -f 2)"
 	paired_end_data_2="$(head -n 1 $assembly_dir/id_paths.txt | cut -f 3)"
