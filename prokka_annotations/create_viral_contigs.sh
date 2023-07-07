@@ -22,6 +22,19 @@ contigs_file="${assembly_dir}/${origin}_${sample}_all_contigs.fa"
 annot_dir="${annotations_dir}/${origin}_${sample}_annotation_viruses"
 gff_file="$annot_dir/${sample}.gff.gz"
 viral_contigs_output="$assembly_dir/${origin}_${sample}_viral_contigs.fa"
+
+# check if annotations file exists
+if ls $gff_file 1> /dev/null 2>&1; then
+	echo "$(timestamp): create_viral_contigs: annotations file not found"
+	exit 1
+fi
+
+# check if viral contigs already indentified
+if ls $viral_contigs_output 1> /dev/null 2>&1; then
+	echo "$(timestamp): create_viral_contigs: viral contigs already found"
+	exit 0
+fi
+
 echo "=================================================="
 echo "$(timestamp): create_viral_contigs: identify viral contigs"
 echo -e "\torigin: $origin"

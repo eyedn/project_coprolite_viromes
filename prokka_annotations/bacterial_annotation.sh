@@ -1,7 +1,7 @@
 ###############################################################################
 #       Aydin Karatas
 #		Project Coprolite Viromes
-#		viral_annotation.sh 
+#		bacterial_annotation.sh 
 ###############################################################################
 #!/bin/bash
 for FILE in $HOME/project_coprolite_viromes/prokka_annotations/bash_functions/* ; do source $FILE ; done
@@ -25,9 +25,22 @@ contigs_file="${assembly_dir}/${origin}_${sample}_viral_contigs.fa"
 annot_dir="${annotations_dir}/${origin}_${sample}_annotation_${label}"
 custom_db="no_data"
 
+# check if contigs file exists
+if ls $contigs_file 1> /dev/null 2>&1; then
+	echo "$(timestamp): bacterial_annotation: contigs file not found"
+	rmdir $annot_dir
+	exit 1
+fi
+
+# check if annotations already completed
+if ls $annot_dir 1> /dev/null 2>&1; then
+	echo "$(timestamp): bacterial_annotation: annotations around completed"
+	exit 0
+fi
+
 # annotation function uses prokka
 echo "=================================================="
-echo "$(timestamp): viral annotation"
+echo "$(timestamp): bacterial annotation"
 echo -e "\torigin: $origin"
 echo -e "\tsample: $sample"
 echo "=================================================="
