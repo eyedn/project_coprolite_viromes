@@ -32,7 +32,7 @@ megahit_assembler() {
 			-2 $paired_end_data_2 \
 			-r $single_end_data \
 			-t $num_cores \
-			-o ${output_dir}_extra
+			-o ${output_dir}
 	elif ! [ "$single_end_data" == "no_data" ] && \
 	[ "$paired_end_data_1" == "no_data" ] && \
 	[ "$paired_end_data_1" == "no_data" ]; then 
@@ -40,7 +40,7 @@ megahit_assembler() {
 		megahit \
 			-r $single_end_data \
 			-t $num_cores \
-			-o ${output_dir}_extra
+			-o ${output_dir}
 	elif [ "$single_end_data" == "no_data" ] && \
 	! [ "$paired_end_data_1" == "no_data" ] && \
 	! [ "$paired_end_data_1" == "no_data" ]; then 
@@ -49,7 +49,7 @@ megahit_assembler() {
 			-1 $paired_end_data_1 \
 			-2 $paired_end_data_2 \
 			-t $num_cores \
-			-o ${output_dir}_extra
+			-o ${output_dir}
 	else
 		echo "$(timestamp): megahit_assembler: libraries provided are not suitible for multiple-library assembly"
 		exit 1
