@@ -1,7 +1,7 @@
 ###############################################################################
 #       Aydin Karatas
 #		Project Coprolite Viromes
-#		download_pre_process_and_assembly.sh 
+#		download_to_assembly.sh 
 ###############################################################################
 #!/bin/bash
 
@@ -11,7 +11,7 @@ origin_parent=$2
 num_cores=$3
 
 # call download and pre-processing script
-. $HOME/project_coprolite_viromes/pre_processing/download_and_pre_process.sh "$origin" "$origin_parent" "$num_cores"
+. $HOME/project_coprolite_viromes/download/download_and_pre_process.sh "$origin" "$origin_parent" "$num_cores"
 
 # call assembly script
 . $HOME/project_coprolite_viromes/megahit_assembly/assembly.sh "$origin" "$origin_parent" "$num_cores"

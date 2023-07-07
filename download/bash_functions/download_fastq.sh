@@ -11,11 +11,10 @@ conda activate myconda
 
 
 # use fasterq dump to convert the sra file to fastq file(s)
-generate_fastq() {
+download_fastq() {
 	local id=$1
-	local sra_dir=$2
-	local fastq_raw_dir=$3
-	local num_cores=$4
+	local fastq_raw_dir=$2
+	local num_cores=$3
 
 	# if conversion already happened, skip to quality control
 	if ls ${fastq_raw_dir}/${id}/*.fastq 1> /dev/null 2>&1; then
@@ -24,20 +23,11 @@ generate_fastq() {
 		rm -r ${sra_dir}/${id}
 		return 0
 	fi
-	
-	# identify the sra file to use
-	if [ -f "${sra_dir}/${id}/${id}.sra" ]; then
-		sra_file="${sra_dir}/${id}/${id}.sra"
-	elif [ -f "${sra_dir}/${id}/${id}.sralite" ]; then
-		sra_file="${sra_dir}/${id}/${id}.sralite"
-	else
-		echo "$(timestamp): convert_sra_to_fastq: ERROR! sra* file not detected"
-		exit 1
-	fi
+
 
 	# convert sra to fastq format
 	fasterq-dump \
-		"$sra_file" \
+		"$id" \
 		--split-3 \
 		-O "${fastq_raw_dir}/${id}" \
 		-e "$num_cores" \

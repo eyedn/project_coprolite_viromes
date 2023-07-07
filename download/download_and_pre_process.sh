@@ -4,7 +4,7 @@
 #		download_and_pre_process.sh 
 ###############################################################################
 #!/bin/bash
-for FILE in $HOME/project_coprolite_viromes/pre_processing/bash_functions/* ; do source $FILE ; done
+for FILE in $HOME/project_coprolite_viromes/download/bash_functions/* ; do source $FILE ; done
 source $HOME/project_coprolite_viromes/general_bash_functions/timestamp.sh
 
 
@@ -20,10 +20,8 @@ accession_ids=$(head -n ${SGE_TASK_ID} ${project_dir}/samples/${origin}_samples.
 
 # create directoies for download and quality control
 mkdir -p $reads_dir
-mkdir -p $reads_dir/${origin}_${sample}_sra
 mkdir -p $reads_dir/${origin}_${sample}_fastq_raw
 mkdir -p $reads_dir/${origin}_${sample}_fastq_trimmed
-sra_dir="$reads_dir/${origin}_${sample}_sra"
 fastq_raw_dir="$reads_dir/${origin}_${sample}_fastq_raw"
 fastq_trimmed_dir="$reads_dir/${origin}_${sample}_fastq_trimmed"
 
@@ -34,16 +32,6 @@ for id in $accession_ids; do
 		return 0
 	fi
 
-	# first, prefect the sra file for each accesion id
-	echo "=================================================="
-	echo "$(timestamp): download_and_pre_process: prefetching sra file"
-	echo -e "\torigin: $origin"
-	echo -e "\tsample: $sample"
-	echo -e "\tid: $id"
-	echo "=================================================="
-	# uses prefetch from sra tool kit
-	download_sra "$id" "$sra_dir"
-
 	# second, convert sra files to fastq files
 	echo "=================================================="
 	echo "$(timestamp): download_and_pre_process: converting sra file to fastq files"
@@ -52,7 +40,7 @@ for id in $accession_ids; do
 	echo -e "\tid: $id"
 	echo "=================================================="
 	# uses fasterq-dump from sra tool kit
-	generate_fastq "$id" "$sra_dir" "$fastq_raw_dir" "$num_cores"
+	download_fastq "$id" "$sra_dir" "$fastq_raw_dir" "$num_cores"
 
 	# quality control fastq files by removing adapters and low quality reads
 	echo "=================================================="
@@ -66,7 +54,5 @@ for id in $accession_ids; do
 	echo "$(timestamp): download_and_pre_process: pre-processing complete for $id"
 done
 
-rm -r $sra_dir
 rm -r $fastq_raw_dir
 echo "$(timestamp): download_and_pre_process: pre-processing complete for $sample"
-
