@@ -26,8 +26,8 @@ fastq_raw_dir="$reads_dir/${origin}_${sample}_fastq_raw"
 fastq_trimmed_dir="$reads_dir/${origin}_${sample}_fastq_trimmed"
 
 for id in $accession_ids; do
-	# check if pre-processing was already complete for this id
-	if ls $reads_dir/$fastq_trimmed_dir/$id/*fq.gz 1> /dev/null 2>&1; then
+	# check if download was already complete for this id
+	if ls $fastq_trimmed_dir/$id/*fq.gz 1> /dev/null 2>&1; then
 		echo "$(timestamp): download_and_pre_process: pre-processing for ${id} already complete"
 		return 0
 	fi
