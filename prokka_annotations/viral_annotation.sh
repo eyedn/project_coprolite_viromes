@@ -28,6 +28,8 @@ custom_db="no_data"
 
 # check if contigs file exists
 if ls $contigs_file 1> /dev/null 2>&1; then
+	echo "$(timestamp): viral_annotation: contigs file found"
+else
 	echo "$(timestamp): viral_annotation: contigs file not found"
 	rmdir $annot_dir
 	exit 1

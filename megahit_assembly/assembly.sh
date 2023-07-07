@@ -28,7 +28,9 @@ fastq_trimmed_dir="${reads_dir}/${origin}_${sample}_fastq_trimmed"
 
 # check if download was already complete for this sample
 if ls $fastq_trimmed_dir/*/*fq.gz 1> /dev/null 2>&1; then
-	echo "$(timestamp): assembly: trimmed fastq files not found. download was not completed"
+	echo "$(timestamp): assembly: fastq file found"
+else
+	echo "$(timestamp): assembly: trimmed fastq files not found"
 	rmdir $assembly_dir $assembly_extra_dir
 	exit 1
 fi

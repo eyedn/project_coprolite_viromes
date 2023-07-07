@@ -23,8 +23,10 @@ annot_dir="${annotations_dir}/${origin}_${sample}_annotation_viruses"
 gff_file="$annot_dir/${sample}.gff.gz"
 viral_contigs_output="$assembly_dir/${origin}_${sample}_viral_contigs.fa"
 
-# check if annotations file exists
+# check if contigs file exists
 if ls $gff_file 1> /dev/null 2>&1; then
+	echo "$(timestamp): create_viral_contigs: annotations file found"
+else
 	echo "$(timestamp): create_viral_contigs: annotations file not found"
 	exit 1
 fi
