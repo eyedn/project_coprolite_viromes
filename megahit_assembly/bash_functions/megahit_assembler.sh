@@ -13,7 +13,7 @@ conda activate myconda
 # contains the megahit command to assembly fastq/fasta files
 megahit_assembler() {
 	# define argument variables
-	local assembly_dir=$1
+	local output_dir=$1
 	local single_end_data=$2
 	local paired_end_data_1=$3
 	local paired_end_data_2=$4
@@ -32,7 +32,7 @@ megahit_assembler() {
 			-2 $paired_end_data_2 \
 			-r $single_end_data \
 			-t $num_cores \
-			-o ${assembly_dir}_extra
+			-o ${output_dir}_extra
 	elif ! [ "$single_end_data" == "no_data" ] && \
 	[ "$paired_end_data_1" == "no_data" ] && \
 	[ "$paired_end_data_1" == "no_data" ]; then 
@@ -40,7 +40,7 @@ megahit_assembler() {
 		megahit \
 			-r $single_end_data \
 			-t $num_cores \
-			-o ${assembly_dir}_extra
+			-o ${output_dir}_extra
 	elif [ "$single_end_data" == "no_data" ] && \
 	! [ "$paired_end_data_1" == "no_data" ] && \
 	! [ "$paired_end_data_1" == "no_data" ]; then 
@@ -49,7 +49,7 @@ megahit_assembler() {
 			-1 $paired_end_data_1 \
 			-2 $paired_end_data_2 \
 			-t $num_cores \
-			-o ${assembly_dir}_extra
+			-o ${output_dir}_extra
 	else
 		echo "$(timestamp): megahit_assembler: libraries provided are not suitible for multiple-library assembly"
 		exit 1

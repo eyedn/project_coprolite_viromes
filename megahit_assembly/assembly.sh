@@ -23,6 +23,7 @@ accession_ids=$(head -n ${SGE_TASK_ID} ${project_dir}/samples/${origin}_samples.
 mkdir -p $contigs_dir
 mkdir -p ${contigs_dir}/${origin}_${sample}_assembly
 assembly_dir="${contigs_dir}/${origin}_${sample}_assembly"
+assembly_extra_dir="${contigs_dir}/${assembly_dir}_extra"
 fastq_trimmed_dir="${reads_dir}/${origin}_${sample}_fastq_trimmed"
 
 # check if assembly was already complete for this sample
@@ -43,7 +44,7 @@ echo "$(timestamp): assembly: assemble all libraries associated with this sample
 echo -e "\torigin: $origin"
 echo -e "\tsample: $sample"
 echo "=================================================="
-assemble_libraries "$sample" "$fastq_trimmed_dir" "$assembly_dir" "$num_cores"
+assemble_libraries "$sample" "$fastq_trimmed_dir" "$assembly_dir" "$assembly_extra_dir" "$num_cores"
 
 # compress fastq trimmed files and extra assembly files
 echo "$(timestamp): assembly: compressing extra files from assembly of $sample"
