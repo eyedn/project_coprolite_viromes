@@ -26,15 +26,6 @@ assembly_dir="${contigs_dir}/${origin}_${sample}_assembly"
 assembly_extra_dir="${assembly_dir}_extra"
 fastq_trimmed_dir="${reads_dir}/${origin}_${sample}_fastq_trimmed"
 
-# check if download was already complete for this sample
-if ls $fastq_trimmed_dir/*/*fq.gz 1> /dev/null 2>&1; then
-	echo "$(timestamp): assembly: fastq file found"
-else
-	echo "$(timestamp): assembly: trimmed fastq files not found"
-	rmdir $assembly_dir $assembly_extra_dir
-	exit 1
-fi
-
 # check if assembly was already complete for this sample
 if ls $assembly_dir/${origin}_${sample}_all_contigs.fa 1> /dev/null 2>&1; then
 	echo "$(timestamp): assembly: final contigs file already created"
@@ -45,6 +36,18 @@ if ls $assembly_dir/${origin}_${sample}_all_contigs.fa 1> /dev/null 2>&1; then
 	else
 		exit 0
 	fi
+elif ls ${fastq_trimmed_dir}.tar.gz 1> /dev/null 2>&1; then
+	echo "$(timestamp): assembly: trimmed fastq files already gzipped"
+	exit 0
+fi
+
+# check if download was already complete for this sample
+if ls $fastq_trimmed_dir/*/*fq.gz 1> /dev/null 2>&1; then
+	echo "$(timestamp): assembly: fastq file found"
+else
+	echo "$(timestamp): assembly: trimmed fastq files not found"
+	rmdir $assembly_dir $assembly_extra_dir
+	exit 1
 fi
 
 # assembly function uses megahit
