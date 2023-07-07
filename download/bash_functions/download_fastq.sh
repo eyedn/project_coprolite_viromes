@@ -6,8 +6,7 @@
 #!/bin/bash
 source $HOME/project_coprolite_viromes/general_bash_functions/timestamp.sh
 source /u/local/Modules/default/init/modules.sh
-module load anaconda3
-conda activate myconda
+module load sra-tools
 
 
 # use fasterq dump to convert the sra file to fastq file(s)
@@ -19,8 +18,6 @@ download_fastq() {
 	# if conversion already happened, skip to quality control
 	if ls ${fastq_raw_dir}/${id}/*.fastq 1> /dev/null 2>&1; then
 		echo "$(timestamp): convert_sra_to_fastq: fastq files(s) found. skipping to quality control"
-		# delete sra file if it still exists
-		rm -r ${sra_dir}/${id}
 		return 0
 	fi
 
@@ -37,7 +34,6 @@ download_fastq() {
 	# check if fastq was created; compress fastq file(s) and delete sra file
 	if ls ${fastq_raw_dir}/${id}/*.fastq 1> /dev/null 2>&1; then
 		gzip ${fastq_raw_dir}/${id}/*.fastq
-		rm -r ${sra_dir}/${id}
 		echo "$(timestamp): convert_sra_to_fastq: fastq.gz created"
 	else
 		echo "$(timestamp): convert_sra_to_fastq: ERROR! trimmed fastq files not found"
