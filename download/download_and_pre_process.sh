@@ -40,7 +40,7 @@ for id in $accession_ids; do
 	echo -e "\tid: $id"
 	echo "=================================================="
 	# uses fasterq-dump from sra tool kit
-	download_fastq "$id" "$sra_dir" "$fastq_raw_dir" "$num_cores"
+	download_fastq "$id" "$fastq_raw_dir" "$num_cores"
 
 	# quality control fastq files by removing adapters and low quality reads
 	echo "=================================================="
