@@ -34,7 +34,7 @@ if ls $assembly_dir/final.contigs.fa 1> /dev/null 2>&1; then
 		echo "$(timestamp): assemble_libraries: contigs file is empty. deleting file and restarting assembly"
 		rm $assembly_dir/final.contigs.fa
 	else
-		return 0
+		exit 0
 	fi
 fi
 

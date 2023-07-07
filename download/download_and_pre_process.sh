@@ -29,7 +29,7 @@ for id in $accession_ids; do
 	# check if download was already complete for this id
 	if ls $fastq_trimmed_dir/$id/*fq.gz 1> /dev/null 2>&1; then
 		echo "$(timestamp): download_and_pre_process: pre-processing for ${id} already complete"
-		return 0
+		continue
 	fi
 
 	# download fastq files
