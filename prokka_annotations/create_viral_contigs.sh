@@ -28,3 +28,5 @@ echo -e "\torigin: $origin"
 echo -e "\tsample: $sample"
 echo "=================================================="
 identify_viral_contigs "$contigs_file" "$gff_file" "$viral_contigs_output"
+
+gzip $contigs_file
