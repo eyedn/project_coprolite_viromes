@@ -36,12 +36,12 @@ else
 fi
 
 # check if assembly was already complete for this sample
-if ls $assembly_dir/final.contigs.fa 1> /dev/null 2>&1; then
+if ls $assembly_dir/${origin}_${sample}_all_contigs.fa 1> /dev/null 2>&1; then
 	echo "$(timestamp): assembly: final contigs file already created"
 	# Check if the file is empty
-	if ! [ -s "$assembly_dir/final.contigs.fa" ]; then
+	if ! [ -s "$assembly_dir/${origin}_${sample}_all_contigs.fa" ]; then
 		echo "$(timestamp): assembly: contigs file is empty. deleting file and restarting assembly"
-		rm $assembly_dir/final.contigs.fa
+		rm $assembly_dir/${origin}_${sample}_all_contigs.fa
 	else
 		exit 0
 	fi
