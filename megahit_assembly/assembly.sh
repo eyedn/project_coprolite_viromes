@@ -23,7 +23,7 @@ accession_ids=$(head -n ${SGE_TASK_ID} ${project_dir}/samples/${origin}_samples.
 mkdir -p $contigs_dir
 mkdir -p ${contigs_dir}/${origin}_${sample}_assembly
 assembly_dir="${contigs_dir}/${origin}_${sample}_assembly"
-assembly_extra_dir="${contigs_dir}/${assembly_dir}_extra"
+assembly_extra_dir="${assembly_dir}_extra"
 fastq_trimmed_dir="${reads_dir}/${origin}_${sample}_fastq_trimmed"
 
 # check if assembly was already complete for this sample
