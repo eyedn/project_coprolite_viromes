@@ -1,0 +1,56 @@
+###############################################################################
+#       Aydin Karatas
+#		Project Coprolite Viromes
+#		assembly.sh 
+###############################################################################
+#!/bin/bash
+for FILE in $HOME/project_coprolite_viromes/megahit_assembly/bash_functions/* ; do source $FILE ; done
+source $HOME/project_coprolite_viromes/general_bash_functions/timestamp.sh
+
+
+# define inputs variables
+origin=$1
+project_dir=$2
+num_cores=$3
+reads_dir="${project_dir}/reads"
+contigs_dir="${project_dir}/contigs"
+sample=$(head -n ${SGE_TASK_ID} ${project_dir}/samples/${origin}_samples.txt | \
+		tail -n 1 | cut -d ' ' -f 1)
+accession_ids=$(head -n ${SGE_TASK_ID} ${project_dir}/samples/${origin}_samples.txt | \
+		tail -n 1 | cut -d ' ' -f 2-)
+
+# create directory for assembly output
+mkdir -p $contigs_dir
+mkdir -p ${contigs_dir}/${origin}_${sample}_assembly
+assembly_dir="${contigs_dir}/${origin}_${sample}_assembly"
+fastq_trimmed_dir="${reads_dir}/${origin}_${sample}_fastq_trimmed"
+
+# check if assembly was already complete for this sample
+if ls $assembly_dir/final.contigs.fa 1> /dev/null 2>&1; then
+	echo "$(timestamp): assemble_libraries: final contigs file already created"
+	# Check if the file is empty
+	if ! [ -s "$assembly_dir/final.contigs.fa" ]; then
+		echo "$(timestamp): assemble_libraries: contigs file is empty. deleting file and restarting assembly"
+		rm $assembly_dir/final.contigs.fa
+	else
+		return 0
+	fi
+fi
+
+# assembly function uses megahit
+echo "=================================================="
+echo "$(timestamp): assembly: assemble all libraries associated with this sample"
+echo -e "\torigin: $origin"
+echo -e "\tsample: $sample"
+echo "=================================================="
+assemble_libraries "$sample" "$fastq_trimmed_dir" "$assembly_dir" "$num_cores"
+
+# compress fastq trimmed files and extra assembly files
+echo "$(timestamp): assembly: compressing extra files from assembly of $sample"
+cd $reads_dir
+tar -czvf ${origin}_${sample}_fastq_trimmed.tar.gz ${origin}_${sample}_fastq_trimmed
+rm -r ${origin}_${sample}_fastq_trimmed
+cd $contigs_dir
+tar -czvf ${origin}_${sample}_assembly_extra.tar.gz ${origin}_${sample}_assembly_extra
+rm -r ${origin}_${sample}_assembly_extra
+echo "$(timestamp): assembly: assembly complete for $sample"

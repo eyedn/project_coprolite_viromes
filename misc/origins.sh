@@ -1,0 +1,16 @@
+pal-AWC
+pal-BEL 
+pal-BMS 
+pal-ENG 
+pal-ITA 
+pal-PER 
+pal-ZAF
+pal-ZAP 
+ind-DNK 
+ind-ESP
+ind-USA
+pre-FJI 
+pre-MDG 
+pre-MEX 
+pre-PER
+pre-TZA
