@@ -9,7 +9,7 @@ source /u/local/Modules/default/init/modules.sh
 module load sra-tools
 
 
-# use fasterq dump to convert the sra file to fastq file(s)
+# use fasterq dump to download fastq files
 download_fastq() {
 	local id=$1
 	local fastq_raw_dir=$2

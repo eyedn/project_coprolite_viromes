@@ -32,7 +32,7 @@ for id in $accession_ids; do
 		return 0
 	fi
 
-	# second, convert sra files to fastq files
+	# download fastq files
 	echo "=================================================="
 	echo "$(timestamp): download_and_pre_process: converting sra file to fastq files"
 	echo -e "\torigin: $origin"
