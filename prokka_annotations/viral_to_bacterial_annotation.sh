@@ -1,7 +1,7 @@
 ###############################################################################
 #       Aydin Karatas
 #		Project Coprolite Viromes
-#		vir_annot_and_create_vir_contigs.sh 
+#		viral_to_bacterial_annotation.sh 
 ###############################################################################
 #!/bin/bash
 
@@ -15,3 +15,6 @@ num_cores=$3
 
 # create a new contigs file that contains only contigs that had a viral annotation
 . $HOME/project_coprolite_viromes/prokka_annotations/create_viral_contigs.sh "$origin" "$origin_parent" "$num_cores"
+
+# annotate viral contigs for bacterial genes
+. $HOME/project_coprolite_viromes/prokka_annotations/bacterial_annotation.sh "$origin" "$origin_parent" "$num_cores"
