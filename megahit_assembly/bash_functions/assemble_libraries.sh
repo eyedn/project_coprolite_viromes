@@ -4,7 +4,7 @@
 #		assemble_libraries.sh 
 ###############################################################################
 #!/bin/bash
-source $HOME/project_coprolite_viromes/general_bash_functions/timestamp.sh
+for FILE in $HOME/project_coprolite_viromes/general_bash_functions/* ; do source $FILE ; done
 source /u/local/Modules/default/init/modules.sh
 module load python
 source $HOME/my_py/bin/activate

@@ -5,7 +5,7 @@
 ###############################################################################
 #!/bin/bash
 for FILE in $HOME/project_coprolite_viromes/prokka_annotations/bash_functions/* ; do source $FILE ; done
-source $HOME/project_coprolite_viromes/general_bash_functions/timestamp.sh
+for FILE in $HOME/project_coprolite_viromes/general_bash_functions/* ; do source $FILE ; done
 
 
 # define inputs variables

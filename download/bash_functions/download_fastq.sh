@@ -4,9 +4,7 @@
 #       generate_fastq.sh 
 ###############################################################################
 #!/bin/bash
-source $HOME/project_coprolite_viromes/general_bash_functions/timestamp.sh
-source /u/local/Modules/default/init/modules.sh
-module load sra-tools
+for FILE in $HOME/project_coprolite_viromes/general_bash_functions/* ; do source $FILE ; done
 
 
 # use fasterq dump to download fastq files
@@ -23,7 +21,7 @@ download_fastq() {
 
 
 	# convert sra to fastq format
-	fasterq-dump \
+	$fasterq_dump \
 		"$id" \
 		--split-3 \
 		-O "${fastq_raw_dir}/${id}" \

@@ -4,10 +4,7 @@
 #       quality_control.sh 
 ###############################################################################
 #!/bin/bash
-source $HOME/project_coprolite_viromes/general_bash_functions/timestamp.sh
-source /u/local/Modules/default/init/modules.sh
-module load anaconda3
-conda activate myconda
+for FILE in $HOME/project_coprolite_viromes/general_bash_functions/* ; do source $FILE ; done
 
 
 # use trim galore to remove adapters and low quality reads
@@ -27,7 +24,7 @@ quality_control() {
 	# run quality check based on if sample is single-end or paired-end data
 	if [ -f "${fastq_raw_dir}/${id}/${id}_1.fastq.gz" ] && \
 	[ -f "${fastq_raw_dir}/${id}/${id}_2.fastq.gz" ]; then
-		trim_galore \
+		$trim_galore \
 			--paired \
 			-o ${fastq_trimmed_dir}/${id} \
 			--gzip \
@@ -36,7 +33,7 @@ quality_control() {
 			${fastq_raw_dir}/${id}/${id}_2.fastq.gz
 	elif [ -f "${fastq_raw_dir}/${id}/${id}.sralite_1.fastq.gz" ] && \
 	[ -f "${fastq_raw_dir}/${id}/${id}.sralite_2.fastq.gz" ]; then
-		trim_galore \
+		$trim_galore \
 			--paired \
 			-o ${fastq_trimmed_dir}/${id} \
 			--gzip \
@@ -44,13 +41,13 @@ quality_control() {
 			${fastq_raw_dir}/${id}/${id}.sralite_1.fastq.gz \
 			${fastq_raw_dir}/${id}/${id}.sralite_2.fastq.gz
 	elif [ -f "${fastq_raw_dir}/${id}/${id}.fastq.gz" ]; then
-		trim_galore \
+		$trim_galore \
 			-o ${fastq_trimmed_dir}/${id} \
 			--gzip \
 			-j $num_cores \
 			${fastq_raw_dir}/${id}/${id}.fastq.gz
 	elif [ -f "${fastq_raw_dir}/${id}/${id}.sralite.fastq.gz" ]; then
-		trim_galore \
+		$trim_galore \
 			-o ${fastq_trimmed_dir}/${id} \
 			--gzip \
 			-j $num_cores \

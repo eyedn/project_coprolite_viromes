@@ -4,7 +4,7 @@
 #		annotate_contigs.sh 
 ###############################################################################
 #!/bin/bash
-source $HOME/project_coprolite_viromes/general_bash_functions/timestamp.sh
+for FILE in $HOME/project_coprolite_viromes/general_bash_functions/* ; do source $FILE ; done
 
 
 # generate informative files by annotating contigs file 

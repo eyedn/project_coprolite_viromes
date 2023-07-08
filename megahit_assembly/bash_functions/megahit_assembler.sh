@@ -4,10 +4,7 @@
 #		assembly_functions.sh 
 ###############################################################################
 #!/bin/bash
-source $HOME/project_coprolite_viromes/general_bash_functions/timestamp.sh
-source /u/local/Modules/default/init/modules.sh
-module load anaconda3
-conda activate myconda
+for FILE in $HOME/project_coprolite_viromes/general_bash_functions/* ; do source $FILE ; done
 
 
 # contains the megahit command to assembly fastq/fasta files
@@ -27,7 +24,7 @@ megahit_assembler() {
 	! [ "$paired_end_data_1" == "no_data" ] && \
 	! [ "$paired_end_data_1" == "no_data" ]; then 
 		echo "$(timestamp): megahit_assembler: assembling with both paired-ended and single-ended data"
-		megahit \
+		$megahit \
 			-1 $paired_end_data_1 \
 			-2 $paired_end_data_2 \
 			-r $single_end_data \
@@ -37,7 +34,7 @@ megahit_assembler() {
 	[ "$paired_end_data_1" == "no_data" ] && \
 	[ "$paired_end_data_1" == "no_data" ]; then 
 		echo "$(timestamp): megahit_assembler: assembling with single-ended data"
-		megahit \
+		$megahit \
 			-r $single_end_data \
 			-t $num_cores \
 			-o $output_dir
@@ -45,7 +42,7 @@ megahit_assembler() {
 	! [ "$paired_end_data_1" == "no_data" ] && \
 	! [ "$paired_end_data_1" == "no_data" ]; then 
 		echo "$(timestamp): megahit_assembler: assembling with paired-ended data"
-		megahit \
+		$megahit \
 			-1 $paired_end_data_1 \
 			-2 $paired_end_data_2 \
 			-t $num_cores \
