@@ -13,7 +13,7 @@ download_fastq() {
 	local fastq_raw_dir=$2
 	local num_cores=$3
 
-	# if conversion already happened, skip to quality control
+	# if fastq already exists, skip to quality control
 	if ls ${fastq_raw_dir}/${id}/*.fastq 1> /dev/null 2>&1; then
 		echo "$(timestamp): convert_sra_to_fastq: fastq files(s) found. skipping to quality control"
 		return 0
