@@ -19,7 +19,6 @@ download_fastq() {
 		return 0
 	fi
 
-
 	# convert sra to fastq format
 	$fasterq_dump \
 		"$id" \
