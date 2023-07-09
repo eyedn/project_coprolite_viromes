@@ -8,10 +8,11 @@ for FILE in $HOME/project_coprolite_viromes/general_bash_functions/* ; do source
 
 
 # use fasterq dump to download fastq files
-download_fastq() {
+generate_fastq() {
 	local id=$1
-	local fastq_raw_dir=$2
-	local num_cores=$3
+	local sra_dir=$2
+	local fastq_raw_dir=$3
+	local num_cores=$4
 
 	# if fastq already exists, skip to quality control
 	if ls ${fastq_raw_dir}/${id}/*.fastq 1> /dev/null 2>&1; then
@@ -19,13 +20,31 @@ download_fastq() {
 		return 0
 	fi
 
+	# identify the sra file to use
+	if [ -f "${sra_dir}/${id}/${id}.sra" ]; then
+		sra_file="${sra_dir}/${id}/${id}.sra"
+	elif [ -f "${sra_dir}/${id}/${id}.sralite" ]; then
+		sra_file="${sra_dir}/${id}/${id}.sralite"
+	else
+		echo "$(timestamp): convert_sra_to_fastq: ERROR! sra* file not detected"
+		exit 1
+	fi
+
+	# establish number of cores to use
+	if [ [ "$num_cores" -gt "$fasterq_dump_cores" ] ]; then
+		cores_to_use="$fasterq_dump_cores";
+	else
+		cores_to_use="$num_cores"
+	fi
+
 	# convert sra to fastq format
 	$fasterq_dump \
-		"$id" \
+		"$sra_file" \
 		--split-3 \
 		-O "${fastq_raw_dir}/${id}" \
-		-e "$num_cores" \
-		-t "${fastq_raw_dir}/${id}_tmp"
+		-e "$cores_to_use" \
+		-t "${fastq_raw_dir}/${id}_tmp" \
+		-p
 	rm -r ${fastq_raw_dir}/${id}_tmp
 
 	# check if fastq was created; compress fastq file(s) and delete sra file

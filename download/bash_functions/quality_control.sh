@@ -18,9 +18,16 @@ quality_control() {
 	local num_cores=$4
 
 	# check if trimmed file(s) already exists, return from pre-processing
-	if ls ${fastq_trimmed_dir}/${id}/*.fq.gz 1> /dev/null 2>&1; then
+	if ls ${fastq_trimmed_dir}/${id}/*.txt 1> /dev/null 2>&1; then
 	echo "$(timestamp): quality_check_fastq: trimmed fastq files found. skipping to final data compression steps"
 		return 0
+	fi
+
+	# establish number of cores to use
+	if [ [ "$num_cores" -gt "$trim_galore_cores" ] ]; then
+		cores_to_use="$trim_galore_cores";
+	else
+		cores_to_use="$num_cores"
 	fi
 
 	# trim adaptors and low quality positions; remove low quality reads
@@ -31,7 +38,7 @@ quality_control() {
 			--paired \
 			-o ${fastq_trimmed_dir}/${id} \
 			--gzip \
-			-j $num_cores \
+			-j $cores_to_use \
 			${fastq_raw_dir}/${id}/${id}_1.fastq.gz \
 			${fastq_raw_dir}/${id}/${id}_2.fastq.gz
 	elif [ -f "${fastq_raw_dir}/${id}/${id}.sralite_1.fastq.gz" ] && \
@@ -40,20 +47,20 @@ quality_control() {
 			--paired \
 			-o ${fastq_trimmed_dir}/${id} \
 			--gzip \
-			-j $num_cores \
+			-j $cores_to_use \
 			${fastq_raw_dir}/${id}/${id}.sralite_1.fastq.gz \
 			${fastq_raw_dir}/${id}/${id}.sralite_2.fastq.gz
 	elif [ -f "${fastq_raw_dir}/${id}/${id}.fastq.gz" ]; then
 		$trim_galore \
 			-o ${fastq_trimmed_dir}/${id} \
 			--gzip \
-			-j $num_cores \
+			-j $cores_to_use \
 			${fastq_raw_dir}/${id}/${id}.fastq.gz
 	elif [ -f "${fastq_raw_dir}/${id}/${id}.sralite.fastq.gz" ]; then
 		$trim_galore \
 			-o ${fastq_trimmed_dir}/${id} \
 			--gzip \
-			-j $num_cores \
+			-j $cores_to_use \
 			${fastq_raw_dir}/${id}/${id}.sralite.fastq.gz
 	fi
 
