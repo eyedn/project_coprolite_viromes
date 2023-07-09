@@ -32,6 +32,7 @@ quality_control() {
 
 	# trim adaptors and low quality positions; remove low quality reads
 	# run quality check based on if sample is single-end or paired-end data
+	mkdir $fastq_trimmed_dir
 	if [ -f "${fastq_raw_dir}/${id}/${id}_1.fastq.gz" ] && \
 	[ -f "${fastq_raw_dir}/${id}/${id}_2.fastq.gz" ]; then
 		$trim_galore \
