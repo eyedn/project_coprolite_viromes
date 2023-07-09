@@ -44,7 +44,6 @@ generate_fastq() {
 		-O "${fastq_raw_dir}/${id}" \
 		-e "$cores_to_use" \
 		-t "${fastq_raw_dir}/${id}_tmp" \
-		-p
 	rm -r ${fastq_raw_dir}/${id}_tmp
 
 	# check if fastq was created; compress fastq file(s) and delete sra file
