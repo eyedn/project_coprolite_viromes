@@ -11,12 +11,14 @@ for FILE in $HOME/project_coprolite_viromes/general_bash_functions/* ; do source
 origin=$1
 project_dir=$2
 num_cores=$3
-contigs_dir="${project_dir}/contigs"
-annotations_dir="${project_dir}/prokka_annotations"
+
+# define sample variable
 sample=$(head -n ${SGE_TASK_ID} ${project_dir}/samples/${origin}_samples.txt | \
 		tail -n 1 | cut -d ' ' -f 1)
 
-# annotation function uses prokka
+# define directories and files
+contigs_dir="${project_dir}/contigs"
+annotations_dir="${project_dir}/prokka_annotations"
 assembly_dir="${contigs_dir}/${origin}_${sample}_assembly"
 contigs_file="${assembly_dir}/${origin}_${sample}_all_contigs.fa"
 annot_dir="${annotations_dir}/${origin}_${sample}_annotation_viruses"
@@ -37,11 +39,9 @@ if ls $viral_contigs_output 1> /dev/null 2>&1; then
 	exit 0
 fi
 
-echo "=================================================="
-echo "$(timestamp): create_viral_contigs: identify viral contigs"
-echo -e "\torigin: $origin"
-echo -e "\tsample: $sample"
-echo "=================================================="
+echo "===================================================================================================="
+echo "$(timestamp): create_viral_contigs: identify viral contigs: $origin; $sample"
+echo "===================================================================================================="
 identify_viral_contigs "$contigs_file" "$gff_file" "$viral_contigs_output"
 
 gzip $contigs_file

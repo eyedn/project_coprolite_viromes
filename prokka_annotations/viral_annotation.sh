@@ -12,15 +12,16 @@ for FILE in $HOME/project_coprolite_viromes/general_bash_functions/* ; do source
 origin=$1
 project_dir=$2
 num_cores=$3
-contigs_dir="${project_dir}/contigs"
-annotations_dir="${project_dir}/prokka_annotations"
+
+# define sample variables
 sample=$(head -n ${SGE_TASK_ID} ${project_dir}/samples/${origin}_samples.txt | \
 		tail -n 1 | cut -d ' ' -f 1)
-
-# define variables for annotation
 type="Viruses"
 label="viruses"
-mkdir -p $annotations_dir
+
+# define directories and files
+contigs_dir="${project_dir}/contigs"
+annotations_dir="${project_dir}/prokka_annotations"
 assembly_dir="${contigs_dir}/${origin}_${sample}_assembly"
 contigs_file="${assembly_dir}/${origin}_${sample}_all_contigs.fa"
 annot_dir="${annotations_dir}/${origin}_${sample}_annotation_${label}"
@@ -42,11 +43,9 @@ if ls $annot_dir 1> /dev/null 2>&1; then
 fi
 
 # annotation function uses prokka
-echo "=================================================="
-echo "$(timestamp): viral annotation"
-echo -e "\torigin: $origin"
-echo -e "\tsample: $sample"
-echo "=================================================="
+echo "===================================================================================================="
+echo "$(timestamp): viral annotation: $origin; $sample"
+echo "===================================================================================================="
 annotate_contigs "$sample" "$contigs_file" "$custom_db" "$annot_dir" \
 	"$type" "$label" "$num_cores"
 
