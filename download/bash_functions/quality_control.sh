@@ -24,7 +24,7 @@ quality_control() {
 	fi
 
 	# establish number of cores to use
-	if [ [ "$num_cores" -gt "$trim_galore_cores" ] ]; then
+	if [ "$num_cores" -gt "$trim_galore_cores" ]; then
 		cores_to_use="$trim_galore_cores";
 	else
 		cores_to_use="$num_cores"

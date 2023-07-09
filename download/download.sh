@@ -1,7 +1,7 @@
 ###############################################################################
 #       Aydin Karatas
 #		Project Coprolite Viromes
-#		download_and_pre_process.sh 
+#		download.sh 
 ###############################################################################
 #!/bin/bash
 for FILE in $HOME/project_coprolite_viromes/download/bash_functions/* ; do source $FILE ; done
@@ -28,35 +28,40 @@ fastq_trimmed_dir="$reads_dir/${origin}_${sample}_fastq_trimmed"
 for id in $accession_ids; do
 	# check if download was already complete for this id
 	if ls $fastq_trimmed_dir/$id/*.txt 1> /dev/null 2>&1; then
-		echo "$(timestamp): download_and_pre_process: pre-processing for ${id} already complete"
+		echo "$(timestamp): download: pre-processing for ${id} already complete"
 		continue
 	fi
 
 	# download sra file for each accesion id
 	echo "===================================================================================================="
-	echo "$(timestamp): download_and_pre_process: prefetching sra file: $origin; $sample; $id"
+	echo "$(timestamp): download: prefetching sra file: $origin; $sample; $id"
 	echo "===================================================================================================="
 	# uses prefetch from sra tool kit
 	download_sra "$id" "$sra_dir"
 
 	# convert sra file to fastq file(s)
 	echo "===================================================================================================="
-	echo "$(timestamp): download_and_pre_process: converting sra file to fastq files: $origin; $sample; $id"
+	echo "$(timestamp): download: converting sra file to fastq files: $origin; $sample; $id"
 	echo "===================================================================================================="
 	# uses fasterq-dump from sra tool kit
 	generate_fastq "$id" "$sra_dir" "$fastq_raw_dir" "$num_cores"
 
 	# quality control fastq files by removing adapters and low quality reads
 	echo "=================================================="
-	echo "$(timestamp): download_and_pre_process: quality control fastq files: $origin; $sample; $id"
+	echo "$(timestamp): download: quality control fastq files: $origin; $sample; $id"
 	echo "=================================================="
 	# quality control uses trim-galore to remove adapters and low quality sequences
 	quality_control "$id" "$fastq_raw_dir" "$fastq_trimmed_dir" "$num_cores"
-	echo "$(timestamp): download_and_pre_process: pre-processing complete for $id"
+	echo "$(timestamp): download: pre-processing complete for $id"
 done
 
 # deleted unnecessary directories
-rm -r $sra_dir
-rm -r $fastq_raw_dir
+if [ -d "$sra_dir" ]; then
+	rm -r "$sra_dir"
+fi
+
+if [ -d "$fastq_raw_dir" ]; then
+	rm -r "$fastq_raw_dir"
+fi
 
 echo "$(timestamp): download_and_pre_process: pre-processing complete for $sample"
