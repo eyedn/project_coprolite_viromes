@@ -15,7 +15,7 @@ generate_fastq() {
 	local num_cores=$4
 
 	# if fastq already exists, skip to quality control
-	if ls ${fastq_raw_dir}/${id}/*.fastq 1> /dev/null 2>&1; then
+	if ls ${fastq_raw_dir}/${id}/*.fastq.gz 1> /dev/null 2>&1; then
 		echo "$(timestamp): convert_sra_to_fastq: fastq files(s) found. skipping to quality control"
 		return 0
 	fi
@@ -43,7 +43,7 @@ generate_fastq() {
 		--split-3 \
 		-O "${fastq_raw_dir}/${id}" \
 		-e "$cores_to_use" \
-		-t "${fastq_raw_dir}/${id}_tmp" \
+		-t "${fastq_raw_dir}/${id}_tmp"
 	rm -r ${fastq_raw_dir}/${id}_tmp
 
 	# check if fastq was created; compress fastq file(s) and delete sra file
