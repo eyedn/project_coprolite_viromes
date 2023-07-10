@@ -11,9 +11,8 @@ source $HOME/my_py/bin/activate
 
 
 # define inputs variables
-origin=$1
-project_dir=$2
-num_cores=$3
+project_dir=$1
+num_cores=$2
 
 # define directories and file
 data_dir="${project_dir}/data"
