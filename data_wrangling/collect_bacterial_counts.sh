@@ -23,6 +23,9 @@ csv_path="$data_dir/bacterial_gene_counts.csv"
 
 # create a list of all files to generate counts from
 ls $search_dir/*gff.gz > $gff_list
+echo "$(timestamp): collect_bacterial_counts: generated file of all file paths needed"
+echo "$(timestamp): collect_bacterial_counts: using the following files:"
+cat $gff_list
 
 # generate counts with python script
 echo "===================================================================================================="
