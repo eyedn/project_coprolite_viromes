@@ -6,6 +6,7 @@
 import typing
 from . import annotation as annot
 
+
 def get_counts(annotations: typing.List[annot.Annotation]) \
     -> typing.Dict[str, int]:
     counts = {}

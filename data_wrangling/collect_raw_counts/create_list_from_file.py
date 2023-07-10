@@ -10,7 +10,7 @@ import typing
 def create_list(list_file: typing.TextIO) \
     -> typing.List[typing.Union[str, typing.BinaryIO]]:
     items: typing.List[typing.Union[str, typing.BinaryIO]] = []
-    with open(list_file, "r"):
-        for line in list_file.readlines():
+    with open(list_file, "r") as f:
+        for line in f.readlines():
             items.append(line.strip())
     return items
