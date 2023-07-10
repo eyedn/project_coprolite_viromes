@@ -4,7 +4,6 @@
 #       search_files.py
 ###############################################################################
 import typing
-import gzip
 from . import read_gff
 from . import search_annotations as search_annot
 
