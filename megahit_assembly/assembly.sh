@@ -46,7 +46,7 @@ assemble_libraries "$sample" "$fastq_trimmed_dir" "$assembly_dir" "$assembly_ext
 
 # compress fastq trimmed files and extra assembly files
 echo "$(timestamp): assembly: compressing extra files from assembly of $sample"
-rm $fastq_trimmed_dir/$id/*.gz
+rm $fastq_trimmed_dir/*/*.gz
 cd $contigs_dir
 tar -czvf ${origin}_${sample}_assembly_extra.tar.gz ${origin}_${sample}_assembly_extra
 rm -r ${origin}_${sample}_assembly_extra
