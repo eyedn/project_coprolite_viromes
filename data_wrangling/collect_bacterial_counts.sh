@@ -32,6 +32,7 @@ echo "==========================================================================
 python3 $HOME/project_coprolite_viromes/data_wrangling/collect_raw_counts.py \
 	$gff_list \
 	$csv_path
+rm $gff_list
 
 # check if raw counts was created
 if ls $csv_path 1> /dev/null 2>&1; then
