@@ -8,7 +8,6 @@ for FILE in general_bash_functions/* ; do source $FILE ; done
 cd $home_dir
 
 
-joblogs_output="../joblogs/$origin/"
 # paleo samples labeled as pal-{location} :
 #       pal-AWC pal-BEL pal-BMS pal-ENG pal-ITA pal-PER pal-ZAF pal-ZAP
 # industrial samples labeled as ind-{location} :
