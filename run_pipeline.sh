@@ -4,8 +4,8 @@
 #		  submit.sh 
 ###############################################################################
 #!/bin/bash
-for FILE in general_bash_functions/* ; do source $FILE ; done
-cd $home_dir
+cd $HOME/project_coprolite_viromes
+for FILE in general_bash_functions/* ; do source $FILE ; dones
 
 
 # paleo samples labeled as pal-{location} :
@@ -48,6 +48,7 @@ done
 # run the submission command on hoffman2
 declare -i total_samples=$(wc -l < ${project_dir}/samples/${origin}_samples.txt) 
 job_name=$(echo $script_name | cut -d '/' -f 2-)
+joblogs_output="$HOME/joblogs/$origin/"
 qsub \
     -cwd \
     -N "${origin}.${job_name}" \

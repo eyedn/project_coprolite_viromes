@@ -6,10 +6,6 @@
 #!/bin/bash
 
 
-home_dir="$HOME/project_coprolite_viromes"
-
-joblogs_output="$HOME/joblogs/$origin/"
-
 python_env="$HOME/my_py/bin/activate"
 
 fasterq_dump_cores=6

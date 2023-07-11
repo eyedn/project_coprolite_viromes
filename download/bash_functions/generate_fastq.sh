@@ -4,7 +4,7 @@
 #       generate_fastq.sh 
 ###############################################################################
 #!/bin/bash
-cd $home_dir
+cd $HOME/project_coprolite_viromes
 for FILE in general_bash_functions/* ; do source $FILE ; done
 
 

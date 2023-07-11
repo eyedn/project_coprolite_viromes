@@ -4,7 +4,7 @@
 #		download_to_full_annotation.sh 
 ###############################################################################
 #!/bin/bash
-cd $home_dir
+cd $HOME/project_coprolite_viromes
 
 
 origin=$1
