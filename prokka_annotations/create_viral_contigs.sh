@@ -37,7 +37,7 @@ fi
 # check if viral contigs already indentified
 if ls $viral_contigs_output 1> /dev/null 2>&1; then
 	echo "$(timestamp): create_viral_contigs: viral contigs already found"
-	exit 0
+	return 0
 fi
 
 echo "===================================================================================================="

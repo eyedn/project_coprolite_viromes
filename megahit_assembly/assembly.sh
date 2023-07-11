@@ -28,7 +28,7 @@ fastq_trimmed_dir="${reads_dir}/${origin}_${sample}_fastq_trimmed"
 # check if assembly was already complete for this sample
 if [ -s "$assembly_dir/${origin}_${sample}_all_contigs.fa" ]; then
 	echo "$(timestamp): assembly: final contigs file already created"
-	exit 0
+	return 0
 fi
 
 # check if download was already complete for this sample

@@ -40,7 +40,7 @@ fi
 # check if annotations already completed
 if ls $annot_dir 1> /dev/null 2>&1; then
 	echo "$(timestamp): bacterial_annotation: annotations already completed"
-	exit 0
+	return 0
 fi
 
 # annotation function uses prokka
