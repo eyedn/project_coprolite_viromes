@@ -15,7 +15,8 @@ kmeans_permute <- function(data_unscaled, data_scaled, k, num_iter,
   # perform kmeans for each permutation
   for (i in seq_len(num_iter)) {
     # shuffle rows (row of data now pairs with different row name)
-    permute_idx <- sample(nrow(data_scaled), nrow(data_scaled))
+    permute_idx <- sample(nrow(data_scaled), nrow(data_scaled), 
+                          replace = FALSE)
     data_scaled_permute <- data_scaled[permute_idx, ]
     rownames(data_scaled_permute) <- rownames(data_scaled)
     
