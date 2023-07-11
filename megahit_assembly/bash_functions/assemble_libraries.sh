@@ -4,10 +4,11 @@
 #		assemble_libraries.sh 
 ###############################################################################
 #!/bin/bash
-for FILE in $HOME/project_coprolite_viromes/general_bash_functions/* ; do source $FILE ; done
+cd $home_dir
+for FILE in general_bash_functions/* ; do source $FILE ; done
 source /u/local/Modules/default/init/modules.sh
 module load python
-source $HOME/my_py/bin/activate
+source $python_env
 
 
 # create final.contigs.fa with megahit assembly from fastq/fasta files
@@ -20,7 +21,7 @@ assemble_libraries() {
 
 	# identyify all libraries
 	mkdir -p $assembly_dir
-	python3 $HOME/project_coprolite_viromes/megahit_assembly/identify_fastq_files.py $fastq_trimmed_dir > $assembly_dir/id_paths.txt
+	python3 megahit_assembly/identify_fastq_files.py $fastq_trimmed_dir > $assembly_dir/id_paths.txt
 	single_end_data="$(head -n 1 $assembly_dir/id_paths.txt | cut -f 1)"
 	paired_end_data_1="$(head -n 1 $assembly_dir/id_paths.txt | cut -f 2)"
 	paired_end_data_2="$(head -n 1 $assembly_dir/id_paths.txt | cut -f 3)"

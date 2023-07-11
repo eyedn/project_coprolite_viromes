@@ -4,9 +4,11 @@
 #		  submit.sh 
 ###############################################################################
 #!/bin/bash
-for FILE in $HOME/project_coprolite_viromes/general_bash_functions/* ; do source $FILE ; done
+for FILE in general_bash_functions/* ; do source $FILE ; done
+cd $home_dir
 
 
+joblogs_output="../joblogs/$origin/"
 # paleo samples labeled as pal-{location} :
 #       pal-AWC pal-BEL pal-BMS pal-ENG pal-ITA pal-PER pal-ZAF pal-ZAP
 # industrial samples labeled as ind-{location} :
@@ -50,7 +52,7 @@ job_name=$(echo $script_name | cut -d '/' -f 2-)
 qsub \
     -cwd \
     -N "${origin}.${job_name}" \
-    -o $HOME/joblogs/$origin/ \
+    -o $joblogs_output \
     -j y \
     -l h_rt=24:00:00,h_data=${data_per_core}G \
     -pe shared ${cores} \

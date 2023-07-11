@@ -4,7 +4,8 @@
 #       generate_fastq.sh 
 ###############################################################################
 #!/bin/bash
-for FILE in $HOME/project_coprolite_viromes/general_bash_functions/* ; do source $FILE ; done
+cd $home_dir
+for FILE in general_bash_functions/* ; do source $FILE ; done
 
 
 # use fasterq dump to download fastq files

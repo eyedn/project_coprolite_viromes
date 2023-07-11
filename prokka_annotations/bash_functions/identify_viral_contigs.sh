@@ -4,10 +4,11 @@
 #		identify_viral_contigs.sh 
 ###############################################################################
 #!/bin/bash
-for FILE in $HOME/project_coprolite_viromes/general_bash_functions/* ; do source $FILE ; done
+cd $home_dir
+for FILE in general_bash_functions/* ; do source $FILE ; done
 source /u/local/Modules/default/init/modules.sh
 module load python
-source $HOME/my_py/bin/activate
+source $python_env
 
 
 # create a contigs file with only contigs with viral annotations
@@ -22,7 +23,7 @@ identify_viral_contigs() {
 		return 0
 	fi
 
-	python3 $HOME/project_coprolite_viromes/prokka_annotations/identify_viral_contigs.py \
+	python3 prokka_annotations/identify_viral_contigs.py \
 		$all_contigs $gff_file > $viral_contigs
 
 	# Check if identification was completed

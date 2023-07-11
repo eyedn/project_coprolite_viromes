@@ -3,8 +3,9 @@
 #		create_viral_contigs.sh 
 ###############################################################################
 #!/bin/bash
-for FILE in $HOME/project_coprolite_viromes/prokka_annotations/bash_functions/* ; do source $FILE ; done
-for FILE in $HOME/project_coprolite_viromes/general_bash_functions/* ; do source $FILE ; done
+cd $home_dir
+for FILE in prokka_annotations/bash_functions/* ; do source $FILE ; done
+for FILE in general_bash_functions/* ; do source $FILE ; done
 
 
 # define inputs variables

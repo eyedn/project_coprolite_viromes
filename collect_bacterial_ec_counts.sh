@@ -4,10 +4,11 @@
 #		collect_bacterial_counts.sh 
 ###############################################################################
 #!/bin/bash
-for FILE in $HOME/project_coprolite_viromes/general_bash_functions/* ; do source $FILE ; done
+cd $home_dir
+for FILE in general_bash_functions/* ; do source $FILE ; done
 source /u/local/Modules/default/init/modules.sh
 module load python
-source $HOME/my_py/bin/activate
+source $python_env
 
 
 # define inputs variables
