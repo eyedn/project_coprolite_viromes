@@ -5,7 +5,7 @@
 ###############################################################################
 #!/bin/bash
 cd $HOME/project_coprolite_viromes
-for FILE in general_bash_functions/* ; do source $FILE ; dones
+for FILE in general_bash_functions/* ; do source $FILE ; done
 
 
 # paleo samples labeled as pal-{location} :
