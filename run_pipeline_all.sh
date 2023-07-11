@@ -1,3 +1,13 @@
+###############################################################################
+#     Aydin Karatas
+#		  Project Coprolite Viromes
+#		  run_pipeline_all.sh 
+###############################################################################
+#!/bin/bash
+for FILE in general_bash_functions/* ; do source $FILE ; done
+cd $home_dir
+
+
 ./run_pipeline.sh -s run_multi_step/download_to_full_annotation.sh  -d 8 -c 8 -p $SCRATCH/project_coprolite_viromes -o ind-USA
 ./run_pipeline.sh -s run_multi_step/download_to_full_annotation.sh  -d 8 -c 8 -p $SCRATCH/project_coprolite_viromes -o ind-ESP
 ./run_pipeline.sh -s run_multi_step/download_to_full_annotation.sh  -d 8 -c 8 -p $SCRATCH/project_coprolite_viromes -o ind-DNK
