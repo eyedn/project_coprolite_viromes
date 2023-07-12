@@ -26,7 +26,7 @@ assembly_extra_dir="${assembly_dir}_extra"
 fastq_trimmed_dir="${reads_dir}/${origin}_${sample}_fastq_trimmed"
 
 # check if assembly was already complete for this sample
-if [ -s "$assembly_dir/${origin}_${sample}_all_contigs.fa" ]; then
+if ls $assembly_dir/${origin}_${sample}_all_contigs.fa* 1> /dev/null 2>&1; then
 	echo "$(timestamp): assembly: final contigs file already created"
 	return 0
 fi
