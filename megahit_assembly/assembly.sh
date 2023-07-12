@@ -52,3 +52,4 @@ cd $contigs_dir
 tar -czvf ${origin}_${sample}_assembly_extra.tar.gz ${origin}_${sample}_assembly_extra
 rm -r ${origin}_${sample}_assembly_extra
 echo "$(timestamp): assembly: assembly complete for $sample"
+cd $HOME/project_coprolite_viromes
