@@ -56,6 +56,9 @@ create_all_mds(bootstrap_mds_info, permute_dir)
 
 # show clustering behavior
 beeswarms_dir <- "../figures/beeswarms"
+violin_dir <- "../figures/violin"
 
 create_beeswarm(bootstrap_cluster_probs, "bootstrap", beeswarms_dir, k)
 create_beeswarm(permute_cluster_probs, "permutation", beeswarms_dir, k)
+create_violin(bootstrap_cluster_probs, permute_cluster_probs,
+              c(0.025, 0.975), "confidence", violin_dir, k)
