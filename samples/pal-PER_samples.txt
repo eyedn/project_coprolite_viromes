@@ -1,0 +1,3 @@
+CM2_Descending_colon_Shotgun 4630170.3
+FI3_Shotgun 4629033.3
+FI12_Shotgun 4626489.3
