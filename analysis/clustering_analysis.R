@@ -24,19 +24,19 @@ raw_counts <- read.csv("~/Documents/Research/data/Bacteria_ec_data.csv",
 
 # normalize observations within a sample and transform to log( CPM + 1 )
 norm_counts <- normalize_data(raw_counts)
-scaled_counts <- as.matrix(scale(t(normalize_data(raw_counts))))
+norm_t_matrix <- as.matrix(t(norm_counts))
 
 # find optimal number of clusters with a wss/silhouette plot
-optimal_sil <- get_optimal_clusters(scaled_counts, "silhouette")
-optimal_wss <- get_optimal_clusters(scaled_counts, "wss")
+optimal_sil <- get_optimal_clusters(norm_t_matrix, "silhouette")
+optimal_wss <- get_optimal_clusters(norm_t_matrix, "wss")
 
 # perform bootstrap clustering with kmeans
-k <- 4
+k <- 3
 boot_iter <- 1000
-graph_every <- 100
+graph_every <- 200
 bootstrap_dir <- "../figures/bootstrap"
 
-bootstrap_res <- kmeans_bootstrap(norm_counts, scaled_counts, k, boot_iter, 
+bootstrap_res <- kmeans_bootstrap(norm_counts, norm_t_matrix, k, boot_iter, 
                                   graph_every)
 
 bootstrap_cluster_probs <- bootstrap_res[[1]]
@@ -47,7 +47,7 @@ create_all_mds(bootstrap_mds_info, bootstrap_dir)
 permute_iter <- 1000
 permute_dir <- "../figures/permute"
 
-permute_res <- kmeans_permute(norm_counts, scaled_counts, k, permute_iter, 
+permute_res <- kmeans_permute(norm_counts, norm_t_matrix, k, permute_iter, 
                               graph_every)
 
 permute_cluster_probs <- permute_res[[1]]
@@ -62,3 +62,13 @@ create_beeswarm(bootstrap_cluster_probs, "bootstrap", beeswarms_dir, k)
 create_beeswarm(permute_cluster_probs, "permutation", beeswarms_dir, k)
 create_violin(bootstrap_cluster_probs, permute_cluster_probs,
               c(0.025, 0.975), "confidence", violin_dir, k)
+
+# get differential expression results
+diff_exp_ind_pre <- get_diff_express(norm_t_matrix, "ind", "pre")
+diff_exp_ind_pal <- get_diff_express(norm_t_matrix, "ind", "pal")
+
+# show differential expresssion
+heat_ind_pre <- create_heatmap(norm_t_matrix, diff_exp_ind_pre, 100,
+                               c("ind", "pre"))
+heat_ind_pal <- create_heatmap(norm_t_matrix, diff_exp_ind_pal, 100,
+                               c("ind", "pal"))
