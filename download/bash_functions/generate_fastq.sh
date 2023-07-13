@@ -32,7 +32,7 @@ generate_fastq() {
 	fi
 
 	# establish number of cores to use
-	if [ [ "$num_cores" -gt "$fasterq_dump_cores" ] ]; then
+	if [ "$num_cores" -gt "$fasterq_dump_cores" ]; then
 		cores_to_use="$fasterq_dump_cores";
 	else
 		cores_to_use="$num_cores"
