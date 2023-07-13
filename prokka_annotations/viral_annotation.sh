@@ -28,6 +28,12 @@ contigs_file="${assembly_dir}/${origin}_${sample}_all_contigs.fa"
 annot_dir="${annotations_dir}/${origin}_${sample}_annotation_${label}"
 custom_db="no_data"
 
+# check if annotations already completed
+if ls $annot_dir 1> /dev/null 2>&1; then
+	echo "$(timestamp): viral_annotation: annotations already completed"
+	return 0
+fi
+
 # check if contigs file exists
 if ls ${contigs_file}* 1> /dev/null 2>&1; then
 	echo "$(timestamp): viral_annotation: contigs file found"
@@ -35,12 +41,6 @@ else
 	echo "$(timestamp): viral_annotation: contigs file not found"
 	rmdir $annot_dir
 	exit 1
-fi
-
-# check if annotations already completed
-if ls $annot_dir 1> /dev/null 2>&1; then
-	echo "$(timestamp): viral_annotation: annotations already completed"
-	return 0
 fi
 
 # annotation function uses prokka
