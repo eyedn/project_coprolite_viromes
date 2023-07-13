@@ -29,7 +29,7 @@ annot_dir="${annotations_dir}/${origin}_${sample}_annotation_${label}"
 custom_db="no_data"
 
 # check if contigs file exists
-if ls $contigs_file 1> /dev/null 2>&1; then
+if ls ${contigs_file}* 1> /dev/null 2>&1; then
 	echo "$(timestamp): viral_annotation: contigs file found"
 else
 	echo "$(timestamp): viral_annotation: contigs file not found"

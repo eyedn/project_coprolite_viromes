@@ -24,6 +24,11 @@ annotate_contigs() {
 		return 0
 	fi
 
+	if ls ${contigs_file}.gz 1> /dev/null 2>&1; then
+		echo "$(timestamp): annotate_contigs: decompressing contigs file"
+		gunzip ${contigs_file}.gz
+	fi
+
 	# annotate using prokka
 	echo "$(timestamp): annotating: $sample"
 	echo "__________________________________________________"
