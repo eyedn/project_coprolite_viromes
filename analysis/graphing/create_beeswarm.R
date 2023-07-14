@@ -44,11 +44,11 @@ create_beeswarm <- function(data, file_name, plot_dir, k) {
       legend.text = element_text(size = 24)
     )
   
-  print(bee)
-  
   # save image to svg file
   ggsave(filename = paste0(plot_dir, "/", file_name, ".svg"),
          plot = bee,
          height = 10,
          width = 20)
+  
+  return(bee)
 }

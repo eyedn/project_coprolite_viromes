@@ -4,6 +4,7 @@
 #   create_violin.R
 ###############################################################################
 library(ggplot2)
+library(ggbrace)
 library(svglite)
 library(reshape2)
 library(latex2exp)
@@ -13,45 +14,39 @@ library(latex2exp)
 create_violin <- function(boot_data, perm_data, ci_perc, file_name, 
                           plot_dir, k) {
   melted_data <- as.data.frame(melt(boot_data))
-  melted_data$Var2 <- factor(melted_data$Var2)
+  colnames(melted_data) <- c("sample", "pair", "prob")
+  melted_data$pair <- factor(melted_data$pair)
   custom_labels <- c("Ind. with Ind.", "Pre. with Pre.", "Pal with Pal.",
                     "Ind. with Pal.", "Ind. with Pre.", "Pre. with Pal.")
   
   # get confidence interval from permutation data
-  ci_perm <- matrix(nrow = 2, ncol = ncol(perm_data))
+  ci_perm <- matrix(nrow = ncol(perm_data), ncol = 3)
   for (i in seq_len(ncol(perm_data))) {
     ci_perm_sorted <- sort(perm_data[, i])
-    ci_perm[1, i] <- ci_perm_sorted[ci_perc[1]*length(ci_perm_sorted)]
-    ci_perm[2, i] <- ci_perm_sorted[ci_perc[2]*length(ci_perm_sorted)]
+    ci_perm[i, 1] <- i
+    ci_perm[i, 2] <- ci_perm_sorted[ci_perc[1]*length(ci_perm_sorted)]
+    ci_perm[i, 3] <- ci_perm_sorted[ci_perc[2]*length(ci_perm_sorted)]
   }
+  ci_perm <- as.data.frame(ci_perm)
+  colnames(ci_perm) <- c("group", "lower", "upper")
+  melted_perm <- as.data.frame(melt(perm_data))
+  colnames(melted_perm) <- c("sample", "pair", "prob")
+  melted_perm$pair <- factor(melted_perm$pair)
   
   # combine boot strap violin plot with permutation CI
-  ci_width = 0.9
-  ci_alpha = 0.1
-  violin <- ggplot(melted_data, aes(x = Var2, y = value)) +
-    geom_violin(aes(fill = Var2)) +
+  violin <- ggplot(melted_data, aes(x = pair, y = prob)) +
+    geom_violin(aes(fill = pair), trim = FALSE) +
+    # geom_violin(data = melted_perm, aes(x = pair, y = prob), trim = TRUE,
+    #             inherit.aes = FALSE) +
     scale_fill_manual(values = safe_colors[c(1:4, 6, 7)], guide = "none") +
-    annotate('rect', xmin = (1 - ci_width / 2), xmax = (1 + ci_width / 2), 
-             ymin = ci_perm[2, 1], ymax = ci_perm[1, 1], alpha = ci_alpha,
-             color = safe_colors[10], fill = safe_colors[10]) +
-    annotate('rect', xmin = (2 - ci_width / 2), xmax = (2 + ci_width / 2),
-             ymin = ci_perm[2, 2], ymax = ci_perm[1, 2], alpha = ci_alpha,
-             color = safe_colors[10], fill = safe_colors[10]) +
-    annotate('rect', xmin = (3 - ci_width / 2), xmax = (3 + ci_width / 2),
-             ymin = ci_perm[2, 3], ymax = ci_perm[1, 3], alpha = ci_alpha,
-             color = safe_colors[10], fill = safe_colors[10]) +
-    annotate('rect', xmin = (4 - ci_width / 2), xmax = (4 + ci_width / 2), 
-             ymin = ci_perm[2, 4], ymax = ci_perm[1, 4], alpha = ci_alpha,
-             color = safe_colors[10], fill = safe_colors[10]) +
-    annotate('rect', xmin = (5 - ci_width / 2), xmax = (5 + ci_width / 2),
-             ymin = ci_perm[2, 5], ymax = ci_perm[1, 5], alpha = ci_alpha,
-             color = safe_colors[10], fill = safe_colors[10]) +
-    annotate('rect', xmin = (6 - ci_width / 2), xmax = (6 + ci_width / 2), 
-             ymin = ci_perm[2, 6], ymax = ci_perm[1, 6], alpha = ci_alpha,
-             color = safe_colors[10], fill=safe_colors[10]) +
+    geom_errorbar( mapping = aes(x = group, ymin = lower, ymax = upper),
+                   data = ci_perm, width = 0.4, size = 1.25,
+                   color = safe_colors[14], inherit.aes = FALSE) +
     scale_x_discrete(labels = custom_labels) +
-    stat_summary(fun = median, geom = "point", fill = safe_colors[14], 
-                 pch = 23, size = 5, stroke = 1) +
+    stat_summary(data = melted_data, aes(x = pair, y = prob), 
+                 fun = median, geom = "point", fill = safe_colors[12], 
+                 color = safe_colors[14], pch = 23, size = 5, stroke = 1,
+                 inherit.aes = FALSE) +
     labs(x = paste0("Randomly Chosen Sample Pair given Categories (",
                     TeX("$C_i$"), " with ", TeX("$C_j"), ")"),
          y = "P(Same Cluster | Pair)",
@@ -74,11 +69,11 @@ create_violin <- function(boot_data, perm_data, ci_perc, file_name,
       legend.text = element_text(size = 24)
     )
 
-  print(violin)
-
   # save image to svg file
   ggsave(filename = paste0(plot_dir, "/", file_name, ".svg"),
          plot = violin,
          height = 10,
          width = 20)
+  
+  return(violin)
 }

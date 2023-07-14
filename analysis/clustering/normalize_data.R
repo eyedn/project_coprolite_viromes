@@ -21,7 +21,7 @@ normalize_data <- function(df) {
   
   df <- df[-zero_rows[[1]], -zero_cols[[1]]]
   
-  # normailze by log(CPM + 1)
+  # normalize by log(CPM + 1)
   for (i in seq_len(ncol(df))) {
     df[, i] <- log((10^6) * df[, i] / sum(df[, i]) + 1)
   }
