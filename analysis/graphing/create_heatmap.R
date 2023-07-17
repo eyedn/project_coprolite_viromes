@@ -11,9 +11,9 @@ library(svglite)
 create_heatmap <- function(data, kruskal_res, max_items, file_name, plot_dir) {
   sig_data <- data[, rownames(kruskal_res)[1:max_items]]
 
-  ind <- c("ind_DNK", "ind_ESP", "ind_USA")
-  pre <- c("pre_FJI", "pre_MDG", "pre_MEX", "pre_PER", "pre_TZA")
-  pal <- c("pal_AWC", "pal_BEL", "pal_BMS", "pal_ENG", "pal_ZAF", "pal_ZAP")
+  ind <- c("ind.DNK", "ind.ESP", "ind.USA")
+  pre <- c("pre.FJI", "pre.MDG", "pre.MEX", "pre.PER", "pre.TZA")
+  pal <- c("pal.AWC", "pal.BEL", "pal.BMS", "pal.ENG", "pal.ZAF", "pal.ZAP")
   cat <- c(ind, pre, pal)
   
   sig_data_concat <- matrix(ncol = ncol(sig_data), nrow = length(cat))
@@ -33,12 +33,25 @@ create_heatmap <- function(data, kruskal_res, max_items, file_name, plot_dir) {
     sig_data_concat[cat[i], ] <- cat_stats
   }
   
+  # define row dendrogram order
+  row_hc <- hclust(dist(sig_data_concat))
+  row_dend <- as.dendrogram(row_hc)
+  weights <- ifelse(grepl("pal", rownames(sig_data_concat)), 4,
+                    ifelse(grepl("MEX", rownames(sig_data_concat)), 2, 
+                           ifelse(grepl("pre", rownames(sig_data_concat)), 3,
+                                  ifelse(grepl("ind", rownames(sig_data_concat)), 1, 
+                                         0))))
+  
+  reordered_dend <- reorder(row_dend, wts = weights, agglo.FUN = mean)
+  
+  
   # save plot to svg file
   color_range = 10
   svglite(filename = paste0(plot_dir, "/", file_name, ".svg"),
           width = 20,
           height = 10)
   heat <- heatmap.2(sig_data_concat, trace = "none",
+                    Rowv = reordered_dend, 
                     col = colorRampPalette(c("blue", "red"))(color_range),
                     key.xlab = "scaled log(CPM + 1)",
                     key.title = "Median EC Representation of Group",
@@ -51,4 +64,3 @@ create_heatmap <- function(data, kruskal_res, max_items, file_name, plot_dir) {
   dev.off()
   return(heat)
 }
-
