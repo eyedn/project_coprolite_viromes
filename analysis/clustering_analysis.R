@@ -28,7 +28,7 @@ optimal_sil <- get_optimal_clusters(norm_t_matrix, "silhouette")
 optimal_wss <- get_optimal_clusters(norm_t_matrix, "wss")
 
 # perform bootstrap clustering with kmeans
-k <- 3
+k <- 4
 boot_iter <- 1000
 graph_every <- 200
 
@@ -48,32 +48,31 @@ permute_cluster_probs <- permute_res[[1]]
 permute_mds_info <- permute_res[[2]]
 
 # show probabalistic clustering behavior
-beeswarm_dir <- "../figures/beeswarms"
 violin_dir <- "../figures/violin"
+permute_name <- paste0("permute_", k)
+confidence_name <- paste0("confidence_", k)
 
-permute_violin <- create_violin(permute_cluster_probs, 
-                                bootstrap_cluster_probs,
-                                   c(0.025, 0.975), 
-                                   "permute_3", violin_dir, k)
+permute_violin <- create_violin(permute_cluster_probs, bootstrap_cluster_probs,
+                                c(0.025, 0.975), FALSE,
+                                permute_name, violin_dir, k)
+
 confidence_violin <- create_violin(bootstrap_cluster_probs, 
-                                   permute_cluster_probs,
-                                   c(0.025, 0.975), 
-                                   "confidence_3", violin_dir, k)
+                                   permute_cluster_probs, c(0.025, 0.975), 
+                                   TRUE, confidence_name, violin_dir, k)
 
 # show differential representation results
+subset_top <- 100
+color_range <- 10
 heat_dir <- "../figures/heat"
+heat_name <- paste0("diff_repres_", subset_top)
 
 diff_repres <- get_diff_repres(norm_t_matrix)
 
-diff_repres_heat <- create_heatmap(norm_t_matrix, diff_repres, 50,
-                                   "diff_repres", heat_dir)
+diff_repres_heat <- create_heatmap(norm_t_matrix, diff_repres, color_range, 
+                                   subset_top, heat_name, heat_dir)
 
-# show iterative clustering behavior
-bootstrap_dir <- "../figures/bootstrap"
-create_all_mds(bootstrap_mds_info, bootstrap_dir)
+# KEGG graphing
 
-permute_dir <- "../figures/permute"
-create_all_mds(permute_mds_info, permute_dir)
 
 # create samples map
 create_samples_map("ind")

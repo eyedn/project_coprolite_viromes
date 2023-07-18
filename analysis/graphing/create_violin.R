@@ -4,19 +4,19 @@
 #   create_violin.R
 ###############################################################################
 library(ggplot2)
-library(ggbrace)
+library(ggsignif)
 library(svglite)
 library(reshape2)
 library(latex2exp)
 
 
 # create a violin plot of paired-clustering tendencies with permutation CI
-create_violin <- function(boot_data, perm_data, ci_perc, file_name, 
+create_violin <- function(boot_data, perm_data, ci_perc, show_ci, file_name, 
                           plot_dir, k) {
   melted_data <- as.data.frame(melt(boot_data))
   colnames(melted_data) <- c("sample", "pair", "prob")
   melted_data$pair <- factor(melted_data$pair)
-  custom_labels <- c("Ind. with Ind.", "Pre. with Pre.", "Pal with Pal.",
+  custom_labels <- c("Ind. with Ind.", "Pre. with Pre.", "Pal. with Pal.",
                     "Ind. with Pal.", "Ind. with Pre.", "Pre. with Pal.")
   
   # get confidence interval from permutation data
@@ -29,24 +29,19 @@ create_violin <- function(boot_data, perm_data, ci_perc, file_name,
   }
   ci_perm <- as.data.frame(ci_perm)
   colnames(ci_perm) <- c("group", "lower", "upper")
-  melted_perm <- as.data.frame(melt(perm_data))
-  colnames(melted_perm) <- c("sample", "pair", "prob")
-  melted_perm$pair <- factor(melted_perm$pair)
   
   # combine boot strap violin plot with permutation CI
   violin <- ggplot(melted_data, aes(x = pair, y = prob)) +
-    geom_violin(aes(fill = pair), trim = FALSE) +
-    # geom_violin(data = melted_perm, aes(x = pair, y = prob), trim = TRUE,
-    #             inherit.aes = FALSE) +
-    scale_fill_manual(values = safe_colors[c(1:4, 6, 7)], guide = "none") +
-    geom_errorbar( mapping = aes(x = group, ymin = lower, ymax = upper),
-                   data = ci_perm, width = 0.4, size = 1.25,
-                   color = safe_colors[14], inherit.aes = FALSE) +
+    geom_violin(trim = TRUE) +
+    geom_errorbar(mapping = aes(x = group, ymin = lower, ymax = upper),
+                   data = ci_perm, width = 0.4, size = 1.25, 
+                  alpha = ifelse(show_ci, 1, 0),
+                   color = "black", inherit.aes = FALSE) +
     scale_x_discrete(labels = custom_labels) +
     stat_summary(data = melted_data, aes(x = pair, y = prob), 
-                 fun = median, geom = "point", fill = safe_colors[12], 
-                 color = safe_colors[14], pch = 23, size = 5, stroke = 1,
-                 inherit.aes = FALSE) +
+                 fun = median, geom = "point", fill = "darkgrey", 
+                 color = "black", pch = 23, size = 5,
+                 stroke = 1, inherit.aes = FALSE) +
     labs(x = paste0("Randomly Chosen Sample Pair given Categories (",
                     TeX("$C_i$"), " with ", TeX("$C_j"), ")"),
          y = "P(Same Cluster | Pair)",

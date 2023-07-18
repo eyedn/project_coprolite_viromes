@@ -5,10 +5,11 @@
 ###############################################################################
 library(gplots)
 library(svglite)
-
+library(RColorBrewer)
 
 # generate a heatmap based on differential expression
-create_heatmap <- function(data, kruskal_res, max_items, file_name, plot_dir) {
+create_heatmap <- function(data, kruskal_res, color_range, max_items, 
+                           file_name, plot_dir) {
   sig_data <- data[, rownames(kruskal_res)[1:max_items]]
 
   ind <- c("ind.DNK", "ind.ESP", "ind.USA")
@@ -36,30 +37,80 @@ create_heatmap <- function(data, kruskal_res, max_items, file_name, plot_dir) {
   # define row dendrogram order
   row_hc <- hclust(dist(sig_data_concat))
   row_dend <- as.dendrogram(row_hc)
-  weights <- ifelse(grepl("pal", rownames(sig_data_concat)), 4,
-                    ifelse(grepl("MEX", rownames(sig_data_concat)), 2, 
-                           ifelse(grepl("pre", rownames(sig_data_concat)), 3,
-                                  ifelse(grepl("ind", rownames(sig_data_concat)), 1, 
-                                         0))))
+  weights <- c()
+  
+  groups <- rownames(sig_data_concat)
+  for (i in seq_len(length(groups))) {
+    if (grepl("pal", groups[i])) {
+      weights <- c(weights, 4)
+    } else if (grepl("MEX", groups[i])) {
+      weights <- c(weights, 2)
+    } else if (grepl("pre", groups[i])) {
+      weights <- c(weights, 3)
+    } else if (grepl("ind", groups[i])) {
+      weights <- c(weights, 1)
+    } else {
+      weights <- c(weights, 0)
+    }
+  }
   
   reordered_dend <- reorder(row_dend, wts = weights, agglo.FUN = mean)
   
+  # define label colors
+  group_col_set <- brewer.pal(4, "Set1")[2:4]
+  ec_col_set <- brewer.pal(7, "Dark2")
+  
+  group_col <- c()
+  for (i in seq_len(length(groups))) {
+    if (grepl("pal", groups[i])) {
+      group_col <- c(group_col, group_col_set[1])
+    } else if (grepl("pre", groups[i])) {
+      group_col <- c(group_col, group_col_set[2])
+    } else {
+      group_col <- c(group_col, group_col_set[3])
+    }
+  }
+  
+  ecs <- colnames(sig_data_concat)
+  ec_col <- c()
+  for (i in seq_len(length(ecs))) {
+    if (startsWith(ecs[i], "1.")) {
+      ec_col <- c(ec_col, ec_col_set[1])
+    } else if (startsWith(ecs[i], "2.")) {
+      ec_col <- c(ec_col, ec_col_set[2])
+    } else if (startsWith(ecs[i], "3.")) {
+      ec_col <- c(ec_col, ec_col_set[3])
+    } else if (startsWith(ecs[i], "4.")) {
+      ec_col <- c(ec_col, ec_col_set[4])
+    } else if (startsWith(ecs[i], "5.")) {
+      ec_col <- c(ec_col, ec_col_set[5])
+    } else if (startsWith(ecs[i], "6.")) {
+      ec_col <- c(ec_col, ec_col_set[6])
+    } else {
+      ec_col <- c(ec_col, ec_col_set[7])
+    } 
+  }
   
   # save plot to svg file
-  color_range = 10
   svglite(filename = paste0(plot_dir, "/", file_name, ".svg"),
           width = 20,
-          height = 10)
-  heat <- heatmap.2(sig_data_concat, trace = "none",
-                    Rowv = reordered_dend, 
+          height = 30)
+  heat <- heatmap.2(t(sig_data_concat), trace = "none",
+                    Colv = reordered_dend, 
                     col = colorRampPalette(c("blue", "red"))(color_range),
                     key.xlab = "scaled log(CPM + 1)",
                     key.title = "Median EC Representation of Group",
-                    xlab = "EC Enzymes",
-                    ylab = "Sample Groups (category-location)",
+                    ylab = "EC Enzymes",
+                    xlab = "Sample Groups (category-location)",
+                    srtCol = 0,
+                    adjCol = c(0.5, 0.5),
+                    ColSideColors = group_col,
+                    colCol = group_col,
+                    RowSideColors = ec_col,
+                    colRow = ec_col,
                     main = "Differentially Represented Viral Metabolic Genes across Sample Groups",
-                    margins = c(10, 10),
-                    cexRow = 1, cexCol = 1, keysize = 1,
+                    margins = c(5, 8),
+                    cexRow = 1.5, cexCol = 1.5, keysize = 1,
                     density.info = "none")
   dev.off()
   return(heat)
