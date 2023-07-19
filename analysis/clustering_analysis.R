@@ -68,7 +68,7 @@ heat_name <- paste0("diff_repres_", subset_top)
 
 diff_repres <- get_diff_repres(norm_t_matrix)
 
-diff_repres_heat <- create_heatmap(norm_t_matrix, diff_repres, color_range, 
+diff_repres_heat <- create_heatmap(norm_t_matrix, diff_repres, color_range,
                                    subset_top, heat_name, heat_dir)
 
 # KEGG graphing
