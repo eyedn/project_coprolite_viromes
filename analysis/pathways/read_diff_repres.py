@@ -20,7 +20,7 @@ def read_diff_repress(file: typing.TextIO) \
     for i, row in ec_df.iterrows():
         new_ec = ec.EC(row.iloc[0], row.iloc[2])
         if not pd.isnull(row.iloc[3]):
-            new_ec.add_pathways(index.process_pathway_str(row.iloc[3]))
+            new_ec.add_pathways(index.process_pathway_str(row.iloc[3], new_ec.ec))
         ecs.append(new_ec)
     
     return index, ecs
