@@ -5,6 +5,7 @@
 ###############################################################################
 library(ggplot2)
 library(ggsignif)
+library(RColorBrewer)
 library(svglite)
 library(reshape2)
 library(latex2exp)
@@ -30,18 +31,38 @@ create_violin <- function(boot_data, perm_data, ci_perc, show_ci, file_name,
   ci_perm <- as.data.frame(ci_perm)
   colnames(ci_perm) <- c("group", "lower", "upper")
   
+  # get fill colors
+  col_spec <- brewer.pal(11, "RdBu")[c(3,6,9)]
+  if (show_ci == TRUE) {
+    fill_col <- c()
+    for (i in seq_len(ncol(boot_data))) {
+      if (median(boot_data[, i]) > ci_perm[i, 3]) {
+        fill_col <- c(fill_col, col_spec[1])
+      } else if (median(boot_data[, i]) < ci_perm[i, 2]) {
+        fill_col <- c(fill_col, col_spec[3])
+      } else {
+        fill_col <- c(fill_col, col_spec[2])
+      }
+    }
+  } else {
+    fill_col <- replicate(6, col_spec[2])
+  }
+  
   # combine boot strap violin plot with permutation CI
   violin <- ggplot(melted_data, aes(x = pair, y = prob)) +
-    geom_violin(trim = TRUE) +
+    geom_violin(aes(color = pair, fill = pair), size = 1, trim = TRUE) +
+    scale_color_manual(values = replicate(6, brewer.pal(9, "Greys")[8]),
+                       guide = "none") +
+    scale_fill_manual(values = fill_col, guide = "none") +
     geom_errorbar(mapping = aes(x = group, ymin = lower, ymax = upper),
-                   data = ci_perm, width = 0.4, size = 1.25, 
+                  data = ci_perm, width = 0.6, size = 1.5, 
                   alpha = ifelse(show_ci, 1, 0),
-                   color = "black", inherit.aes = FALSE) +
+                  color = brewer.pal(9, "Greys")[5], inherit.aes = FALSE) +
     scale_x_discrete(labels = custom_labels) +
     stat_summary(data = melted_data, aes(x = pair, y = prob), 
-                 fun = median, geom = "point", fill = "darkgrey", 
-                 color = "black", pch = 23, size = 5,
-                 stroke = 1, inherit.aes = FALSE) +
+                 fun = median, geom = "point", 
+                 fill = brewer.pal(9, "Greys")[8], pch = 23, size = 5,
+                 inherit.aes = FALSE) +
     labs(x = paste0("Randomly Chosen Sample Pair given Categories (",
                     TeX("$C_i$"), " with ", TeX("$C_j"), ")"),
          y = "P(Same Cluster | Pair)",
@@ -59,9 +80,8 @@ create_violin <- function(boot_data, perm_data, ci_perc, show_ci, file_name,
                                   face = "bold",
                                   margin = margin(t = 0, r = 20, b = 0, l = 0)),
       axis.text = element_text(size = 28),
-      legend.position = "top",
-      legend.title = element_text(size = 24),
-      legend.text = element_text(size = 24)
+      panel.grid.major = element_blank(),
+      panel.grid.minor = element_blank()
     )
 
   # save image to svg file

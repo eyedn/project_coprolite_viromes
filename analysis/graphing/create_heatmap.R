@@ -38,7 +38,6 @@ create_heatmap <- function(data, kruskal_res, color_range, max_items,
   row_hc <- hclust(dist(sig_data_concat))
   row_dend <- as.dendrogram(row_hc)
   weights <- c()
-  
   groups <- rownames(sig_data_concat)
   for (i in seq_len(length(groups))) {
     if (grepl("pal", groups[i])) {
@@ -53,14 +52,12 @@ create_heatmap <- function(data, kruskal_res, color_range, max_items,
       weights <- c(weights, 0)
     }
   }
-  
   reordered_dend <- reorder(row_dend, wts = weights, agglo.FUN = mean)
   
-  # define label colors
-  group_col_set <- brewer.pal(4, "Set1")[2:4]
-  ec_col_set <- brewer.pal(7, "Dark2")
-  
+  # define column colors and labels
+  group_col_set <- rev(brewer.pal(9, "Greys")[c(3,5,8)])
   group_col <- c()
+  col_labels <- c()
   for (i in seq_len(length(groups))) {
     if (grepl("pal", groups[i])) {
       group_col <- c(group_col, group_col_set[1])
@@ -69,8 +66,11 @@ create_heatmap <- function(data, kruskal_res, color_range, max_items,
     } else {
       group_col <- c(group_col, group_col_set[3])
     }
+    col_labels <- c(col_labels, origin_labels[[groups[i]]])
   }
   
+  # define row colors
+  ec_col_set <- brewer.pal(7, "PuRd")
   ecs <- colnames(sig_data_concat)
   ec_col <- c()
   for (i in seq_len(length(ecs))) {
@@ -93,25 +93,29 @@ create_heatmap <- function(data, kruskal_res, color_range, max_items,
   
   # save plot to svg file
   svglite(filename = paste0(plot_dir, "/", file_name, ".svg"),
-          width = 20,
-          height = 30)
-  heat <- heatmap.2(t(sig_data_concat), trace = "none",
+          width = 25,
+          height = 35)
+  heat <- heatmap.2(t(sig_data_concat),
+                    trace = "none",
                     Colv = reordered_dend, 
-                    col = colorRampPalette(c("blue", "red"))(color_range),
+                    col = rev(brewer.pal(11, "RdBu")),
                     key.xlab = "scaled log(CPM + 1)",
-                    key.title = "Median EC Representation of Group",
+                    key.title = "Median EC Representation",
                     ylab = "EC Enzymes",
-                    xlab = "Sample Groups (category-location)",
-                    srtCol = 0,
-                    adjCol = c(0.5, 0.5),
+                    xlab = "Sample Groups",
+                    srtCol = 45,
+                    adjCol = c(1, 0.5),
                     ColSideColors = group_col,
-                    colCol = group_col,
+                    labCol = col_labels,
                     RowSideColors = ec_col,
-                    colRow = ec_col,
                     main = "Differentially Represented Viral Metabolic Genes across Sample Groups",
-                    margins = c(5, 8),
-                    cexRow = 1.5, cexCol = 1.5, keysize = 1,
+                    margins = c(15, 10),
+                    cexRow = 2,
+                    cexCol = 3,
+                    keysize = 1, 
+                    key.par = list(cex = 1.5),
                     density.info = "none")
   dev.off()
+  
   return(heat)
 }
