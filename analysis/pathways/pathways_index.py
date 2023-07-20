@@ -29,4 +29,4 @@ class Pathways_Index:
 
     def print_pathways_by_rep(self) -> None:
         for pathway, _ in sorted(self.index.items(), key=lambda x: x[1][1], reverse = True):
-            print(f"{pathway},{self.index[pathway][0]},{self.index[pathway][1]},{self.index[pathway][2]}")
+            print(pathway)

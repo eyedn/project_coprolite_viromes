@@ -9,7 +9,7 @@ sapply(clustering_functions, source)
 setwd("~/Documents/Research/project_coprolite_viromes/analysis/graphing/")
 graphing_functions <- list.files(pattern="*.R")
 sapply(graphing_functions, source)
-setwd("~/Documents/Research/project_coprolite_viromes/analysis/anova/")
+setwd("~/Documents/Research/project_coprolite_viromes/analysis/stats/")
 anova_functions <- list.files(pattern="*.R")
 sapply(anova_functions, source)
 setwd("~/Documents/Research/project_coprolite_viromes/")
@@ -47,7 +47,7 @@ permute_res <- kmeans_permute(norm_counts, norm_t_matrix, k, permute_iter,
 permute_cluster_probs <- permute_res[[1]]
 permute_mds_info <- permute_res[[2]]
 
-# show probabalistic clustering behavior
+# show probabilistic clustering behavior
 violin_dir <- "../figures/violin"
 permute_name <- paste0("permute_", k)
 confidence_name <- paste0("confidence_", k)
@@ -71,10 +71,27 @@ diff_repres <- get_diff_repres(norm_t_matrix)
 diff_repres_heat <- create_heatmap(norm_t_matrix, diff_repres, color_range,
                                    subset_top, heat_name, heat_dir)
 
-# KEGG graphing
+# show ec proportions
+bar_dir <- "../figures/bar"
+ec_name <- paste0("ec_", subset_top)
 
+ec_class_counts <- get_prop(raw_counts, c("ind", "pre", "pal"),
+                            c("1", "2", "3", "4", "5", "6", "7"))
+ec_bar <- create_barplot(ec_class_counts, 
+                         "EC Class Representation from Annotation",
+                         "Greys", ec_name, bar_dir)
 
-# create samples map
-create_samples_map("ind")
-create_samples_map("pre")
-create_samples_map("pal")
+# show metabolism proportions
+met_name <- paste0("met_", subset_top)
+
+ec_pathways_assoc <- read.csv("../data/diff_repress_bacterial_ec_meta.csv",
+                              header = FALSE, row.names = 1)
+met_pathways <- read.csv("../data/diff_repress_bacterial_pathways.csv", 
+                         header = FALSE)
+met_pathways <- met_pathways[, 1]
+
+met_pathways_counts <- get_met_path(met_pathways, raw_counts, 
+                                    ec_pathways_assoc)
+met_bar <- create_barplot(met_pathways_counts,
+                          "Metabolic Pathway Representation",
+                          "PuRd", met_name, bar_dir)
