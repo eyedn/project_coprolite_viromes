@@ -12,8 +12,8 @@ get_diff_repres <- function(data_scaled) {
   rownames(kruskal_res) <- colnames(data_scaled)
   
   # create vector of groups for kruskal wallis test
-  groups = vector(length = nrow(data_scaled))
-  samples = rownames(data_scaled)
+  groups <- vector(length = nrow(data_scaled))
+  samples <- rownames(data_scaled)
   for (i in seq_len(length(samples))) {
     if (grepl("ind", samples[i], fixed = TRUE)) {
       groups[i] = 1
