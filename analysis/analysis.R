@@ -1,7 +1,7 @@
 ###############################################################################
 #   Aydin Karatas
 #   Project Coprolite Viromes
-#   clustering_analysis.R
+#   analysis.R
 ###############################################################################
 setwd("~/Documents/Research/project_coprolite_viromes/analysis/clustering/")
 clustering_functions <- list.files(pattern="*.R")
@@ -73,16 +73,34 @@ diff_repres_heat <- create_heatmap(norm_t_matrix, diff_repres, color_range,
 
 # show ec proportions
 bar_dir <- "../figures/bar"
-ec_name <- paste0("ec_", subset_top)
+ec_cat_name <- paste0("ec_cat_", subset_top)
+ec_time_name <- paste0("ec_time_", subset_top)
 
-ec_class_counts <- get_prop(raw_counts, c("ind", "pre", "pal"),
-                            c("1", "2", "3", "4", "5", "6", "7"))
+ec_class_counts <- get_cat_CPM(raw_counts, rownames(diff_repres)[1:subset_top],
+                               c(cat_labels),
+                               c("1", "2", "3", "4", "5", "6", "7"))
 ec_bar <- create_barplot(ec_class_counts, 
-                         "EC Class Representation from Annotation",
-                         "Greys", ec_name, bar_dir)
+                         "Most Differentiated EC Class Representation",
+                         "EC Classes",
+                         "Median log(CPM + 1)",
+                         c(brewer.pal(9, "Greys")[c(3,5,8)],
+                           brewer.pal(9, "Blues")[c(2,4,6,7,8)],
+                           brewer.pal(9, "Reds")[c(2,3,4,5,6,7)]), 
+                         ec_cat_name, bar_dir)
+
+ec_class_counts <- get_cat_CPM(raw_counts, rownames(diff_repres)[1:subset_top],
+                               c("ind", "pre", "pal"),
+                               c("1", "2", "3", "4", "5", "6", "7"))
+ec_bar <- create_barplot(ec_class_counts, 
+                         "Most Differentiated EC Class Representation",
+                         "EC Classes",
+                         "Median log(CPM + 1)",
+                         c(brewer.pal(9, "Greys")[c(3,5,8)]), 
+                         ec_time_name, bar_dir)
 
 # show metabolism proportions
-met_name <- paste0("met_", subset_top)
+met_cat_name <- paste0("met_cat_", subset_top)
+met_time_name <- paste0("met_time_", subset_top)
 
 ec_pathways_assoc <- read.csv("../data/diff_repress_bacterial_ec_meta.csv",
                               header = FALSE, row.names = 1)
@@ -90,8 +108,22 @@ met_pathways <- read.csv("../data/diff_repress_bacterial_pathways.csv",
                          header = FALSE)
 met_pathways <- met_pathways[, 1]
 
-met_pathways_counts <- get_met_path(met_pathways, raw_counts, 
-                                    ec_pathways_assoc)
-met_bar <- create_barplot(met_pathways_counts,
-                          "Metabolic Pathway Representation",
-                          "PuRd", met_name, bar_dir)
+met_pathways_cat <- get_met_path(met_pathways, raw_counts, ec_pathways_assoc,
+                                 rownames(diff_repres)[1:subset_top])
+met_cat_bar <- create_barplot(met_pathways_counts,
+                          "Most Differentiated Metabolic Pathways",
+                          "Metabolic Pathways",
+                          "Median CPM of Contributing Enzymes",
+                          c(c(brewer.pal(9, "Greys")[c(3,5,8)],
+                              brewer.pal(9, "Blues")[c(2,4,6,7,8)],
+                              brewer.pal(9, "Reds")[c(2,3,4,5,6,7)])), 
+                          met_cat_name, bar_dir)
+
+met_pathways_time <- get_met_path(met_pathways, raw_counts, ec_pathways_assoc,
+                                  rownames(diff_repres)[1:subset_top])
+met_time_bar <- create_barplot(met_pathways_counts,
+                          "Most Differentiated Metabolic Pathways",
+                          "Metabolic Pathways",
+                          "Median CPM of Contributing Enzymes",
+                          c(brewer.pal(9, "Greys")[c(3,5,8)]), 
+                          met_time_name, bar_dir)

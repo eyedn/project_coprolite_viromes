@@ -26,6 +26,12 @@ origin_labels <- c("ind.DNK" = "Denmark",
                    "pal.ZAF" = "South Africa",
                    "pal.ZAP" = "Zape (MEX)")
 
+# labels for heatmap and barplots
+ind_label <- c("ind.DNK", "ind.ESP", "ind.USA")
+pre_labels <- c("pre.FJI", "pre.MDG", "pre.MEX", "pre.PER", "pre.TZA")
+pal_labels <- c("pal.AWC", "pal.BEL", "pal.BMS", "pal.ENG", "pal.ZAF", "pal.ZAP")
+cat_labels <- c(ind_label, pre_labels, pal_labels)
+
 # reference for pair labels based on category names
 pair_labels <- c("Ind. vs. Ind.", "Pre. vs. Pre.", "Pal. vs. Pal.",
                  "Ind. vs. Pal", "Ind. vs. Pre", "Pre. vs. Pal.")

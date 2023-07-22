@@ -11,19 +11,14 @@ library(RColorBrewer)
 create_heatmap <- function(data, kruskal_res, color_range, max_items, 
                            file_name, plot_dir) {
   sig_data <- data[, rownames(kruskal_res)[1:max_items]]
-
-  ind <- c("ind.DNK", "ind.ESP", "ind.USA")
-  pre <- c("pre.FJI", "pre.MDG", "pre.MEX", "pre.PER", "pre.TZA")
-  pal <- c("pal.AWC", "pal.BEL", "pal.BMS", "pal.ENG", "pal.ZAF", "pal.ZAP")
-  cat <- c(ind, pre, pal)
   
-  sig_data_concat <- matrix(ncol = ncol(sig_data), nrow = length(cat))
+  sig_data_concat <- matrix(ncol = ncol(sig_data), nrow = length(cat_labels))
   colnames(sig_data_concat) <- colnames(sig_data)
-  rownames(sig_data_concat) <- cat
+  rownames(sig_data_concat) <- cat_labels
   
   # combine all data from same category by taking median
-  for (i in seq_len(length(cat))) {
-    cat_subset <- sig_data[grep(cat[i], rownames(sig_data)), ]
+  for (i in seq_len(length(cat_labels))) {
+    cat_subset <- sig_data[grep(cat_labels[i], rownames(sig_data)), ]
     
     if (is.matrix(cat_subset)) {
       cat_stats <- apply(cat_subset, 2, median)
@@ -31,7 +26,7 @@ create_heatmap <- function(data, kruskal_res, color_range, max_items,
       cat_stats <- as.vector(cat_subset)
     }
     
-    sig_data_concat[cat[i], ] <- cat_stats
+    sig_data_concat[cat_labels[i], ] <- cat_stats
   }
   
   # define row dendrogram order

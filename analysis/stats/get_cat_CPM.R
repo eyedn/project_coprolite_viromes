@@ -1,12 +1,12 @@
 ###############################################################################
 #   Aydin Karatas
 #   Project Coprolite Viromes
-#   get_prop.R
+#   get_cat_CPM.R
 ###############################################################################
 
 
 # return df contain information on enzyme class counts of samples
-get_prop <- function(data, cat, var) {
+get_cat_CPM <- function(data, subset_rows, cat, var) {
   class_counts <- matrix(nrow = length(var), ncol = length(cat))
   rownames(class_counts) <- var
   colnames(class_counts) <- cat
@@ -15,6 +15,8 @@ get_prop <- function(data, cat, var) {
   for (i in seq_len(ncol(data))) {
     data[, i] <- 10^6 * data[, i] / sum(data[, i])
   }
+  
+  data <- data[subset_rows, ]
   
   for (i in seq_len(nrow(class_counts))) {
     class_subset <- data[startsWith(rownames(data), var[i]), , drop=FALSE]
@@ -25,7 +27,8 @@ get_prop <- function(data, cat, var) {
                                    drop=FALSE]
       group_sums <- c()
       for (k in seq_len(ncol(group_subset))) {
-        group_sums <- c(group_sums, sum(group_subset[, k], na.rm = TRUE))
+        group_sums <- c(group_sums,
+                        sum(group_subset[, k], na.rm = TRUE))
       }
       class_counts[i, j] <- median(group_sums, na.rm = TRUE)
     }
