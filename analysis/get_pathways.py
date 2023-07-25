@@ -1,7 +1,7 @@
 ###############################################################################
 #       Aydin Karatas
 #		Project Coprolite Viromes
-#		diff_repres_pathways.py
+#		get_pathways.py
 ###############################################################################
 from sys import argv
 import pathways as pw

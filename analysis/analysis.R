@@ -3,19 +3,20 @@
 #   Project Coprolite Viromes
 #   analysis.R
 ###############################################################################
+setwd("~/Documents/Research/project_coprolite_viromes/analysis/general_R_functions/")
+general_functions <- list.files(pattern="*.R")
+sapply(general_functions, source)
 setwd("~/Documents/Research/project_coprolite_viromes/analysis/clustering/")
-clustering_functions <- list.files(pattern="*.R")
-sapply(clustering_functions, source)
-setwd("~/Documents/Research/project_coprolite_viromes/analysis/general_graphing/")
-graphing_functions <- list.files(pattern="*.R")
-sapply(graphing_functions, source)
-setwd("~/Documents/Research/project_coprolite_viromes/analysis/differential_repres_R/")
-anova_functions <- list.files(pattern="*.R")
-sapply(anova_functions, source)
+cluster_functions <- list.files(pattern="*.R")
+sapply(cluster_functions, source)
+setwd("~/Documents/Research/project_coprolite_viromes/analysis/diff_repres/")
+diff_functions <- list.files(pattern="*.R")
+sapply(diff_functions, source)
 setwd("~/Documents/Research/project_coprolite_viromes/")
 
 
 # define script constants
+set.seed(seed = 621)
 k <- 4
 iterations <- 10000
 subset_top <- 100
