@@ -31,7 +31,7 @@ create_jitter <- function(data, file_name, plot_dir) {
     
   jitter <- ggplot(melted_data, aes(x = ec, y = value, fill = cat)) +
     geom_point(color = "black", pch = 21, size = 5, 
-               position = position_jitterdodge(jitter.width = 0.5,
+               position = position_jitterdodge(jitter.width = 0.55,
                                                dodge.width = 0.85)) +
     scale_fill_manual(labels = c("Industrial", "Pre-Industrial", "Paleosample"),
                       values = brewer.pal(9, "Greys")[c(3,5,8)]) +
