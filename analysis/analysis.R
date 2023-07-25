@@ -6,14 +6,28 @@
 setwd("~/Documents/Research/project_coprolite_viromes/analysis/clustering/")
 clustering_functions <- list.files(pattern="*.R")
 sapply(clustering_functions, source)
-setwd("~/Documents/Research/project_coprolite_viromes/analysis/graphing/")
+setwd("~/Documents/Research/project_coprolite_viromes/analysis/general_graphing/")
 graphing_functions <- list.files(pattern="*.R")
 sapply(graphing_functions, source)
-setwd("~/Documents/Research/project_coprolite_viromes/analysis/stats/")
+setwd("~/Documents/Research/project_coprolite_viromes/analysis/differential_repres_R/")
 anova_functions <- list.files(pattern="*.R")
 sapply(anova_functions, source)
 setwd("~/Documents/Research/project_coprolite_viromes/")
 
+
+# define script constants
+k <- 4
+iterations <- 10000
+subset_top <- 100
+color_range <- 10
+violin_dir <- "../figures/violin"
+heat_dir <- "../figures/heat"
+beeswarm_dir <- "../figures/beeswarms"
+confidence_name <- paste0("confidence_", k)
+heat_name <- paste0("diff_repres_", subset_top)
+bee_name <- paste0("ec_repres_", subset_top)
+star_bounds <- list(list(0.1, 0.9), list(0.025, 0.975), list(0.01, 0.99),
+                    list(0.001, 0.999))
 
 # read in raw counts data
 raw_counts <- read.csv("~/Documents/Research/data/bacterial_gene_counts.csv",
@@ -27,103 +41,22 @@ norm_t_matrix <- scale(t(norm_counts))
 optimal_sil <- get_optimal_clusters(norm_t_matrix, "silhouette")
 optimal_wss <- get_optimal_clusters(norm_t_matrix, "wss")
 
-# perform bootstrap clustering with kmeans
-k <- 4
-boot_iter <- 1000
-graph_every <- 200
+# perform kmeans with boostraping and permutations
+bootstrap_res <- kmeans_bootstrap(norm_t_matrix, k, iterations)
+permute_res <- kmeans_permute(norm_t_matrix, k, iterations)
 
-bootstrap_res <- kmeans_bootstrap(norm_counts, norm_t_matrix, k, boot_iter, 
-                                  graph_every)
-
-bootstrap_cluster_probs <- bootstrap_res[[1]]
-bootstrap_mds_info <- bootstrap_res[[2]]
-
-# perform kmeans clustering of permuations
-permute_iter <- 1000
-
-permute_res <- kmeans_permute(norm_counts, norm_t_matrix, k, permute_iter, 
-                              graph_every)
-
-permute_cluster_probs <- permute_res[[1]]
-permute_mds_info <- permute_res[[2]]
-
-# show probabilistic clustering behavior
-violin_dir <- "../figures/violin"
-permute_name <- paste0("permute_", k)
-confidence_name <- paste0("confidence_", k)
-
-permute_violin <- create_violin(permute_cluster_probs, bootstrap_cluster_probs,
-                                c(0.025, 0.975), FALSE,
-                                permute_name, violin_dir, k)
-
-confidence_violin <- create_violin(bootstrap_cluster_probs, 
-                                   permute_cluster_probs, c(0.025, 0.975), 
-                                   TRUE, confidence_name, violin_dir, k)
+# show clustering results by combining bootstrap and permutation res
+cluster_results <- get_clustering_res(bootstrap_res, permute_res, star_bounds,
+                                      iterations)
+confidence_violin <- create_violin(bootstrap_res, cluster_results,
+                                   confidence_name, violin_dir)
 
 # show differential representation results
-subset_top <- 100
-color_range <- 10
-heat_dir <- "../figures/heat"
-heat_name <- paste0("diff_repres_", subset_top)
-
-diff_repres <- get_diff_repres(norm_t_matrix)
-
-diff_repres_heat <- create_heatmap(norm_t_matrix, diff_repres, color_range,
-                                   subset_top, heat_name, heat_dir)
+diff_repres <- get_diff_repres_ec(norm_t_matrix)
+create_heatmap(norm_t_matrix, diff_repres, color_range, subset_top,
+               heat_name, heat_dir)
 
 # show ec proportions
-bar_dir <- "../figures/bar"
-ec_cat_name <- paste0("ec_cat_", subset_top)
-ec_time_name <- paste0("ec_time_", subset_top)
-
-ec_class_counts <- get_cat_CPM(raw_counts, rownames(diff_repres)[1:subset_top],
-                               c(cat_labels),
-                               c("1", "2", "3", "4", "5", "6", "7"))
-ec_bar <- create_barplot(ec_class_counts, 
-                         "Most Differentiated EC Class Representation",
-                         "EC Classes",
-                         "Median log(CPM + 1)",
-                         c(brewer.pal(9, "Greys")[c(3,5,8)],
-                           brewer.pal(9, "Blues")[c(2,4,6,7,8)],
-                           brewer.pal(9, "Reds")[c(2,3,4,5,6,7)]), 
-                         ec_cat_name, bar_dir)
-
-ec_class_counts <- get_cat_CPM(raw_counts, rownames(diff_repres)[1:subset_top],
-                               c("ind", "pre", "pal"),
-                               c("1", "2", "3", "4", "5", "6", "7"))
-ec_bar <- create_barplot(ec_class_counts, 
-                         "Most Differentiated EC Class Representation",
-                         "EC Classes",
-                         "Median log(CPM + 1)",
-                         c(brewer.pal(9, "Greys")[c(3,5,8)]), 
-                         ec_time_name, bar_dir)
-
-# show metabolism proportions
-met_cat_name <- paste0("met_cat_", subset_top)
-met_time_name <- paste0("met_time_", subset_top)
-
-ec_pathways_assoc <- read.csv("../data/diff_repress_bacterial_ec_meta.csv",
-                              header = FALSE, row.names = 1)
-met_pathways <- read.csv("../data/diff_repress_bacterial_pathways.csv", 
-                         header = FALSE)
-met_pathways <- met_pathways[, 1]
-
-met_pathways_cat <- get_met_path(met_pathways, raw_counts, ec_pathways_assoc,
-                                 rownames(diff_repres)[1:subset_top])
-met_cat_bar <- create_barplot(met_pathways_counts,
-                          "Most Differentiated Metabolic Pathways",
-                          "Metabolic Pathways",
-                          "Median CPM of Contributing Enzymes",
-                          c(c(brewer.pal(9, "Greys")[c(3,5,8)],
-                              brewer.pal(9, "Blues")[c(2,4,6,7,8)],
-                              brewer.pal(9, "Reds")[c(2,3,4,5,6,7)])), 
-                          met_cat_name, bar_dir)
-
-met_pathways_time <- get_met_path(met_pathways, raw_counts, ec_pathways_assoc,
-                                  rownames(diff_repres)[1:subset_top])
-met_time_bar <- create_barplot(met_pathways_counts,
-                          "Most Differentiated Metabolic Pathways",
-                          "Metabolic Pathways",
-                          "Median CPM of Contributing Enzymes",
-                          c(brewer.pal(9, "Greys")[c(3,5,8)]), 
-                          met_time_name, bar_dir)
+median_ec <- get_cat_medians(norm_t_matrix[, rownames(diff_repres)[1:100]])
+ec_jitter <- create_jitter(median_ec, bee_name, beeswarm_dir)
+get_diff_repres_class(median_ec)

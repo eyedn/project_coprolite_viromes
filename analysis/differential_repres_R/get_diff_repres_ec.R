@@ -1,13 +1,13 @@
 ###############################################################################
 #   Aydin Karatas
 #   Project Coprolite Viromes
-#   get_diff_repres.R
+#   get_diff_repres_ec.R
 ###############################################################################
 library(stats)
 
 
-# applies a wilcoxon test to find differential expressed column values
-get_diff_repres <- function(data_scaled) {
+# applies a kruskal-walis test to find differential expressed column values
+get_diff_repres_ec <- function(data_scaled) {
   kruskal_res <- matrix(nrow = ncol(data_scaled), ncol = 1)
   rownames(kruskal_res) <- colnames(data_scaled)
   
@@ -31,7 +31,7 @@ get_diff_repres <- function(data_scaled) {
   }
   
   # apply benjamini hochberg correction to p-values
-  kruskal_res[, 1] <- p.adjust(kruskal_res[, 1], method = "fdr", 
+  kruskal_res[, 1] <- p.adjust(kruskal_res[, 1], method = "BH", 
                               n = length(kruskal_res[, 1]))
   
   # order p-values from lowest to highest
