@@ -68,7 +68,7 @@ create_violin <- function(boot_data, clus_res, file_name, plot_dir) {
       axis.title.y = element_text(size = 18,
                                   face = "bold",
                                   margin = margin(t = 0, r = 20, b = 0, l = 0)),
-      axis.text = element_text(size = 18),
+      axis.text = element_text(size = 14),
       panel.grid.major = element_blank(),
       panel.grid.minor = element_blank(),
       axis.ticks.x = element_blank()
@@ -101,7 +101,7 @@ create_violin <- function(boot_data, clus_res, file_name, plot_dir) {
       axis.title.x = element_text(size = 18,
                                   face = "bold",
                                   margin = margin(t = 20, r = 0, b = 0, l = 0)),
-      axis.text = element_text(size = 18),
+      axis.text = element_text(size = 14),
       panel.grid.major = element_blank(),
       panel.grid.minor = element_blank(),
       axis.ticks.x = element_blank(),
@@ -111,7 +111,7 @@ create_violin <- function(boot_data, clus_res, file_name, plot_dir) {
     )
   
   violin <- homo_violin + hete_violin + plot_annotation(
-    title = "Clustering Probability of Sample Categories",
+    title = "Clustering Probability of Samples by Gene Representation",
     theme = theme(plot.title = element_text(size = 24, 
                                             face = "bold"))
   )
@@ -119,7 +119,7 @@ create_violin <- function(boot_data, clus_res, file_name, plot_dir) {
   # save image to svg file
   ggsave(filename = paste0(plot_dir, "/", file_name, ".svg"),
          plot = violin,
-         height = 7,
+         height = 8,
          width = 14)
   
   return(violin)

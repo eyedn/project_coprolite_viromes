@@ -30,14 +30,14 @@ create_jitter <- function(data, file_name, plot_dir) {
   melted_data$ec <- factor(melted_data$ec)
     
   jitter <- ggplot(melted_data, aes(x = ec, y = value, fill = cat)) +
-    geom_point(color = "black", pch = 21, size = 4, 
-               position = position_jitterdodge(jitter.width = 0.55,
+    geom_point(color = "black", pch = 21, size = 5, 
+               position = position_jitterdodge(jitter.width = 0.5,
                                                dodge.width = 0.85)) +
     scale_fill_manual(labels = c("Industrial", "Pre-Industrial", "Paleosample"),
                       values = brewer.pal(9, "Greys")[c(3,5,8)]) +
     labs(fill = "Categories", y = "Scaled log(CPM + 1)",
          x = "Enzyme Class",
-         title = "Representation of Enzyme Classes Across Sample Categories") +
+         title = "Representation of Enzyme Classes among Most Differentially Expressed Genes") +
     scale_x_discrete(labels = ec_classes) +
     theme_bw() +
     theme(
@@ -51,18 +51,20 @@ create_jitter <- function(data, file_name, plot_dir) {
       axis.title.y = element_text(size = 18,
                                   face = "bold",
                                   margin = margin(t = 0, r = 20, b = 0, l = 0)),
-      axis.text = element_text(size = 18),
-      axis.text.x = element_text(angle = 45, vjust = 1, hjust = 1),
+      axis.text = element_text(size = 14),
       legend.position = "top",
       legend.title = element_blank(),
-      legend.text = element_text(size = 14)
+      legend.text = element_text(size = 18),
+      panel.grid.major = element_blank(),
+      panel.grid.minor = element_blank(),
+      axis.ticks.x = element_blank()
     )
   
   # save image to svg file
   ggsave(filename = paste0(plot_dir, "/", file_name, ".svg"),
          plot = jitter,
-         height = 10,
-         width = 18)
+         height = 8,
+         width = 14)
   
   return(jitter)
 }
