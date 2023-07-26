@@ -34,7 +34,7 @@ get_lifestyles() {
         --threads 8 \
         --len 100 \
         --rootpth $predict_dir \
-        --dbdir $phabox/database/
+        --dbdir $phabox/database
     cd $HOME
     echo "__________________________________________________"
 
