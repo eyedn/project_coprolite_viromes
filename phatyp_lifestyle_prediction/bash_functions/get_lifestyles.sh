@@ -29,6 +29,7 @@ get_lifestyles() {
     echo "$(timestamp): get_lifestyles: $sample"
 	echo "__________________________________________________"
     cd $phabox
+    pwd
     python3 PhaTYP_single.py  \
         --contigs $contigs_file \
         --threads 8 \
