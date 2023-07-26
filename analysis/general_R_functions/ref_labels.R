@@ -33,5 +33,5 @@ pal_labels <- c("pal.AWC", "pal.BEL", "pal.BMS", "pal.ENG", "pal.ZAF", "pal.ZAP"
 cat_labels <- c(ind_label, pre_labels, pal_labels)
 
 # reference for pair labels based on category names
-pair_labels <- c("Ind. vs. Ind.", "Pre. vs. Pre.", "Pal. vs. Pal.",
-                 "Ind. vs. Pal", "Ind. vs. Pre", "Pre. vs. Pal.")
+pair_labels <- c("Ind. with Ind.", "Pre. with Pre.", "Pal. with Pal.",
+                 "Ind. with Pal", "Ind. with Pre", "Pre. with Pal.")

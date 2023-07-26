@@ -17,7 +17,7 @@ get_clustering_res <- function(boot_data, perm_data, star_bounds, num_iter) {
   for (i in seq_len(length(observed_stats))) {
     observation <- observed_stats[i]
     cat(paste0(pair_labels[i], " observation: ", observation, "\n"))
-    hist(perm_data[, i], xlim = c(0, 1), breaks = 40)
+    hist(perm_data[, i], xlim = c(0, 1), breaks = 40, main = pair_labels[i])
     abline(v = observation, col = abline_cols[1], lwd = abline_size)
     
     pair_results <- list()
@@ -34,7 +34,7 @@ get_clustering_res <- function(boot_data, perm_data, star_bounds, num_iter) {
       } else {
         pass <- FALSE
       }
-      cat(paste0(strrep("*", j), ": ", bounds[1, j], ", ", bounds[2, j]),
+      cat(paste0("\t", strrep("*", j), ": ", bounds[1, j], ", ", bounds[2, j]),
           ", passed = ", pass, "\n")
       abline(v = bounds[1, j], col = abline_cols[j + 1], lwd = abline_size)
       abline(v = bounds[2, j], col = abline_cols[j + 1], lwd = abline_size)

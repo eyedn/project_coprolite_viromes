@@ -37,7 +37,7 @@ create_jitter <- function(data, file_name, plot_dir) {
                       values = brewer.pal(9, "Greys")[c(3,5,8)]) +
     labs(fill = "Categories", y = "Scaled log(CPM + 1)",
          x = "Enzyme Class",
-         title = "Representation of Enzyme Classes among Most Differentially Expressed Genes") +
+         title = "Enzyme Classes of Most Differentially Represented Genes") +
     scale_x_discrete(labels = ec_classes) +
     theme_bw() +
     theme(
