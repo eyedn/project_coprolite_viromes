@@ -10,6 +10,7 @@ source /u/local/Modules/default/init/modules.sh
 module load anaconda3
 conda activate phabox
 module load python
+source $python_env
 
 
 # use PhaTYP from PhaBOX to predict viral lifestyles
@@ -28,7 +29,7 @@ get_lifestyles() {
     echo "$(timestamp): get_lifestyles: $sample"
 	echo "__________________________________________________"
     cd $phabox
-    python PhaTYP_single.py  \
+    python3 PhaTYP_single.py  \
         --contigs $contigs_file \
         --threads 8 \
         --len 100 \
