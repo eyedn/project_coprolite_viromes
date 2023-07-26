@@ -7,9 +7,9 @@
 cd $HOME/project_coprolite_viromes
 for FILE in general_bash_functions/* ; do source $FILE ; done
 source /u/local/Modules/default/init/modules.sh
-module load python
 module load anaconda3
 conda activate phabox
+module load python
 
 
 # use PhaTYP from PhaBOX to predict viral lifestyles
@@ -28,7 +28,7 @@ get_lifestyles() {
     echo "$(timestamp): get_lifestyles: $sample"
 	echo "__________________________________________________"
     cd $phabox
-    python3 PhaTYP_single.py  \
+    python PhaTYP_single.py  \
         --contigs $contigs_file \
         --threads 8 \
         --len 100 \
