@@ -14,4 +14,4 @@ trim_galore="$HOME/software/TrimGalore-0.6.10/trim_galore"
 
 megahit="$HOME/software/MEGAHIT-1.2.9-Linux-x86_64-static/bin/megahit"
 
-phabox="$HOME/software/PhaBOX"
+phabox="$SCRATCH/software/PhaBOX"
