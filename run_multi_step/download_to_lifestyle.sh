@@ -27,4 +27,4 @@ num_cores=$3
 . prokka_annotations/bacterial_annotation.sh "$origin" "$origin_parent" "$num_cores"
 
 # create lifestyle predictions of viral contigs
-. phatyp_lifestyle_prediction/predict_lifestyle "$origin" "$origin_parent" "$num_cores"
+. phatyp_lifestyle_prediction/predict_lifestyle.sh "$origin" "$origin_parent" "$num_cores"
