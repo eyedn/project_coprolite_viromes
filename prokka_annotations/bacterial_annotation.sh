@@ -25,14 +25,14 @@ label="bacteria"
 
 # define directories and files
 contigs_dir="${project_dir}/contigs"
-annotations_dir="${project_dir}/prokka_annotations"
+annotations_dir="${project_dir}/genome_annotation"
 assembly_dir="${contigs_dir}/${origin}_${sample}_assembly"
-contigs_file="${assembly_dir}/${origin}_${sample}_viral_contigs.fa"
-annot_dir="${annotations_dir}/${origin}_${sample}_annotation_${label}"
+contigs_file="${project_dir}/phage_predictions/${origin}_${sample}_prediction/phage_contigs.fa"
+sample_annot_dir="${annotations_dir}/${origin}_${sample}_annotation_${label}"
 custom_db="no_data"
 
 # check if contigs file exists
-if ls $contigs_file 1> /dev/null 2>&1; then
+if ls ${contigs_file}* 1> /dev/null 2>&1; then
 	echo "$(timestamp): bacterial_annotation: contigs file found"
 else
 	echo "$(timestamp): bacterial_annotation: contigs file not found"
@@ -41,7 +41,7 @@ else
 fi
 
 # check if annotations already completed
-if ls $annot_dir 1> /dev/null 2>&1; then
+if ls $sample_annot_dir 1> /dev/null 2>&1; then
 	echo "$(timestamp): bacterial_annotation: annotations already completed"
 	return 0
 fi
@@ -50,8 +50,8 @@ fi
 echo "===================================================================================================="
 echo "$(timestamp): bacterial annotation: $origin; $sample"
 echo "===================================================================================================="
-annotate_contigs "$sample" "$contigs_file" "$custom_db" "$annot_dir" \
+annotate_contigs "$sample" "$contigs_file" "$custom_db" "$sample_annot_dir" \
 	"$type" "$label" "$num_cores"
 
 # compress annotation files
-gzip $annot_dir/*
+gzip $sample_annot_dir/*
