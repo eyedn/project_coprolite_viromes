@@ -16,13 +16,13 @@ annotate_contigs() {
 	local num_cores=$7
 
 	# if annotation already happend, skip return early
-	if ls "$annot_dir" 1> /dev/null 2>&1; then
+	if ls $annot_dir 1> /dev/null 2>&1; then
 		echo "$(timestamp): annotate_contigs: annotation directory found. annotation already completed"
 		return 0
 	fi
 
+	# decompress contigs file if needed
 	if ls ${contigs_file}.gz 1> /dev/null 2>&1; then
-		echo "$(timestamp): annotate_contigs: decompressing contigs file"
 		gunzip ${contigs_file}.gz
 	fi
 
@@ -33,8 +33,13 @@ annotate_contigs() {
 		"$type" "$label" "$num_cores"
 	echo "__________________________________________________"
 
+	# compress contigs file
+	if ls ${contigs_file} 1> /dev/null 2>&1; then
+		gzip ${contigs_file}
+	fi
+
 	# Check if annotation was completed
-	if ls "$annot_dir" 2>&1; then
+	if ls $annot_dir 1> /dev/null 2>&1; then
 		echo "$(timestamp): annotate_contigs: annotation files created"
 		# Check if the tbl file is empty
 		if ! [ -s "$annot_dir/"*.tbl  ]; then
