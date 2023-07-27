@@ -6,6 +6,9 @@
 cd $HOME/project_coprolite_viromes
 for FILE in prokka_annotations/bash_functions/* ; do source $FILE ; done
 for FILE in general_bash_functions/* ; do source $FILE ; done
+source /u/local/Modules/default/init/modules.sh
+module load python
+source $python_env
 
 
 # define inputs variables

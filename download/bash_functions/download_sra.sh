@@ -3,9 +3,6 @@
 #       Project Coprolite Viromes
 #       download_sra.sh 
 ###############################################################################
-#!/bin/bash
-cd $HOME/project_coprolite_viromes
-for FILE in general_bash_functions/* ; do source $FILE ; done
 
 
 # use prefetch to download sra file of accession id

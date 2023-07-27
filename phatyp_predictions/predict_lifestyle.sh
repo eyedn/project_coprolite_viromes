@@ -7,6 +7,11 @@
 cd $HOME/project_coprolite_viromes
 for FILE in phatyp_lifestyle_prediction/bash_functions/* ; do source $FILE ; done
 for FILE in general_bash_functions/* ; do source $FILE ; done
+source /u/local/Modules/default/init/modules.sh
+module load anaconda3
+conda activate phabox
+module load python
+source $python_env
 
 
 # define inputs variables

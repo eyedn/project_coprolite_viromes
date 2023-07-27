@@ -3,9 +3,6 @@
 #		Project Coprolite Viromes
 #		assembly_functions.sh 
 ###############################################################################
-#!/bin/bash
-cd $HOME/project_coprolite_viromes
-for FILE in general_bash_functions/* ; do source $FILE ; done
 
 
 # contains the megahit command to assembly fastq/fasta files

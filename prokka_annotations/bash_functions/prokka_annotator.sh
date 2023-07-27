@@ -3,12 +3,6 @@
 #		Project Coprolite Viromes
 #		annotate_contigs.sh 
 ###############################################################################
-#!/bin/bash
-cd $HOME/project_coprolite_viromes
-for FILE in general_bash_functions/* ; do source $FILE ; done
-source /u/local/Modules/default/init/modules.sh
-module load anaconda3
-conda activate myconda
 
 
 # contains the prokka command that annotated the contigs file 

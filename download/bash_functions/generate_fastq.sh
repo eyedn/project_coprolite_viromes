@@ -3,9 +3,6 @@
 #       Project Coprolite Viromes
 #       generate_fastq.sh 
 ###############################################################################
-#!/bin/bash
-cd $HOME/project_coprolite_viromes
-for FILE in general_bash_functions/* ; do source $FILE ; done
 
 
 # use fasterq dump to download fastq files

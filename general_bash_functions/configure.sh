@@ -3,7 +3,6 @@
 #       Project Coprolite Viromes
 #       configure.sh 
 ###############################################################################
-#!/bin/bash
 
 
 python_env="$HOME/my_py/bin/activate"

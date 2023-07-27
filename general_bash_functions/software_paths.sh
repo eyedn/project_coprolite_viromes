@@ -3,7 +3,6 @@
 #       Project Coprolite Viromes
 #       software_paths.sh 
 ###############################################################################
-#!/bin/bash
 
 
 prefetch="$HOME/software/sratoolkit.3.0.5-ubuntu64/bin/prefetch-orig.3.0.5"

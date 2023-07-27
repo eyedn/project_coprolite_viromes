@@ -3,12 +3,6 @@
 #		Project Coprolite Viromes
 #		assemble_libraries.sh 
 ###############################################################################
-#!/bin/bash
-cd $HOME/project_coprolite_viromes
-for FILE in general_bash_functions/* ; do source $FILE ; done
-source /u/local/Modules/default/init/modules.sh
-module load python
-source $python_env
 
 
 # create final.contigs.fa with megahit assembly from fastq/fasta files

@@ -3,12 +3,6 @@
 #		Project Coprolite Viromes
 #		identify_viral_contigs.sh 
 ###############################################################################
-#!/bin/bash
-cd $HOME/project_coprolite_viromes
-for FILE in general_bash_functions/* ; do source $FILE ; done
-source /u/local/Modules/default/init/modules.sh
-module load python
-source $python_env
 
 
 # create a contigs file with only contigs with viral annotations
