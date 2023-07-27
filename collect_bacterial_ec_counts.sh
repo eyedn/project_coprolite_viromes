@@ -11,12 +11,9 @@ module load python
 source $python_env
 
 
-# define inputs variables
-project_dir=$1
-
 # define directories and file
-data_dir="${project_dir}/data"
-prokka_annotations="${project_dir}/prokka_annotations"
+data_dir="$SCRATCH/project_coprolite_viromes/data"
+prokka_annotations="${project_dir}/genome_annotation"
 search_dir="$prokka_annotations/*bacteria"
 gff_list="$data_dir/collect_bacterial_counts_tmp.txt"
 csv_path="$data_dir/bacterial_gene_counts.csv"
