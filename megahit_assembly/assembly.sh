@@ -49,10 +49,16 @@ echo "==========================================================================
 assemble_libraries "$sample" "$fastq_trimmed_dir" "$assembly_dir" "$assembly_extra_dir" "$num_cores"
 
 # compress fastq trimmed files and extra assembly files
-echo "$(timestamp): assembly: compressing extra files from assembly of $sample"
-rm $fastq_trimmed_dir/*/*.gz
-cd $contigs_dir
-tar -czvf ${origin}_${sample}_assembly_extra.tar.gz ${origin}_${sample}_assembly_extra
-rm -r ${origin}_${sample}_assembly_extra
+# Check if the directories exist before attempting to create compressed archives
+if [ -d "$contigs_dir/${origin}_${sample}_assembly_extra" ]; then
+	echo "$(timestamp): assembly: compressing extra files from assembly of $sample"
+	rm "$fastq_trimmed_dir"/*/*.gz
+	cd "$contigs_dir"
+	tar -czvf "${origin}_${sample}_assembly_extra.tar.gz" "${origin}_${sample}_assembly_extra"
+	rm -r "${origin}_${sample}_assembly_extra"
+else
+	echo "Error: Directory '${origin}_${sample}_assembly_extra' not found. Skipping compression."
+fi
+
 echo "$(timestamp): assembly: assembly complete for $sample"
-cd $HOME/project_coprolite_viromes
+cd "$HOME/project_coprolite_viromes"
