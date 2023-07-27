@@ -19,6 +19,11 @@ get_lifestyles() {
         return 0
     fi
 
+    # decompress contigs file if needed
+    if ls ${contigs_file}.gz 1> /dev/null 2>&1; then
+        gunzip ${contigs_file}.gz
+    fi
+
     # create predictions dir for this sample
     mkdir -p $predict_dir
 
@@ -32,6 +37,11 @@ get_lifestyles() {
         --rootpth $predict_dir 
     cd $HOME
     echo "__________________________________________________"
+
+    # compress contigs file
+    if ls ${contigs_file}.gz 1> /dev/null 2>&1; then
+        gzip ${contigs_file}
+    fi
 
     # Check if predictions were completed
 	if ls $predict_dir/out/phatyp_prediction.csv 1> /dev/null 2>&1; then

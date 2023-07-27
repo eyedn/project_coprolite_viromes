@@ -50,3 +50,28 @@ get_lifestyles "$sample" "$phage_file" "$predict_dir" "$num_cores"
 get_families "$sample" "$phage_file" "$predict_dir" "$num_cores"
 # identify hosts of phages
 get_hosts "$sample" "$phage_file" "$predict_dir" "$num_cores"
+
+# compress files
+echo "$(timestamp): phage_predictions: compressing extra files from phage predictions of $sample"
+gunzip predict_dir/*
+
+# Check if the directories exist before attempting to create compressed archives
+if [ -d "$predict_dir/midfolder" ]; then
+	echo "$(timestamp): phage_predictions: compressing 'midfolder' from phage predictions of $sample"
+	gunzip "$predict_dir"/*
+	cd "$predict_dir"
+	tar -czvf midfolder.tar.gz midfolder
+	rm -r midfolder
+else
+	echo "Error: Directory 'midfolder' not found. Skipping compression."
+fi
+
+if [ -d "$predict_dir/CNN_temp" ]; then
+	echo "$(timestamp): phage_predictions: compressing 'CNN_temp' from phage predictions of $sample"
+	tar -czvf CNN_temp.tar.gz CNN_temp
+	rm -r CNN_temp
+else
+	echo "Error: Directory 'CNN_temp' not found. Skipping compression."
+fi
+
+cd "$HOME/project_coprolite_viromes"
