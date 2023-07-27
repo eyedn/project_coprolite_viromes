@@ -18,4 +18,4 @@ num_cores=$3
 . megahit_assembly/assembly.sh "$origin" "$origin_parent" "$num_cores"
 
 # create lifestyle predictions of viral contigs
-. phatyp_lifestyle_prediction/predict_lifestyle.sh "$origin" "$origin_parent" "$num_cores"
+. phatyp_predictions/phage_predictions.sh "$origin" "$origin_parent" "$num_cores"
