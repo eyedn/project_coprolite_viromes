@@ -1,17 +1,15 @@
 ###############################################################################
 #       Aydin Karatas
 #		Project Coprolite Viromes
-#		predict_lifestyle.sh 
+#		phage_predictions.sh 
 ###############################################################################
 #!/bin/bash
 cd $HOME/project_coprolite_viromes
-for FILE in phatyp_lifestyle_prediction/bash_functions/* ; do source $FILE ; done
+for FILE in phage_predictions/bash_functions/* ; do source $FILE ; done
 for FILE in general_bash_functions/* ; do source $FILE ; done
 source /u/local/Modules/default/init/modules.sh
 module load anaconda3
 conda activate phabox
-module load python
-source $python_env
 
 
 # define inputs variables
@@ -23,15 +21,16 @@ num_cores=$3
 sample=$(head -n ${SGE_TASK_ID} ${project_dir}/samples/${origin}_samples.txt | \
 		tail -n 1 | cut -d ' ' -f 1)
 
+
 # define directories and files
 contigs_dir="${project_dir}/contigs"
 assembly_dir="${contigs_dir}/${origin}_${sample}_assembly"
-lifestyle_dir="${project_dir}/lifestyle"
-predict_dir="${lifestyle_dir}/${origin}_${sample}_prediction"
-contigs_file="${assembly_dir}/${origin}_${sample}_viral_contigs.fa"
+predict_dir="${project_dir}/phage_predictions/${origin}_${sample}_prediction"
+contigs_file="${assembly_dir}/${origin}_${sample}_all_contigs.fa"
+phage_file="${predict_dir}/predicted_phage.fa"
 
 # check if contigs file exists
-if ls $contigs_file 1> /dev/null 2>&1; then
+if ls ${contigs_file}* 1> /dev/null 2>&1; then
 	echo "$(timestamp): predict_lifestyle: contigs file found"
 else
 	echo "$(timestamp): predict_lifestyle: contigs file not found"
@@ -39,21 +38,15 @@ else
 	exit 1
 fi
 
-# check if predictions already completed
-if ls $predict_dir/out/phatyp_prediction.csv 1> /dev/null 2>&1; then
-	echo "$(timestamp): predict_lifestyle: predictions already completed"
-	return 0
-fi
-
-# annotation function uses prokka
+# uses PhaBOX tools for phage prediction and analysis
 echo "===================================================================================================="
-echo "$(timestamp): predict_lifestyle: $origin; $sample"
+echo "$(timestamp): phage_predictions: $origin; $sample"
 echo "===================================================================================================="
-get_lifestyles "$sample" "$contigs_file" "$predict_dir" "$num_cores"
-
-# compress annotation files
-echo "$(timestamp): predict_lifestyle: compressing extra files from assembly of $sample"
-cd $predict_dir
-gzip *.fa
-tar -czvf midfolder.tar.gz midfolder
-cd $HOME/project_coprolite_viromes
+# identify contigs that are phages
+get_phages "$sample" "$contigs_file" "$predict_dir" "$num_cores"
+# identify is phages are virulent or temperate
+get_lifestyles "$sample" "$phage_file" "$predict_dir" "$num_cores"
+# identify taxonomic classification of phages
+get_families "$sample" "$phage_file" "$predict_dir" "$num_cores"
+# identify hosts of phages
+get_hosts "$sample" "$phage_file" "$predict_dir" "$num_cores"

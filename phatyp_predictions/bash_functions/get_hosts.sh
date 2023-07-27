@@ -1,7 +1,7 @@
 ###############################################################################
 #       Aydin Karatas
 #		Project Coprolite Viromes
-#		get_lifestyles.sh 
+#		get_hosts.sh 
 ###############################################################################
 
 
@@ -12,20 +12,19 @@ get_lifestyles() {
 	local predict_dir=$3
 	local num_cores=$4
 
-
-    # check if predictions already completed
-    if ls $predict_dir/out/phatyp_prediction.csv 1> /dev/null 2>&1; then
-        echo "$(timestamp): get_lifestyles: lifestyle predictions already completed"
+	# check if predictions already completed
+    if ls $predict_dir/out/cherry_prediction.csv 1> /dev/null 2>&1; then
+        echo "$(timestamp): get_hosts: host predictions already completed"
         return 0
     fi
 
     # create predictions dir for this sample
     mkdir -p $predict_dir
 
-    echo "$(timestamp): get_lifestyles: $sample"
+    echo "$(timestamp): get_hosts: $sample"
 	echo "__________________________________________________"
     cd $phabox
-    python3 PhaTYP_single.py \
+    python3 Cherry_single.py \
         --contigs $contigs_file \
         --threads 8 \
         --len 100 \
@@ -34,15 +33,15 @@ get_lifestyles() {
     echo "__________________________________________________"
 
     # Check if predictions were completed
-	if ls $predict_dir/out/phatyp_prediction.csv 1> /dev/null 2>&1; then
-		echo "$(timestamp): get_lifestyles: lifestyle predictions file created"
+	if ls $predict_dir/out/cherry_prediction.csv 1> /dev/null 2>&1; then
+		echo "$(timestamp): get_hosts: host predictions file created"
 		# Check if the file is empty
-		if ! [ -s "$predict_dir/out/phatyp_prediction.csv" ]; then
-			echo "$(timestamp): get_lifestyles: ERROR! lifestyle predictions file is empty"
+		if ! [ -s "$predict_dir/out/cherry_prediction.csv" ]; then
+			echo "$(timestamp): get_hosts: ERROR! host predictions file is empty"
 			exit 1
 		fi
 	else
-		echo "$(timestamp): get_lifestyles: ERROR! lifestyle predictions file not found"
+		echo "$(timestamp): get_hosts: ERROR! host predictions file not found"
 		exit 1
 	fi
 }
