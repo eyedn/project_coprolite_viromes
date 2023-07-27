@@ -17,14 +17,5 @@ num_cores=$3
 # call assembly script
 . megahit_assembly/assembly.sh "$origin" "$origin_parent" "$num_cores"
 
-# annotate all contigs for viral genes
-. prokka_annotations/viral_annotation.sh "$origin" "$origin_parent" "$num_cores"
-
-# create a new contigs file that contains only contigs that had a viral annotation
-. prokka_annotations/create_viral_contigs.sh "$origin" "$origin_parent" "$num_cores"
-
-# annotate viral contigs for bacterial genes
-. prokka_annotations/bacterial_annotation.sh "$origin" "$origin_parent" "$num_cores"
-
 # create lifestyle predictions of viral contigs
 . phatyp_lifestyle_prediction/predict_lifestyle.sh "$origin" "$origin_parent" "$num_cores"

@@ -6,7 +6,7 @@
 
 
 # use PhaTYP from PhaBOX to predict viral lifestyles
-get_lifestyles() {
+get_phages() {
     local sample=$1
 	local contigs_file=$2
 	local predict_dir=$3
