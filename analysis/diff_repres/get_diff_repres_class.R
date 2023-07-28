@@ -9,16 +9,21 @@ library(reshape2)
 
 # use kruskal-walis test to determine differential repres. of enzymes classes
 get_diff_repres_class <- function(data) {
-  value_res <- vector(length = 7)
-  spread_res <- vector(length = 7)
+  value_res <- vector()
+  spread_res <- vector()
   
   for (i in seq_len(7)) {
-    class_subset <- data[, startsWith(colnames(data), as.character(i))]
+    class_subset <- data[, startsWith(colnames(data), as.character(i)),
+                         drop = FALSE]
     class_subset <- melt(class_subset)
     colnames(class_subset) <- c("sample", "ec", "value")
     class_subset$sample <- substr(class_subset$sample, 0, 3)
     
-    value_res[i] <- kruskal.test(class_subset$value, class_subset$sample)[[3]]
+    if (nrow(class_subset) == 0) {
+      next
+    } else {
+      value_res[i] <- kruskal.test(class_subset$value, class_subset$sample)[[3]]
+    }
     
     ind_subset <- class_subset[class_subset$sample == "ind", ]
     pre_subset <- class_subset[class_subset$sample == "pre", ]
@@ -40,7 +45,7 @@ get_diff_repres_class <- function(data) {
   value_res <- p.adjust(value_res, method = "BH", n = length(value_res))
   spread_res <- p.adjust(spread_res, method = "BH", n = length(spread_res))
    
-  for (i in seq_len(7)) {
+  for (i in seq_len(length(value_res))) {
     cat(paste0("ec", i, " results: \n"))
     cat(paste0("\tvalue test: ", value_res[i], " , pass = ",
                ifelse(value_res[i] <= 0.05, TRUE, FALSE), "\n"))

@@ -9,9 +9,10 @@ library(reshape2)
 
 
 # create a beeswarms plot of paired-cluserting tendencies
-create_jitter <- function(data, file_name, plot_dir) {
+create_jitter <- function(data, classes_to_use, file_name, plot_dir) {
   ec_classes <- c("Oxidoreductases", "Transferases", "Hydrolases", "Lyases",
                   "Isomerases", "Ligases", "Translocases")
+  ec_classes <- ec_classes[classes_to_use]
   
   melted_data <- as.data.frame(melt(data))
   colnames(melted_data) <- c("cat", "ec", "value")

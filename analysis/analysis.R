@@ -18,20 +18,20 @@ setwd("~/Documents/Research/project_coprolite_viromes/")
 # define script constants
 set.seed(seed = 621)
 k <- 4
-iterations <- 10000
+iterations <- 1000
 subset_top <- 100
 color_range <- 10
 violin_dir <- "../figures/violin"
 heat_dir <- "../figures/heat"
 jitter_dir <- "../figures/jitter"
-confidence_name <- paste0("confidence_", k)
-heat_name <- paste0("diff_repres_", subset_top)
-jitter_name <- paste0("ec_repres_", subset_top)
+confidence_name <- paste0("confidence_phage_", k)
+heat_name <- paste0("diff_repres_phage_", subset_top)
+jitter_name <- paste0("ec_repres_phage_", subset_top)
 star_bounds <- list(list(0.1, 0.9), list(0.025, 0.975), list(0.01, 0.99),
                     list(0.001, 0.999))
 
 # read in raw counts data
-raw_counts <- read.csv("~/Documents/Research/data/bacterial_gene_counts.csv",
+raw_counts <- read.csv("~/Documents/Research/data/phage_ec_counts.csv",
                        header = TRUE, row.names = 1)
 
 # normalize observations within a sample and transform to log( CPM + 1 )
@@ -59,16 +59,16 @@ create_heatmap(norm_t_matrix, diff_repres, color_range, subset_top,
 
 # show ec proportions
 median_ec <- get_cat_medians(norm_t_matrix[, rownames(diff_repres)[1:100]])
-ec_jitter <- create_jitter(median_ec, jitter_name, jitter_dir)
 get_diff_repres_class(median_ec)
+ec_jitter <- create_jitter(median_ec, c(1:6), jitter_name, jitter_dir)
 
 
-pal_ec <- read.csv("~/Documents/Research/data/pal_ec.csv", header = F)
-all_ec <- read.csv("~/Documents/Research/data/diff_repress_bacterial_ec.csv",
-                   header = TRUE, row.names = 1)
-
-pal_diff_repres <- all_ec[pal_ec[, 1], , drop = FALSE]
-pal_diff_repres <- pal_diff_repres[, 1:3]
+# pal_ec <- read.csv("~/Documents/Research/data/pal_ec.csv", header = F)
+# all_ec <- read.csv("~/Documents/Research/data/diff_repress_bacterial_ec.csv",
+#                    header = TRUE, row.names = 1)
+# 
+# pal_diff_repres <- all_ec[pal_ec[, 1], , drop = FALSE]
+# pal_diff_repres <- pal_diff_repres[, 1:3]
 
 
 

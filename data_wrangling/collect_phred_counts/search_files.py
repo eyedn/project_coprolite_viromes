@@ -4,7 +4,7 @@
 #       search_files.py
 ###############################################################################
 import typing
-from . import get_lifestyle_counts as get
+from . import get_counts as get
 
 
 def get_counts_dict(files: typing.List[typing.Union[str, typing.BinaryIO]]) \
@@ -16,6 +16,6 @@ def get_counts_dict(files: typing.List[typing.Union[str, typing.BinaryIO]]) \
         sample_name = sample_name.split("_")[:-1]
         sample_name = '_'.join(sample_name)
         # create counts dict for each sample; add it to the main counts dict
-        sample_counts = get.get_lifestyle_counts(file)
+        sample_counts = get.get_counts(file)
         counts[sample_name] = sample_counts
     return counts
