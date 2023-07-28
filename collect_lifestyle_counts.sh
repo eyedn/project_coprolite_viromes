@@ -37,8 +37,8 @@ rm $predict_list
 
 # check if raw counts was created
 if ls $csv_path 1> /dev/null 2>&1; then
-	echo "$(timestamp): collect_lifestyle: bacterial gene counts csv created"
+	echo "$(timestamp): collect_lifestyle: lifestyle counts csv created"
 else
-	echo "$(timestamp): collect_lifestyle: bacterial gene counts csv not found"
+	echo "$(timestamp): collect_lifestyle: lifestyle counts csv not found"
 	exit 1
 fi
