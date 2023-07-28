@@ -53,12 +53,11 @@ get_hosts "$sample" "$phage_file" "$predict_dir" "$num_cores"
 
 # compress files
 echo "$(timestamp): phage_predictions: compressing extra files from phage predictions of $sample"
-gunzip predict_dir/*
 
 # Check if the directories exist before attempting to create compressed archives
 if [ -d "$predict_dir/midfolder" ]; then
 	echo "$(timestamp): phage_predictions: compressing 'midfolder' from phage predictions of $sample"
-	gunzip "$predict_dir"/*
+	gzip $predict_dir/*
 	cd "$predict_dir"
 	tar -czvf midfolder.tar.gz midfolder
 	rm -r midfolder

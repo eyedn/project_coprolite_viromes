@@ -11,13 +11,17 @@ module load python
 source $python_env
 
 
+# define inputs variables
+origin=$1
+project_dir=$2
+num_cores=$3
+
 # define directories and file
-project_dir="$SCRATCH/project_coprolite_viromes"
 data_dir="${project_dir}/data"
 predict_dir="${project_dir}/phage_predictions"
 search_dir="$predict_dir/*/out"
 search_file="phatyp_prediction.csv"
-predict_list="$data_dir/collect_lifestyle_tmp.txt"
+predict_list="$data_dir/lifestyle_counts_tmp.txt"
 csv_path="$data_dir/lifestyle_counts.csv"
 
 # create a list of all files to generate counts from

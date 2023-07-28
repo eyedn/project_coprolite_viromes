@@ -1,7 +1,7 @@
 ###############################################################################
 #     Aydin Karatas
 #		  Project Coprolite Viromes
-#		  submit.sh 
+#		  submit_script.sh 
 ###############################################################################
 #!/bin/bash
 cd $HOME/project_coprolite_viromes
@@ -17,7 +17,7 @@ for FILE in general_bash_functions/* ; do source $FILE ; done
 valid_ori=( pal-AWC pal-BEL pal-BMS pal-ENG pal-ITA pal-PER pal-ZAF pal-ZAP \
             ind-DNK ind-ESP ind-USA \
             pre-FJI pre-MDG pre-MEX pre-PER pre-TZA \
-            test )
+            test all )
             
 # read in arguments by flag and assign them to variables
 while getopts "s:o:p:d:c:" opt; do
@@ -46,7 +46,12 @@ for arg in "${args[@]}"; do
 done
 
 # run the submission command on hoffman2
-declare -i total_samples=$(wc -l < ${project_dir}/samples/${origin}_samples.txt) 
+if [ "$origin" == "all" ]; then
+  total_samples=1
+else
+  declare -i total_samples=$(wc -l < ${project_dir}/samples/${origin}_samples.txt) 
+fi
+
 job_name=$(echo $script_name | cut -d '/' -f 2-)
 joblogs_output="$HOME/joblogs/$origin/"
 qsub \

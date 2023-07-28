@@ -25,9 +25,9 @@ label="bacteria"
 
 # define directories and files
 contigs_dir="${project_dir}/contigs"
-annotations_dir="${project_dir}/genome_annotation"
+annotations_dir="${project_dir}/prokka_annotations"
 assembly_dir="${contigs_dir}/${origin}_${sample}_assembly"
-contigs_file="${project_dir}/phage_predictions/${origin}_${sample}_prediction/phage_contigs.fa"
+contigs_file="${assembly_dir}/${origin}_${sample}_viral_contigs.fa"
 sample_annot_dir="${annotations_dir}/${origin}_${sample}_annotation_${label}"
 custom_db="no_data"
 
