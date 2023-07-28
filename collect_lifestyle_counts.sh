@@ -12,7 +12,8 @@ source $python_env
 
 
 # define directories and file
-data_dir="$SCRATCH/project_coprolite_viromes/data"
+project_dir="$SCRATCH/project_coprolite_viromes"
+data_dir="${project_dir}/data"
 predict_dir="${project_dir}/phage_predictions"
 search_dir="$predict_dir/*/out"
 search_file="phatyp_prediction.csv"
@@ -27,7 +28,7 @@ cat $predict_list
 
 # generate counts with python script
 echo "===================================================================================================="
-echo "$(timestamp): collect_lifestyle: generating bacterial gene counts"
+echo "$(timestamp): collect_lifestyle: generating lifestyle counts"
 echo "===================================================================================================="
 python3 data_wrangling/collect_lifestyle_counts.py \
 	$predict_list \
