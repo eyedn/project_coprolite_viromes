@@ -4,7 +4,7 @@
 #		collect_raw_counts.py
 ###############################################################################
 from sys import argv
-import collect_raw_counts as crc
+import collect_ec_counts as crc
 
 
 if __name__ == "__main__":

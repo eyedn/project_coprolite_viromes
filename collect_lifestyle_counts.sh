@@ -1,7 +1,7 @@
 ###############################################################################
 #       Aydin Karatas
 #		Project Coprolite Viromes
-#		collect_bacterial_counts.sh 
+#		collect_lifestyle.sh 
 ###############################################################################
 #!/bin/bash
 cd $HOME/project_coprolite_viromes
@@ -13,30 +13,31 @@ source $python_env
 
 # define directories and file
 data_dir="$SCRATCH/project_coprolite_viromes/data"
-prokka_annotations="${project_dir}/genome_annotation"
-search_dir="$prokka_annotations/*bacteria"
-gff_list="$data_dir/collect_bacterial_counts_tmp.txt"
+predict_dir="${project_dir}/phage_predictions"
+search_dir="$predict_dir/*/out"
+search_file="phatyp_prediction.csv"
+predict_list="$data_dir/collect_lifestyle_tmp.txt"
 csv_path="$data_dir/bacterial_gene_counts.csv"
 
 # create a list of all files to generate counts from
-ls $search_dir/*gff.gz > $gff_list
-echo "$(timestamp): collect_bacterial_counts: generated file of all file paths needed"
-echo "$(timestamp): collect_bacterial_counts: using the following files:"
-cat $gff_list
+ls $search_dir/$search_file > $predict_list
+echo "$(timestamp): collect_lifestyle: generated file of all file paths needed"
+echo "$(timestamp): collect_lifestyle: using the following files:"
+cat $predict_list
 
 # generate counts with python script
 echo "===================================================================================================="
-echo "$(timestamp): collect_bacterial_counts: generating bacterial gene counts"
+echo "$(timestamp): collect_lifestyle: generating bacterial gene counts"
 echo "===================================================================================================="
-python3 data_wrangling/collect_ec_counts.py \
-	$gff_list \
+python3 data_wrangling/collect_lifestyle_counts.py \
+	$predict_list \
 	$csv_path
-rm $gff_list
+rm $predict_list
 
 # check if raw counts was created
 if ls $csv_path 1> /dev/null 2>&1; then
-	echo "$(timestamp): collect_bacterial_counts: bacterial gene counts csv created"
+	echo "$(timestamp): collect_lifestyle: bacterial gene counts csv created"
 else
-	echo "$(timestamp): collect_bacterial_counts: bacterial gene counts csv not found"
+	echo "$(timestamp): collect_lifestyle: bacterial gene counts csv not found"
 	exit 1
 fi
