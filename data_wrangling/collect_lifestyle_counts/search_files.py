@@ -4,7 +4,7 @@
 #       search_files.py
 ###############################################################################
 import typing
-import get_lifestyle_counts as get
+from . import get_lifestyle_counts as get
 
 
 def get_counts_dict(files: typing.List[typing.Union[str, typing.BinaryIO]]) \
