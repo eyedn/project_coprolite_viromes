@@ -17,7 +17,7 @@ predict_dir="${project_dir}/phage_predictions"
 search_dir="$predict_dir/*/out"
 search_file="phatyp_prediction.csv"
 predict_list="$data_dir/collect_lifestyle_tmp.txt"
-csv_path="$data_dir/bacterial_gene_counts.csv"
+csv_path="$data_dir/lifestyle_counts.csv"
 
 # create a list of all files to generate counts from
 ls $search_dir/$search_file > $predict_list
