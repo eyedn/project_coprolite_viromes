@@ -19,7 +19,7 @@ normalize_data <- function(df) {
     zero_cols <- ncol(df) * 2
   }
   
-  df <- df[-zero_rows[[1]], -zero_cols[[1]]]
+  df <- df[-zero_rows, -zero_cols]
   
   # normalize by log(CPM + 1)
   for (i in seq_len(ncol(df))) {
