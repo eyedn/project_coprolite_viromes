@@ -26,4 +26,6 @@ def print_annotated_contigs(contigs: typing.List[contig.Contig],
                 contig.affil.append("viral")
             if contig.label in phage_labels:
                 contig.affil.append("phage")
+            if len(contig.affil) == 0:
+                contig.affil.append("none")
         contig.print_contig()
