@@ -20,20 +20,20 @@ identify_viral_phage_contigs() {
 
 	# decompress contigs file if needed
 	if ls ${viral_contigs}.gz 1> /dev/null 2>&1; then
-		gunzip ${contigs_file}.gz
+		gunzip ${viral_contigs}.gz
 	fi
 	if ls ${phage_contigs}.gz 1> /dev/null 2>&1; then
-		gunzip ${contigs_file}.gz
+		gunzip ${phage_contigs}.gz
 	fi
 	
 	python3 prokka_annotations/identify_viral_phage_contigs.py \
 		$viral_contigs $phage_contigs $gff_file > $viral_phage_contigs
 
 	if ls ${viral_contigs} 1> /dev/null 2>&1; then
-		gzip ${contigs_file}
+		gzip ${viral_contigs}
 	fi
 	if ls ${phage_contigs} 1> /dev/null 2>&1; then
-		gzip ${contigs_file}
+		gzip ${phage_contigs}
 	fi
 
 	# Check if identification was completed
