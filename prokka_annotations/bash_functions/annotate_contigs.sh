@@ -27,7 +27,7 @@ annotate_contigs() {
 	fi
 
 	# annotate using prokka
-	echo "$(timestamp): annotating: $sample"
+	echo "$(timestamp): annotate_contigs: $sample"
 	echo "__________________________________________________"
 	prokka_annotator "$sample" "$contigs_file" "$custom_db" "$annot_dir" \
 		"$type" "$label" "$num_cores"

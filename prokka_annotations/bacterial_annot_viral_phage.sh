@@ -48,7 +48,7 @@ fi
 
 # annotation function uses prokka
 echo "===================================================================================================="
-echo "$(timestamp): bacterial bacterial_annot_viral_phage: $origin; $sample"
+echo "$(timestamp): bacterial_annot_viral_phage: $origin; $sample"
 echo "===================================================================================================="
 annotate_contigs "$sample" "$contigs_file" "$custom_db" "$sample_annot_dir" \
 	"$type" "$label" "$num_cores"

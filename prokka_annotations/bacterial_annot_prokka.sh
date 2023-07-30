@@ -1,7 +1,7 @@
 ###############################################################################
 #       Aydin Karatas
 #		Project Coprolite Viromes
-#		bacterial_annotation.sh 
+#		bacterial_annot_prokka.sh 
 ###############################################################################
 #!/bin/bash
 cd $HOME/project_coprolite_viromes
@@ -33,22 +33,22 @@ custom_db="no_data"
 
 # check if contigs file exists
 if ls ${contigs_file}* 1> /dev/null 2>&1; then
-	echo "$(timestamp): bacterial_annotation: contigs file found"
+	echo "$(timestamp): bacterial_annot_prokka: contigs file found"
 else
-	echo "$(timestamp): bacterial_annotation: contigs file not found"
+	echo "$(timestamp): bacterial_annot_prokka: contigs file not found"
 	rmdir $annot_dir
 	exit 1
 fi
 
 # check if annotations already completed
 if ls $sample_annot_dir 1> /dev/null 2>&1; then
-	echo "$(timestamp): bacterial_annotation: annotations already completed"
+	echo "$(timestamp): bacterial_annot_prokka: annotations already completed"
 	return 0
 fi
 
 # annotation function uses prokka
 echo "===================================================================================================="
-echo "$(timestamp): bacterial annotation: $origin; $sample"
+echo "$(timestamp): bacterial_annot_prokka: $origin; $sample"
 echo "===================================================================================================="
 annotate_contigs "$sample" "$contigs_file" "$custom_db" "$sample_annot_dir" \
 	"$type" "$label" "$num_cores"
