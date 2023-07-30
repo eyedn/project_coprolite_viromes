@@ -39,7 +39,7 @@ get_phages() {
     echo "__________________________________________________"
 
     # compress contigs file
-    if ls ${contigs_file}.gz 1> /dev/null 2>&1; then
+    if ls ${contigs_file} 1> /dev/null 2>&1; then
         gzip ${contigs_file}
     fi
 
