@@ -18,16 +18,16 @@ identify_viral_contigs() {
 	fi
 
 	# decompress contigs file if needed
-	if ls ${contigs_file}.gz 1> /dev/null 2>&1; then
-		gunzip ${contigs_file}.gz
+	if ls ${all_contigs}.gz 1> /dev/null 2>&1; then
+		gunzip ${all_contigs}.gz
 	fi
 
 	python3 prokka_annotations/identify_viral_contigs.py \
 		$all_contigs $gff_file > $viral_contigs
 
 	# compress contigs file
-	if ls ${contigs_file} 1> /dev/null 2>&1; then
-		gzip ${contigs_file}
+	if ls ${all_contigs} 1> /dev/null 2>&1; then
+		gunzip ${all_contigs}
 	fi
 
 	# Check if identification was completed
