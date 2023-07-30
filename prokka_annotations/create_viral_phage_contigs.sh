@@ -48,6 +48,3 @@ echo "==========================================================================
 echo "$(timestamp): create_viral_contigs: identify viral contigs: $origin; $sample"
 echo "===================================================================================================="
 identify_viral_phage_contigs "$viral_contigs" "$phage_contigs" "$gff_file" "$viral_contigs_output"
-
-gzip $viral_contigs
-gzip $phage_contigs

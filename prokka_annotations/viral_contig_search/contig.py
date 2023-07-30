@@ -17,10 +17,12 @@ class Contig:
         len = data[3].split("=")[1]
         self.len = len
         self.sequence = ""
+        self.affil: typing.List[str] = []
     
     def append_to_sequence(self, sequence: str) -> None:
         self.sequence = self.sequence + sequence
 
     def print_contig(self) -> None:
-        print(f">{self.label} flag={self.flag} mutli={self.mutli} len={self.len}")
+        affil = ";".join(self.affil)
+        print(f">{self.label} flag={self.flag} mutli={self.mutli} len={self.len} affil={affil}")
         print(self.sequence)
