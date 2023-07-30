@@ -18,12 +18,12 @@ def read_contigs(fa_file: typing.TextIO, contigs: typing.List[contig.Contig] = [
             # lines that start with ">" contain are the contig label
             if curr_line.startswith(">"):
                 line_data = curr_line.split()
-                new_labels.append(line_data[0])
+                new_labels.append(line_data[0][1:])
                 # skip to next contig if it was already added
                 if line_data[0] in existing_labels:
                     continue
                 else:
-                    existing_labels.append(line_data[0])
+                    existing_labels.append(line_data[0][1:])
                 contigs.append(contig.Contig(line_data))
             # line without ">" contain sequence info related to the current label
             else:
