@@ -27,7 +27,7 @@ identify_viral_contigs() {
 
 	# compress contigs file
 	if ls ${all_contigs} 1> /dev/null 2>&1; then
-		gunzip ${all_contigs}
+		gzip ${all_contigs}
 	fi
 
 	# Check if identification was completed
