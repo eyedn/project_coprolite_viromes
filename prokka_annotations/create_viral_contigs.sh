@@ -48,4 +48,4 @@ echo "$(timestamp): create_viral_contigs: identify viral contigs: $origin; $samp
 echo "===================================================================================================="
 identify_viral_contigs "$contigs_file" "$gff_file" "$viral_contigs_output"
 
-gzip $contigs_file
+gzip $viral_contigs_output
