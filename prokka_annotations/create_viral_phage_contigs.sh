@@ -1,6 +1,6 @@
 #       Aydin Karatas
 #		Project Coprolite Viromes
-#		create_viral_contigs.sh 
+#		create_viral_phage_contigs.sh 
 ###############################################################################
 #!/bin/bash
 cd $HOME/project_coprolite_viromes
@@ -22,7 +22,7 @@ sample=$(head -n ${SGE_TASK_ID} ${project_dir}/samples/${origin}_samples.txt | \
 
 # define directories and files
 contigs_dir="${project_dir}/contigs"
-annotations_dir="${project_dir}/prokka_annotations"
+annotations_dir="${project_dir}/genome_annotation"
 assembly_dir="${contigs_dir}/${origin}_${sample}_assembly"
 viral_contigs="${assembly_dir}/${origin}_${sample}_all_contigs.fa"
 phage_contigs="${project_dir}/phage_predictions/${origin}_${sample}_prediction/phage_contigs.fa"
@@ -32,19 +32,19 @@ viral_contigs_output="$assembly_dir/${origin}_${sample}_viral_phage_contigs.fa"
 
 # check if contigs file exists
 if ls $gff_file 1> /dev/null 2>&1; then
-	echo "$(timestamp): create_viral_contigs: annotations file found"
+	echo "$(timestamp): create_viral_phage_contigs: annotations file found"
 else
-	echo "$(timestamp): create_viral_contigs: annotations file not found"
+	echo "$(timestamp): create_viral_phage_contigs: annotations file not found"
 	exit 1
 fi
 
 # check if viral contigs already indentified
 if ls $viral_contigs_output 1> /dev/null 2>&1; then
-	echo "$(timestamp): create_viral_contigs: viral contigs already found"
+	echo "$(timestamp): create_viral_phage_contigs: viral contigs already found"
 	return 0
 fi
 
 echo "===================================================================================================="
-echo "$(timestamp): create_viral_contigs: identify viral contigs: $origin; $sample"
+echo "$(timestamp): create_viral_phage_contigs: identify viral contigs: $origin; $sample"
 echo "===================================================================================================="
 identify_viral_phage_contigs "$viral_contigs" "$phage_contigs" "$gff_file" "$viral_contigs_output"
