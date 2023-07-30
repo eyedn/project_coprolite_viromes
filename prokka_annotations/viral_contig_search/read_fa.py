@@ -10,7 +10,7 @@ from . import contig
 # read an fa file of contigs and return a list of contigs of that fa file
 def read_contigs(fa_file: typing.TextIO, contigs: typing.List[contig.Contig] = [],
                 existing_labels: typing.List[str] = []) \
-    -> typing.Tuple(typing.List[contig.Contig], typing.List[str]):
+    -> typing.Tuple[typing.List[contig.Contig], typing.List[str], typing.List[str]]:
     new_labels: typing.List[str] = []
     with open(fa_file, "r") as f:
         for line in f.readlines():
