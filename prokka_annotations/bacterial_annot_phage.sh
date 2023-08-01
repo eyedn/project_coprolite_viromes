@@ -1,7 +1,7 @@
 ###############################################################################
 #       Aydin Karatas
 #		Project Coprolite Viromes
-#		bacterial_annot_phamer.sh 
+#		bacterial_annot_phage.sh 
 ###############################################################################
 #!/bin/bash
 cd $HOME/project_coprolite_viromes

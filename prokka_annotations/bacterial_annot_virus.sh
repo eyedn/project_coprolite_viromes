@@ -1,7 +1,7 @@
 ###############################################################################
 #       Aydin Karatas
 #		Project Coprolite Viromes
-#		bacterial_annot_prokka.sh 
+#		bacterial_annot_virus.sh 
 ###############################################################################
 #!/bin/bash
 cd $HOME/project_coprolite_viromes

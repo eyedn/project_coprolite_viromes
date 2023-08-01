@@ -14,6 +14,9 @@ num_cores=$3
 # annotate all contigs for viral genes
 . prokka_annotations/viral_annotation.sh "$origin" "$origin_parent" "$num_cores"
 
+# annotate all contigs for bacterial genes
+. prokka_annotations/bacterial_annot_all "$origin" "$origin_parent" "$num_cores"
+
 # create a new contigs file that contains only viral and/or phage contigs
 . prokka_annotations/create_viral_phage_contigs.sh "$origin" "$origin_parent" "$num_cores"
 
