@@ -20,7 +20,7 @@ num_cores=$3
 contigs_dir="${project_dir}/contigs"
 prokka_annotations="${project_dir}/genome_annotation"
 data_dir="$project_dir/data"
-annot_search_dir="$prokka_annotations/*viral"
+annot_search_dir="$prokka_annotations/*viruses"
 gff_list="$data_dir/viral_prop_tmp.txt"
 csv_path="$data_dir/viral_prop.csv"
 
