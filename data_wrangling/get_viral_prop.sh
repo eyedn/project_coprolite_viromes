@@ -21,7 +21,8 @@ contigs_dir="${project_dir}/contigs"
 prokka_annotations="${project_dir}/genome_annotation"
 data_dir="$project_dir/data"
 annot_search_dir="$prokka_annotations/*viruses"
-gff_list="$data_dir/viral_prop_tmp.txt"
+fa_list="$data_dir/viral_prop_fa.txt"
+gff_list="$data_dir/viral_prop_gff.txt"
 csv_path="$data_dir/viral_prop.csv"
 
 # create a list of all files to generate counts from
@@ -30,7 +31,7 @@ echo "$(timestamp): get_viral_prop: generated file of all contig paths needed"
 echo "$(timestamp): get_viral_prop: using the following contig files:"
 cat $fa_list
 
-ls $search_dir/*gff.gz > $gff_list
+ls $annot_search_dir/*gff.gz > $gff_list
 echo "$(timestamp): get_viral_prop: generated file of all gff paths needed"
 echo "$(timestamp): get_viral_prop: using the following gff files:"
 cat $gff_list
