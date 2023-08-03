@@ -42,8 +42,6 @@ echo "==========================================================================
 echo "$(timestamp): get_viral_prop: generating viral prop. counts"
 echo "===================================================================================================="
 python3 data_wrangling/get_viral_prop.py $fa_list $gff_list $csv_path
-rm $fa_list
-rm $gff_list
 
 # check if raw counts was created
 if ls $csv_path 1> /dev/null 2>&1; then
