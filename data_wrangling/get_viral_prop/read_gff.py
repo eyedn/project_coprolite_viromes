@@ -9,8 +9,8 @@ from . import annotation as annot
 
 
 # read gzipped gff file of annotation and return a list of those annotations
-def read_annotations(gff_file: typing.BinaryIO) -> typing.Dict[str, annot.Annotation]:
-    annotations: typing.Dict[str, annot.Annotation] = {}
+def read_annotations(gff_file: typing.BinaryIO) -> typing.List[annot.Annotation]:
+    annotations: typing.List[annot.Annotation] = []
     with gzip.open(gff_file, "rt") as f:
         for line in f.readlines():
             curr_line = str(line.strip())
@@ -21,6 +21,6 @@ def read_annotations(gff_file: typing.BinaryIO) -> typing.Dict[str, annot.Annota
             if curr_line.startswith("##"):
                 continue
             line_data = curr_line.split("\t")
-            annotations[line_data[0]] = annot.Annotation(line_data)
+            annotations.append(annot.Annotation(line_data))
     return annotations
 

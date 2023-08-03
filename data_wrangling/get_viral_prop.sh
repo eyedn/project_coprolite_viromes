@@ -20,13 +20,13 @@ num_cores=$3
 contigs_dir="${project_dir}/contigs"
 prokka_annotations="${project_dir}/genome_annotation"
 data_dir="$project_dir/data"
-annot_search_dir="$prokka_annotations/*viruses"
+annot_search_dir="$prokka_annotations/*_annotation_viruses"
 fa_list="$data_dir/viral_prop_fa.txt"
 gff_list="$data_dir/viral_prop_gff.txt"
 csv_path="$data_dir/viral_prop.csv"
 
 # create a list of all files to generate counts from
-ls $contigs_dir/*/*phage_contigs.fa.gz > $fa_list
+ls $contigs_dir/*/*_viral_phage_contigs.fa.gz > $fa_list
 echo "$(timestamp): get_viral_prop: generated file of all contig paths needed"
 echo "$(timestamp): get_viral_prop: using the following contig files:"
 cat $fa_list
@@ -40,10 +40,8 @@ cat $gff_list
 echo "===================================================================================================="
 echo "$(timestamp): get_viral_prop: generating bacterial gene counts"
 echo "===================================================================================================="
-python3 data_wrangling/get_viral_prop.py \
-	$fa_list \
-	$gff_list \
-	$csv_path
+python3 data_wrangling/get_viral_prop.py $fa_list $gff_list $csv_path
+rm $fa_list
 rm $gff_list
 
 # check if raw counts was created

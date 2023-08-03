@@ -4,7 +4,7 @@
 #		get_viral_prop.py
 ###############################################################################
 from sys import argv
-import csv
+import pandas as pd
 import get_viral_prop as gvp
 from collect_ec_counts import create_list
 
@@ -19,9 +19,5 @@ if __name__ == "__main__":
     gff_list = create_list.create_list(gff_list_file)
     fa_list = create_list.create_list(fa_list_file)
     viral_gene_coverage = gvp.get.get_viral_prop_from_annot(fa_list, gff_list)
-
-    with open(csv_path, 'w') as f:
-        writer = csv.writer(f)
-        for val in viral_gene_coverage:
-            writer.writerow([val])
-    
+    coverage_df = pd.DataFrame.from_records(viral_gene_coverage)
+    coverage_df.to_csv(csv_path)

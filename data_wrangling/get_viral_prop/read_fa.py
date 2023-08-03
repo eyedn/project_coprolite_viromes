@@ -9,9 +9,9 @@ from . import contig
 
 
 # read an fa file of contigs and return a list of contigs of that fa file
-def read_contigs(fa_file: typing.TextIO, contigs: typing.Dict[str, contig.Contig] = {},
-                existing_labels: typing.Set[str] = set()) \
-    -> typing.Dict[str, contig.Contig]:
+def read_contigs(fa_file: typing.TextIO) -> typing.Dict[str, contig.Contig]:
+    contigs: typing.Dict[str, contig.Contig] = {}
+    existing_labels: typing.Set[str] = set()
     with gzip.open(fa_file, "rt") as f:
         for line in f.readlines():
             curr_line = str(line.strip())
