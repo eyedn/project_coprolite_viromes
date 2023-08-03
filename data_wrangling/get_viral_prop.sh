@@ -41,7 +41,10 @@ cat $gff_list
 echo "===================================================================================================="
 echo "$(timestamp): get_viral_prop: generating viral prop. counts"
 echo "===================================================================================================="
-python3 data_wrangling/get_viral_prop.py "$fa_list" "$gff_list" "$csv_path"
+python3 data_wrangling/get_viral_prop.py \
+	$fa_list \
+	$gff_list \
+	$csv_path
 rm $fa_list
 rm $gff_list
 
