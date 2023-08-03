@@ -3,9 +3,9 @@
 #       Project Coporlite Viromes
 #       read_fa.py
 ###############################################################################
+from . import contig
 import typing
 import gzip
-from . import contig
 
 
 # read an fa file of contigs and return a list of contigs of that fa file

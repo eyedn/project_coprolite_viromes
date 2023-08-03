@@ -3,8 +3,8 @@
 #       Project Coporlite Viromes
 #       contig.py
 ###############################################################################
-import typing
 from . import annotation as annot
+import typing
 
 
 # contigs are extracted from fa files after assembly
@@ -21,8 +21,6 @@ class Contig:
     def add_covered_bases(self, annotation: annot.Annotation) -> None:
         start = int(annotation.start)
         end = int(annotation.end)
-
         for base in range(start, end + 1):
             self.covered_bases.add(int(base))
-
         self.spanned_by_prot = len(self.covered_bases) / int(self.len)

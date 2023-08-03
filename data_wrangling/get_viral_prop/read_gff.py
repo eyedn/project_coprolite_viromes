@@ -3,9 +3,9 @@
 #       Project Coporlite Viromes
 #       read_gff.py
 ###############################################################################
+from . import annotation as annot
 import typing
 import gzip
-from . import annotation as annot
 
 
 # read gzipped gff file of annotation and return a list of those annotations
