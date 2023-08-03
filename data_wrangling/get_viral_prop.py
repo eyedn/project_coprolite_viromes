@@ -17,7 +17,10 @@ if __name__ == "__main__":
     gff_list_file = argv[1]
     csv_path = argv[2]
     gff_list = create_list.create_list(gff_list_file)
+    print("gff list created")
     fa_list = create_list.create_list(fa_list_file)
+    print("fa list created")
     viral_gene_coverage = gvp.get.get_viral_prop_from_annot(fa_list, gff_list)
     coverage_df = pd.DataFrame.from_records(viral_gene_coverage)
+    print("printing results")
     coverage_df.to_csv(csv_path)
