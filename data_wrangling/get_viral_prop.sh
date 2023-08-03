@@ -20,13 +20,14 @@ num_cores=$3
 contigs_dir="${project_dir}/contigs"
 prokka_annotations="${project_dir}/genome_annotation"
 data_dir="$project_dir/data"
+contig_search_dir="$prokka_annotations/*_assembly"
 annot_search_dir="$prokka_annotations/*_annotation_viruses"
 fa_list="$data_dir/viral_prop_fa.txt"
 gff_list="$data_dir/viral_prop_gff.txt"
 csv_path="$data_dir/viral_prop.csv"
 
 # create a list of all files to generate counts from
-ls $contigs_dir/*/*_viral_phage_contigs.fa.gz > $fa_list
+ls $contig_search_dir/*_viral_phage_contigs.fa.gz > $fa_list
 echo "$(timestamp): get_viral_prop: generated file of all contig paths needed"
 echo "$(timestamp): get_viral_prop: using the following contig files:"
 cat $fa_list
