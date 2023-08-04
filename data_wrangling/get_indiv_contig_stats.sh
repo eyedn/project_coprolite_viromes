@@ -52,6 +52,7 @@ echo "==========================================================================
 python3 data_wrangling/get_indiv_contig_stats.py \
 	$data_dir/${origin}_${sample}_contig_stats_tmp.txt \
 	$csv_path
+rm $data_dir/${origin}_${sample}_contig_stats_tmp.txt
 
 # check if raw counts was created
 if ls $csv_path 1> /dev/null 2>&1; then
