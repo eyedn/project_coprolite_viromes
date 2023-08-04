@@ -13,8 +13,6 @@ class Contig:
         self.label = data[0][1:]
         len = data[3].split("=")[1]
         self.len = len
-        affil = data[4].split("=")[1]
-        self.affil = affil
         self.covered_bases: typing.Set[int] = set()
         self.spanned_by_prot = 0
 
