@@ -26,6 +26,7 @@ def get_viral_prop_from_annot(fa_file: typing.Union[str, typing.BinaryIO],
     for contig in contigs.keys():
         contig_data = {'cat': cat, 'ori': ori, 'sample': sample,
                         'contig': contigs[contig].label,
-                        'freq': contigs[contig].spanned_by_prot}
+                        'freq': contigs[contig].spanned_by_prot,
+                        'len': contigs[contig].len}
         data_list.append(contig_data)
     return data_list
