@@ -37,10 +37,16 @@ if ls $csv_path 1> /dev/null 2>&1; then
 fi
 
 # check if download was already complete for this sample
-if ls $fastq_trimmed_dir/*/*fq.gz 1> /dev/null 2>&1; then
-	echo "$(timestamp): get_indiv_vial_prop: fastq file found"
+if ls $fa_file1> /dev/null 2>&1; then
+	echo "$(timestamp): get_indiv_vial_prop: fa file found"
 else
-	echo "$(timestamp): get_indiv_vial_prop: trimmed fastq files not found"
+	echo "$(timestamp): get_indiv_vial_prop: fa file not found"
+	exit 1
+fi
+if ls $gff_file 1> /dev/null 2>&1; then
+	echo "$(timestamp): get_indiv_vial_prop: gff file found"
+else
+	echo "$(timestamp): get_indiv_vial_prop: gff file not found"
 	exit 1
 fi
 
@@ -48,7 +54,7 @@ fi
 echo "===================================================================================================="
 echo "$(timestamp): get_indiv_vial_prop: generating viral prop. counts"
 echo "===================================================================================================="
-python3 data_wrangling/get_indiv_vial_prop.py \
+python3 data_wrangling/get_indiv_viral_prop.py \
 	$fa_file \
 	$gff_file \
 	$csv_path
