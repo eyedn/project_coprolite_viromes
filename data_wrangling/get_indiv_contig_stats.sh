@@ -23,7 +23,7 @@ sample=$(head -n ${SGE_TASK_ID} ${project_dir}/samples/${origin}_samples.txt | \
 # define directories and file
 contigs_dir="${project_dir}/contigs"
 data_dir="$project_dir/data/indiv_contig_stats"
-stats_file="$contigs_dir/${origin}_${sample}_assembly/${origin}_${sample}_log.fa.gz"
+stats_file="$contigs_dir/${origin}_${sample}_assembly/${origin}_${sample}_log.txt"
 csv_path="$data_dir/${origin}_${sample}_contig_stats.csv"
 
 mkdir -p $data_dir
