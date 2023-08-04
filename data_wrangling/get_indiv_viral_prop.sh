@@ -1,7 +1,7 @@
 ###############################################################################
 #       Aydin Karatas
 #		Project Coprolite Viromes
-#		get_indiv_vial_prop.sh 
+#		get_indiv_viral_prop.sh 
 ###############################################################################
 #!/bin/bash
 cd $HOME/project_coprolite_viromes
@@ -32,27 +32,27 @@ mkdir -p $data_dir
 
 # check if assembly was already complete for this sample
 if ls $csv_path 1> /dev/null 2>&1; then
-	echo "$(timestamp): get_indiv_vial_prop: final contigs file already created"
+	echo "$(timestamp): get_indiv_viral_prop: final contigs file already created"
 	return 0
 fi
 
 # check if download was already complete for this sample
 if ls $fa_file1> /dev/null 2>&1; then
-	echo "$(timestamp): get_indiv_vial_prop: fa file found"
+	echo "$(timestamp): get_indiv_viral_prop: fa file found"
 else
-	echo "$(timestamp): get_indiv_vial_prop: fa file not found"
+	echo "$(timestamp): get_indiv_viral_prop: fa file not found"
 	exit 1
 fi
 if ls $gff_file 1> /dev/null 2>&1; then
-	echo "$(timestamp): get_indiv_vial_prop: gff file found"
+	echo "$(timestamp): get_indiv_viral_prop: gff file found"
 else
-	echo "$(timestamp): get_indiv_vial_prop: gff file not found"
+	echo "$(timestamp): get_indiv_viral_prop: gff file not found"
 	exit 1
 fi
 
 # generate counts with python script
 echo "===================================================================================================="
-echo "$(timestamp): get_indiv_vial_prop: generating viral prop. counts"
+echo "$(timestamp): get_indiv_viral_prop: generating viral prop. counts"
 echo "===================================================================================================="
 python3 data_wrangling/get_indiv_viral_prop.py \
 	$fa_file \
@@ -61,8 +61,8 @@ python3 data_wrangling/get_indiv_viral_prop.py \
 
 # check if raw counts was created
 if ls $csv_path 1> /dev/null 2>&1; then
-	echo "$(timestamp): get_indiv_vial_prop: viral prop csv created"
+	echo "$(timestamp): get_indiv_viral_prop: viral prop csv created"
 else
-	echo "$(timestamp): get_indiv_vial_prop: viral prop csv not found"
+	echo "$(timestamp): get_indiv_viral_prop: viral prop csv not found"
 	exit 1
 fi
