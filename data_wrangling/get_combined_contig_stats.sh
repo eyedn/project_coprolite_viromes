@@ -1,7 +1,7 @@
 ###############################################################################
 #       Aydin Karatas
 #		Project Coprolite Viromes
-#		get_combined_viral_prop.sh 
+#		get_combined_contig_stats.sh 
 ###############################################################################
 #!/bin/bash
 cd $HOME/project_coprolite_viromes
@@ -19,12 +19,12 @@ num_cores=$3
 # define directories and file
 contigs_dir="${project_dir}/contigs"
 data_dir="$project_dir/data"
-indiv_csv_dir="$data_dir/indiv_viral_prop"
-csv_path="$data_dir/viral_prop.csv"
+indiv_csv_dir="$data_dir/indiv_contig_stats"
+csv_path="$data_dir/contig_stats.csv"
 
 # generate counts with python script
 echo "===================================================================================================="
-echo "$(timestamp): get_combined_viral_prop: generating viral prop. counts"
+echo "$(timestamp): get_combined_contig_stats: combining all contig stats"
 echo "===================================================================================================="
 python3 data_wrangling/get_combined_data.py \
 	$indiv_csv_dir \
@@ -32,8 +32,8 @@ python3 data_wrangling/get_combined_data.py \
 
 # check if raw counts was created
 if ls $csv_path 1> /dev/null 2>&1; then
-	echo "$(timestamp): get_combined_viral_prop: viral prop csv created"
+	echo "$(timestamp): get_combined_contig_stats: stats csv created"
 else
-	echo "$(timestamp): get_combined_viral_prop: viral prop csv not found"
+	echo "$(timestamp): get_combined_contig_stats: stats csv not found"
 	exit 1
 fi

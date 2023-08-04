@@ -1,7 +1,7 @@
 ###############################################################################
 #       Aydin Karatas
 #		Project Coprolite Viromes
-#		get_viral_prop.py
+#		get_indiv_viral_prop.py
 ###############################################################################
 from sys import argv
 import get_viral_prop as gvp
