@@ -12,4 +12,4 @@ origin_parent=$2
 num_cores=$3
 
 # predict phage contigs and their lifestyle, family, and hosts
-. prokka_annotations/bacterial_annot_all.sh "$origin" "$origin_parent" "$num_cores"
+. data_wrangling/get_indiv_contig_stats.sh "$origin" "$origin_parent" "$num_cores"
