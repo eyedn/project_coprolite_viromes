@@ -37,7 +37,7 @@ if ls $csv_path 1> /dev/null 2>&1; then
 fi
 
 # check if download was already complete for this sample
-if ls $fa_file1> /dev/null 2>&1; then
+if ls $fa_file 1> /dev/null 2>&1; then
 	echo "$(timestamp): get_indiv_viral_prop: fa file found"
 else
 	echo "$(timestamp): get_indiv_viral_prop: fa file not found"
