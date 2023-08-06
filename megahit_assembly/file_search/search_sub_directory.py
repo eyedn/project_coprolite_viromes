@@ -19,7 +19,7 @@ def get_file_names(fastq_dir: typing.Union[str, os.PathLike]) \
         if str(file).endswith("fq.gz"):
             file_path = os.path.join(fastq_dir, file)
             # type of data can be identified by what the file name ends in
-            if str(file).endswith("R.fastq.gz"):
+            if str(file).endswith("RU.fastq.gz"):
                 my_single_data = file_path
             elif str(file).endswith("R1.fastq.gz"):
                 my_paired_data_1 = file_path
