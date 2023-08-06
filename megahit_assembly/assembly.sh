@@ -26,7 +26,7 @@ reads_dir="${project_dir}/reads"
 contigs_dir="${project_dir}/contigs"
 assembly_dir="${contigs_dir}/${origin}_${sample}_assembly"
 assembly_extra_dir="${assembly_dir}_extra"
-fastq_trimmed_dir="${reads_dir}/${origin}_${sample}_fastq_trimmed"
+fastq_clean_dir="$reads_dir/${origin}_${sample}_fastq_clean"
 
 # check if assembly was already complete for this sample
 if ls $assembly_dir/${origin}_${sample}_all_contigs.fa* 1> /dev/null 2>&1; then
@@ -35,10 +35,10 @@ if ls $assembly_dir/${origin}_${sample}_all_contigs.fa* 1> /dev/null 2>&1; then
 fi
 
 # check if download was already complete for this sample
-if ls $fastq_trimmed_dir/*/*fq.gz 1> /dev/null 2>&1; then
-	echo "$(timestamp): assembly: fastq file found"
+if ls $fastq_clean_dir/*/*fastq.gz 1> /dev/null 2>&1; then
+	echo "$(timestamp): assembly: fastq file(s) found"
 else
-	echo "$(timestamp): assembly: trimmed fastq files not found"
+	echo "$(timestamp): assembly: clean fastq files not found"
 	exit 1
 fi
 
@@ -46,13 +46,13 @@ fi
 echo "===================================================================================================="
 echo "$(timestamp): assembly: assemble all libraries associated with this sample: $origin; $sample"
 echo "===================================================================================================="
-assemble_libraries "$sample" "$fastq_trimmed_dir" "$assembly_dir" "$assembly_extra_dir" "$num_cores"
+assemble_libraries "$sample" "$fastq_clean_dir" "$assembly_dir" "$assembly_extra_dir" "$num_cores"
 
-# compress fastq trimmed files and extra assembly files
+# compress fastq files and extra assembly files
 # Check if the directories exist before attempting to create compressed archives
 if [ -d "$contigs_dir/${origin}_${sample}_assembly_extra" ]; then
 	echo "$(timestamp): assembly: compressing extra files from assembly of $sample"
-	rm "$fastq_trimmed_dir"/*/*.gz
+	rm "$fastq_clean_dir"/*/*.gz
 	cd "$contigs_dir"
 	tar -czvf "${origin}_${sample}_assembly_extra.tar.gz" "${origin}_${sample}_assembly_extra"
 	rm -r "${origin}_${sample}_assembly_extra"
