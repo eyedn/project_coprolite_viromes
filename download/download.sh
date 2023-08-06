@@ -28,6 +28,7 @@ reads_dir="$project_dir/reads"
 sra_dir="$reads_dir/${origin}_${sample}_sra"
 fastq_raw_dir="$reads_dir/${origin}_${sample}_fastq_raw"
 fastq_trimmed_dir="$reads_dir/${origin}_${sample}_fastq_trimmed"
+fastq_clean_dir="$reads_dir/${origin}_${sample}_fastq_clean"
 
 for id in $accession_ids; do
 	# check if download was already complete for this id
@@ -51,11 +52,20 @@ for id in $accession_ids; do
 	generate_fastq "$id" "$sra_dir" "$fastq_raw_dir" "$num_cores"
 
 	# quality control fastq files by removing adapters and low quality reads
-	echo "=================================================="
+	echo "===================================================================================================="
 	echo "$(timestamp): download: quality control fastq files: $origin; $sample; $id"
-	echo "=================================================="
+	echo "===================================================================================================="
 	# quality control uses trim-galore to remove adapters and low quality sequences
 	quality_control "$id" "$fastq_raw_dir" "$fastq_trimmed_dir" "$num_cores"
+
+	# remove human reads from fastq files
+	echo "===================================================================================================="
+	echo "$(timestamp): download: remove human dna from trimmed reads: $origin; $sample; $id"
+	echo "===================================================================================================="
+	# host removal uses bowtie to map reads to human genome
+	# samtools used to generate clean (w/o host) fastq files 
+	remove_human_reads "$id" "$fastq_trimmed_dir" "$fastq_clean_dir" "$num_cores"
+
 	echo "$(timestamp): download: pre-processing complete for $id"
 done
 
