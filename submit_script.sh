@@ -53,7 +53,7 @@ else
 fi
 
 job_name=$(echo $script_name | cut -d '/' -f 2-)
-joblogs_output="$HOME/joblogs/$origin/"
+joblogs_output="$SCRATCH/joblogs/$origin/"
 qsub \
     -cwd \
     -N "${origin}.${job_name}" \
