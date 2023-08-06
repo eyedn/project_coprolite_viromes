@@ -11,6 +11,10 @@ fasterq_dump="$HOME/software/sratoolkit.3.0.5-ubuntu64/bin/fasterq-dump-orig.3.0
 
 trim_galore="$HOME/software/TrimGalore-0.6.10/trim_galore"
 
+bowtie2="$HOME/software/bowtie2-2.5.1-linux-x86_64/bowtie2"
+
+samtools="$HOME/software/samtools-1.18/bin/samtools"
+
 megahit="$HOME/software/MEGAHIT-1.2.9-Linux-x86_64-static/bin/megahit"
 
 phabox="$HOME/software/PhaBOX"
