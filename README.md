@@ -71,7 +71,7 @@ The `hmm_alignment` directory contains scripts that build and align contigs
 to databases with `HMMER`.
 
 ## data_wrangling
-The `data_wranling` directory contains scripts that collect raw counts of
+The `data_wrangling` directory contains scripts that collect raw counts of
 individual samples and contain functions for raw counts collection. Scripts in
 this directory are used by scripts in both `pipeline_by_origin` and 
 `pipeline_all`.
