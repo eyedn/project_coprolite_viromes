@@ -1,7 +1,7 @@
 ###############################################################################
 #       Aydin Karatas
 #		Project Coprolite Viromes
-#		collect_vir_phage_ec_counts.sh 
+#		get_counts_viral_taxonomy.sh 
 ###############################################################################
 #!/bin/bash
 cd $HOME/project_coprolite_viromes
@@ -17,31 +17,32 @@ project_dir=$2
 num_cores=$3
 
 # define directories and file
-prokka_annotations="${project_dir}/genome_annotation"
-data_dir="$project_dir/data"
-search_dir="$prokka_annotations/*viral_phage"
-gff_list="$data_dir/vir_phage_ec_counts_tmp.txt"
-csv_path="$data_dir/vir_phage_ec_counts.csv"
+data_dir="${project_dir}/data"
+predict_dir="${project_dir}/phage_predictions"
+search_dir="$predict_dir/*/out"
+search_file="phagcn_prediction.csv"
+predict_list="$data_dir/families_counts_tmp.txt"
+csv_path="$data_dir/families_counts.csv"
 
 # create a list of all files to generate counts from
-ls $search_dir/*gff.gz > $gff_list
-echo "$(timestamp): collect_vir_phage_ec_counts: generated file of all file paths needed"
-echo "$(timestamp): collect_vir_phage_ec_counts: using the following files:"
-cat $gff_list
+ls $search_dir/$search_file > $predict_list
+echo "$(timestamp): get_counts_viral_taxonomy: generated file of all file paths needed"
+echo "$(timestamp): get_counts_viral_taxonomy: using the following files:"
+cat $predict_list
 
 # generate counts with python script
 echo "===================================================================================================="
-echo "$(timestamp): collect_vir_phage_ec_counts: generating bacterial gene counts"
+echo "$(timestamp): get_counts_viral_taxonomy: generating families counts"
 echo "===================================================================================================="
-python3 data_wrangling/collect_ec_counts.py \
-	$gff_list \
+python3 data_wrangling/collect_phred_counts.py \
+	$predict_list \
 	$csv_path
-rm $gff_list
+rm $predict_list
 
 # check if raw counts was created
 if ls $csv_path 1> /dev/null 2>&1; then
-	echo "$(timestamp): collect_vir_phage_ec_counts: bacterial gene counts csv created"
+	echo "$(timestamp): get_counts_viral_taxonomy: families counts csv created"
 else
-	echo "$(timestamp): collect_vir_phage_ec_counts: bacterial gene counts csv not found"
+	echo "$(timestamp): get_counts_viral_taxonomy: families counts csv not found"
 	exit 1
 fi
