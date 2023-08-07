@@ -26,6 +26,7 @@ csv_path="$data_dir/contig_stats.csv"
 echo "===================================================================================================="
 echo "$(timestamp): 1_get_combined_contig_stats: combining all contig stats"
 echo "===================================================================================================="
+mkdir -p $data_dir
 python3 data_wrangling/get_combined_data.py \
 	$indiv_csv_dir \
 	$csv_path

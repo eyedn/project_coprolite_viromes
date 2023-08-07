@@ -24,16 +24,17 @@ search_file="phagcn_prediction.csv"
 predict_list="$data_dir/families_counts_tmp.txt"
 csv_path="$data_dir/families_counts.csv"
 
+# generate counts with python script
+echo "===================================================================================================="
+echo "$(timestamp): 3_4_get_counts_viral_taxonomy: generating families counts"
+echo "===================================================================================================="
 # create a list of all files to generate counts from
+mkdir -p $data_dir
 ls $search_dir/$search_file > $predict_list
 echo "$(timestamp): 3_4_get_counts_viral_taxonomy: generated file of all file paths needed"
 echo "$(timestamp): 3_4_get_counts_viral_taxonomy: using the following files:"
 cat $predict_list
 
-# generate counts with python script
-echo "===================================================================================================="
-echo "$(timestamp): 3_4_get_counts_viral_taxonomy: generating families counts"
-echo "===================================================================================================="
 python3 data_wrangling/collect_phred_counts.py \
 	$predict_list \
 	$csv_path

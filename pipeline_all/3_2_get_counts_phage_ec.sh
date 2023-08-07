@@ -17,22 +17,23 @@ project_dir=$2
 num_cores=$3
 
 # define directories and file
-prokka_annotations="${project_dir}/genome_annotation"
 data_dir="$project_dir/data"
+prokka_annotations="${project_dir}/genome_annotation"
 search_dir="$prokka_annotations/*annotation_phage"
 gff_list="$data_dir/phage_ec_counts_tmp.txt"
 csv_path="$data_dir/phage_ec_counts.csv"
-
-# create a list of all files to generate counts from
-ls $search_dir/*gff.gz > $gff_list
-echo "$(timestamp): 3_2_get_counts_phage_ec: generated file of all file paths needed"
-echo "$(timestamp): 3_2_get_counts_phage_ec: using the following files:"
-cat $gff_list
 
 # generate counts with python script
 echo "===================================================================================================="
 echo "$(timestamp): 3_2_get_counts_phage_ec: generating bacterial gene counts"
 echo "===================================================================================================="
+# create a list of all files to generate counts from
+mkdir -p $data_dir
+ls $search_dir/*gff.gz > $gff_list
+echo "$(timestamp): 3_2_get_counts_phage_ec: generated file of all file paths needed"
+echo "$(timestamp): 3_2_get_counts_phage_ec: using the following files:"
+cat $gff_list
+
 python3 data_wrangling/collect_ec_counts.py \
 	$gff_list \
 	$csv_path

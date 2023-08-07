@@ -26,6 +26,7 @@ csv_path="$data_dir/viral_prop.csv"
 echo "===================================================================================================="
 echo "$(timestamp): 2_get_combined_viral_prop: generating viral prop. counts"
 echo "===================================================================================================="
+mkdir -p $data_dir
 python3 data_wrangling/get_combined_data.py \
 	$indiv_csv_dir \
 	$csv_path

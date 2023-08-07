@@ -24,16 +24,17 @@ search_file="phatyp_prediction.csv"
 predict_list="$data_dir/lifestyle_counts_tmp.txt"
 csv_path="$data_dir/lifestyle_counts.csv"
 
+# generate counts with python script
+echo "===================================================================================================="
+echo "$(timestamp): 3_3_get_counts_viral_lifestyle: generating lifestyle counts"
+echo "===================================================================================================="
 # create a list of all files to generate counts from
+mkdir -p $data_dir
 ls $search_dir/$search_file > $predict_list
 echo "$(timestamp): 3_3_get_counts_viral_lifestyle: generated file of all file paths needed"
 echo "$(timestamp): 3_3_get_counts_viral_lifestyle: using the following files:"
 cat $predict_list
 
-# generate counts with python script
-echo "===================================================================================================="
-echo "$(timestamp): 3_3_get_counts_viral_lifestyle: generating lifestyle counts"
-echo "===================================================================================================="
 python3 data_wrangling/collect_phred_counts.py \
 	$predict_list \
 	$csv_path

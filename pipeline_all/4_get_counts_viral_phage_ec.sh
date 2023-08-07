@@ -23,16 +23,17 @@ search_dir="$prokka_annotations/*viral_phage"
 gff_list="$data_dir/vir_phage_ec_counts_tmp.txt"
 csv_path="$data_dir/vir_phage_ec_counts.csv"
 
+# generate counts with python script
+echo "===================================================================================================="
+echo "$(timestamp): 4_get_counts_viral_phage_ec: generating bacterial gene counts"
+echo "===================================================================================================="
 # create a list of all files to generate counts from
+mkdir -p $data_dir
 ls $search_dir/*gff.gz > $gff_list
 echo "$(timestamp): 4_get_counts_viral_phage_ec: generated file of all file paths needed"
 echo "$(timestamp): 4_get_counts_viral_phage_ec: using the following files:"
 cat $gff_list
 
-# generate counts with python script
-echo "===================================================================================================="
-echo "$(timestamp): 4_get_counts_viral_phage_ec: generating bacterial gene counts"
-echo "===================================================================================================="
 python3 data_wrangling/collect_ec_counts.py \
 	$gff_list \
 	$csv_path

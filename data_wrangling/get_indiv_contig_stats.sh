@@ -26,8 +26,6 @@ data_dir="$project_dir/data/indiv_contig_stats"
 stats_file="$contigs_dir/${origin}_${sample}_assembly/${origin}_${sample}_log.txt"
 csv_path="$data_dir/${origin}_${sample}_contig_stats.csv"
 
-mkdir -p $data_dir
-
 # check if assembly was already complete for this sample
 if ls $csv_path 1> /dev/null 2>&1; then
 	echo "$(timestamp): get_indiv_contig_stats: final contigs file already created"
@@ -42,13 +40,13 @@ else
 	exit 1
 fi
 
-head -n 5 $stats_file | tail -n 1 > $data_dir/${origin}_${sample}_contig_stats_tmp.txt
-tail -n 2 $stats_file | head -n 1 >> $data_dir/${origin}_${sample}_contig_stats_tmp.txt
-
 # generate counts with python script
 echo "===================================================================================================="
 echo "$(timestamp): get_indiv_contig_stats: generating stats"
 echo "===================================================================================================="
+mkdir -p $data_dir
+head -n 5 $stats_file | tail -n 1 > $data_dir/${origin}_${sample}_contig_stats_tmp.txt
+tail -n 2 $stats_file | head -n 1 >> $data_dir/${origin}_${sample}_contig_stats_tmp.txt
 python3 data_wrangling/get_indiv_contig_stats.py \
 	$data_dir/${origin}_${sample}_contig_stats_tmp.txt \
 	$csv_path

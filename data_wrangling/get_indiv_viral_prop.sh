@@ -28,8 +28,6 @@ fa_file="$contigs_dir/${origin}_${sample}_assembly/${origin}_${sample}_viral_con
 gff_file="$prokka_annotations/${origin}_${sample}_annotation_viruses/${sample}.gff.gz"
 csv_path="$data_dir/${origin}_${sample}_viral_prop.csv"
 
-mkdir -p $data_dir
-
 # check if assembly was already complete for this sample
 if ls $csv_path 1> /dev/null 2>&1; then
 	echo "$(timestamp): get_indiv_viral_prop: final contigs file already created"
@@ -54,6 +52,7 @@ fi
 echo "===================================================================================================="
 echo "$(timestamp): get_indiv_viral_prop: generating viral prop. counts"
 echo "===================================================================================================="
+mkdir -p $data_dir
 python3 data_wrangling/get_indiv_viral_prop.py \
 	$fa_file \
 	$gff_file \

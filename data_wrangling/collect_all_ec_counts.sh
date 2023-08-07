@@ -33,6 +33,7 @@ cat $gff_list
 echo "===================================================================================================="
 echo "$(timestamp): collect_all_ec_counts: generating bacterial gene counts"
 echo "===================================================================================================="
+mkdir -p $data_dir
 python3 data_wrangling/collect_ec_counts.py \
 	$gff_list \
 	$csv_path
