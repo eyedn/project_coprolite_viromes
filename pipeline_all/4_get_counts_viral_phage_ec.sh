@@ -1,7 +1,7 @@
 ###############################################################################
 #       Aydin Karatas
 #		Project Coprolite Viromes
-#		get_counts_vir_phage_ec.sh 
+#		4_get_counts_viral_phage_ec.sh 
 ###############################################################################
 #!/bin/bash
 cd $HOME/project_coprolite_viromes
@@ -25,13 +25,13 @@ csv_path="$data_dir/vir_phage_ec_counts.csv"
 
 # create a list of all files to generate counts from
 ls $search_dir/*gff.gz > $gff_list
-echo "$(timestamp): get_counts_vir_phage_ec: generated file of all file paths needed"
-echo "$(timestamp): get_counts_vir_phage_ec: using the following files:"
+echo "$(timestamp): 4_get_counts_viral_phage_ec: generated file of all file paths needed"
+echo "$(timestamp): 4_get_counts_viral_phage_ec: using the following files:"
 cat $gff_list
 
 # generate counts with python script
 echo "===================================================================================================="
-echo "$(timestamp): get_counts_vir_phage_ec: generating bacterial gene counts"
+echo "$(timestamp): 4_get_counts_viral_phage_ec: generating bacterial gene counts"
 echo "===================================================================================================="
 python3 data_wrangling/collect_ec_counts.py \
 	$gff_list \
@@ -40,8 +40,8 @@ rm $gff_list
 
 # check if raw counts was created
 if ls $csv_path 1> /dev/null 2>&1; then
-	echo "$(timestamp): get_counts_vir_phage_ec: bacterial gene counts csv created"
+	echo "$(timestamp): 4_get_counts_viral_phage_ec: bacterial gene counts csv created"
 else
-	echo "$(timestamp): get_counts_vir_phage_ec: bacterial gene counts csv not found"
+	echo "$(timestamp): 4_get_counts_viral_phage_ec: bacterial gene counts csv not found"
 	exit 1
 fi

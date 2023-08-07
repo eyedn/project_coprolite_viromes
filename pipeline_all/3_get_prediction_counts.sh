@@ -1,7 +1,7 @@
 ###############################################################################
 #       Aydin Karatas
 #		Project Coprolite Viromes
-#		all.sh 
+#		3_get_prediction_counts.sh 
 ###############################################################################
 #!/bin/bash
 cd $HOME/project_coprolite_viromes

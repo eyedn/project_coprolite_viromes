@@ -1,7 +1,7 @@
 ###############################################################################
 #       Aydin Karatas
 #		Project Coprolite Viromes
-#		get_counts_viral_taxonomy.sh 
+#		3_4_get_counts_viral_taxonomy.sh 
 ###############################################################################
 #!/bin/bash
 cd $HOME/project_coprolite_viromes
@@ -26,13 +26,13 @@ csv_path="$data_dir/families_counts.csv"
 
 # create a list of all files to generate counts from
 ls $search_dir/$search_file > $predict_list
-echo "$(timestamp): get_counts_viral_taxonomy: generated file of all file paths needed"
-echo "$(timestamp): get_counts_viral_taxonomy: using the following files:"
+echo "$(timestamp): 3_4_get_counts_viral_taxonomy: generated file of all file paths needed"
+echo "$(timestamp): 3_4_get_counts_viral_taxonomy: using the following files:"
 cat $predict_list
 
 # generate counts with python script
 echo "===================================================================================================="
-echo "$(timestamp): get_counts_viral_taxonomy: generating families counts"
+echo "$(timestamp): 3_4_get_counts_viral_taxonomy: generating families counts"
 echo "===================================================================================================="
 python3 data_wrangling/collect_phred_counts.py \
 	$predict_list \
@@ -41,8 +41,8 @@ rm $predict_list
 
 # check if raw counts was created
 if ls $csv_path 1> /dev/null 2>&1; then
-	echo "$(timestamp): get_counts_viral_taxonomy: families counts csv created"
+	echo "$(timestamp): 3_4_get_counts_viral_taxonomy: families counts csv created"
 else
-	echo "$(timestamp): get_counts_viral_taxonomy: families counts csv not found"
+	echo "$(timestamp): 3_4_get_counts_viral_taxonomy: families counts csv not found"
 	exit 1
 fi

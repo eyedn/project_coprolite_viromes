@@ -1,7 +1,7 @@
 ###############################################################################
 #       Aydin Karatas
 #		Project Coprolite Viromes
-#		get_combined_viral_prop.sh 
+#		2_get_combined_viral_prop.sh 
 ###############################################################################
 #!/bin/bash
 cd $HOME/project_coprolite_viromes
@@ -24,7 +24,7 @@ csv_path="$data_dir/viral_prop.csv"
 
 # generate counts with python script
 echo "===================================================================================================="
-echo "$(timestamp): get_combined_viral_prop: generating viral prop. counts"
+echo "$(timestamp): 2_get_combined_viral_prop: generating viral prop. counts"
 echo "===================================================================================================="
 python3 data_wrangling/get_combined_data.py \
 	$indiv_csv_dir \
@@ -32,8 +32,8 @@ python3 data_wrangling/get_combined_data.py \
 
 # check if raw counts was created
 if ls $csv_path 1> /dev/null 2>&1; then
-	echo "$(timestamp): get_combined_viral_prop: viral prop csv created"
+	echo "$(timestamp): 2_get_combined_viral_prop: viral prop csv created"
 else
-	echo "$(timestamp): get_combined_viral_prop: viral prop csv not found"
+	echo "$(timestamp): 2_get_combined_viral_prop: viral prop csv not found"
 	exit 1
 fi
