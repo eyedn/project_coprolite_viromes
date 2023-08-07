@@ -1,5 +1,5 @@
 # Project Coprolite Viromes
-The script in the repo compose the bioinformatic pipeline used to collect and
+The scripts in this repo compose the bioinformatic pipeline used to collect and
 analyze publicly available human get metagenomic sequence data. Samples in this
 project were from modern-industrial samples, modern-non-industrial samples, and
 paleofecal samples, known as coprolites. The files and directories listed in
