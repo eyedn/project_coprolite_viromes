@@ -17,6 +17,7 @@ download_sra() {
 	fi
 
 	# prefetch sra
+	mkdir -p ${sra_dir}
 	prefetch-orig.3.0.5 --type sra ${id} -O ${sra_dir} --max-size 100G
 
 	# check if sra was successfully downloaded; move it into appropriate directory if needed
