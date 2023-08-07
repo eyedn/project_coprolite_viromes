@@ -42,7 +42,7 @@ quality_control() {
 	mkdir -p $fastq_trimmed_dir
 	if [ -f "${fastq_raw_dir}/${id}/${id}_1.fastq.gz" ] && \
 	[ -f "${fastq_raw_dir}/${id}/${id}_2.fastq.gz" ]; then
-		$trim_galore \
+		trim_galore \
 			--paired \
 			-o ${fastq_trimmed_dir}/${id} \
 			--basename ${id} \
@@ -50,18 +50,8 @@ quality_control() {
 			-j $cores_to_use \
 			${fastq_raw_dir}/${id}/${id}_1.fastq.gz \
 			${fastq_raw_dir}/${id}/${id}_2.fastq.gz
-
-		# TODO: integrate host removal for paired data
-		$bowtie2 -p 8 -x host_DB -1 SAMPLE_R1.fastq.gz -2 SAMPLE_R2.fastq.gz -S SAMPLE_mapped_and_unmapped.sam
-		$samtools view -bS SAMPLE_mapped_and_unmapped.sam > SAMPLE_mapped_and_unmapped.bam
-		$samtools view -b -f 12 -F 256 SAMPLE_mapped_and_unmapped.bam > SAMPLE_bothReadsUnmapped.bam 
-		$samtools sort -n -m 5G -@ 2 SAMPLE_bothReadsUnmapped.bam -o SAMPLE_bothReadsUnmapped_sorted.bam
-		$samtools fastq -@ 8 SAMPLE_bothReadsUnmapped_sorted.bam \
-			-1 SAMPLE_host_removed_R1.fastq.gz \
-			-2 SAMPLE_host_removed_R2.fastq.gz \
-			-0 /dev/null -s /dev/null -n
 	elif [ -f "${fastq_raw_dir}/${id}/${id}.fastq.gz" ]; then
-		$trim_galore \
+		trim_galore \
 			-o ${fastq_trimmed_dir}/${id} \
 			--basename ${id} \
 			--gzip \

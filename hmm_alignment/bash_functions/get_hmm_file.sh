@@ -24,7 +24,7 @@ get_hmm_file() {
     fi
 
     # build hmm file for future alignment
-    $hmmbuild $hmm_file $sto_file
+    hmmbuild $hmm_file $sto_file
 
     # check if hmm_file was created and is not empty
 	if ls $hmm_file 1> /dev/null 2>&1; then
