@@ -1,7 +1,7 @@
 ###############################################################################
 #       Aydin Karatas
 #		Project Coprolite Viromes
-#		download_and_assembly.sh 
+#		1_download_and_assembly.sh 
 ###############################################################################
 #!/bin/bash
 cd $HOME/project_coprolite_viromes

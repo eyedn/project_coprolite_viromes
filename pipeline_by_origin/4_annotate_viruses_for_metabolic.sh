@@ -1,7 +1,7 @@
 ###############################################################################
 #       Aydin Karatas
 #		Project Coprolite Viromes
-#		annotate_viruses_for_metabolic.sh 
+#		4_annotate_viruses_for_metabolic.sh 
 ###############################################################################
 #!/bin/bash
 cd $HOME/project_coprolite_viromes
