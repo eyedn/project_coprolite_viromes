@@ -34,7 +34,6 @@ remove_human_reads() {
 			--trimmomatic $trimmomatic_dir \
 			--sequencer-source none \
 			--bypass-trim \
-			--bypass-trf \
 			--threads $num_cores
 
 		mv ${fastq_clean_dir}/${id}/${id}_val_1_kneaddata_paired_1.fastq \
@@ -54,7 +53,6 @@ remove_human_reads() {
 			--trimmomatic $trimmomatic_dir \
 			--sequencer-source none \
 			--bypass-trim \
-			--bypass-trf \
 			--threads $num_cores
 
 		mv ${fastq_clean_dir}/${id}/${id}_trimmed_kneaddata.fastq \
