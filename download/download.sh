@@ -32,7 +32,7 @@ fastq_clean_dir="$reads_dir/${origin}_${sample}_fastq_clean"
 
 for id in $accession_ids; do
 	# check if download was already complete for this id
-	if ls $fastq_trimmed_dir/$id/*.txt 1> /dev/null 2>&1; then
+	if ls $fastq_clean_dir/$id/*.txt 1> /dev/null 2>&1; then
 		echo "$(timestamp): download: pre-processing for ${id} already complete"
 		continue
 	fi
