@@ -32,7 +32,9 @@ phabox="$software/PhaBOX"
 
 ref_db="$HOME/references"
 
-trf_dir="$HOME/.conda/pkgs/trf-4.09.1-h031d066_4/bin"
+trf_dir="$HOME/.local/bin/"
+
+trimmomatic_dir="$HOME/.conda/pkgs/trf-4.09.1-h031d066_4/bin"
 
 samtools_m=32
 
