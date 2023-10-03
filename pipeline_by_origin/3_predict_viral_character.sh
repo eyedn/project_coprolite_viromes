@@ -4,6 +4,8 @@
 #		3_predict_viral_character.sh 
 ###############################################################################
 #!/bin/bash
+cd $HOME
+source .bashrc
 cd $HOME/project_coprolite_viromes
 
 

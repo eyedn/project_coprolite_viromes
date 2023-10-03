@@ -4,6 +4,8 @@
 #		3_get_prediction_counts.sh 
 ###############################################################################
 #!/bin/bash
+cd $HOME
+source .bashrc
 cd $HOME/project_coprolite_viromes
 
 
