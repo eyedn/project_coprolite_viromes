@@ -4,8 +4,6 @@
 #		3_4_get_counts_viral_taxonomy.sh 
 ###############################################################################
 #!/bin/bash
-cd $HOME
-source .bashrc
 cd $HOME/project_coprolite_viromes
 for FILE in general_bash_functions/* ; do source $FILE ; done
 source /u/local/Modules/default/init/modules.sh

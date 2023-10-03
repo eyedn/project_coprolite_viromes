@@ -4,8 +4,6 @@
 #		2_annotate_all_for_viruses.sh 
 ###############################################################################
 #!/bin/bash
-cd $HOME
-source .bashrc
 cd $HOME/project_coprolite_viromes
 
 

@@ -4,8 +4,6 @@
 #		4_annotate_viruses_for_metabolic.sh 
 ###############################################################################
 #!/bin/bash
-cd $HOME
-source .bashrc
 cd $HOME/project_coprolite_viromes
 
 
