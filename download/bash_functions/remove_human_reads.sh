@@ -28,6 +28,8 @@ remove_human_reads() {
 			--input2 ${fastq_trimmed_dir}/${id}/${id}_val_2.fq.gz \
 			--reference-db $ref_db \
 			--output ${fastq_clean_dir}/${id} \
+			--bowtie2 $bowtie2_dir \
+			--fastqc $fastqc_dir \
 			--trf $trf_dir \
 			--trimmomatic $trimmomatic_dir \
 			--sequencer-source none \
@@ -44,6 +46,8 @@ remove_human_reads() {
 			--unpaired ${fastq_trimmed_dir}/${id}/${id}_trimmed.fq.gz \
 			--reference-db $ref_db \
 			--output ${fastq_clean_dir}/${id} \
+			--bowtie2 $bowtie2_dir \
+			--fastqc $fastqc_dir \
 			--trf $trf_dir \
 			--trimmomatic $trimmomatic_dir \
 			--sequencer-source none \

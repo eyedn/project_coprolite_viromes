@@ -36,6 +36,10 @@ trimmomatic_dir="$HOME/.local/bin/"
 
 trf_dir="$HOME/.conda/pkgs/trf-4.09.1-h031d066_4/bin"
 
+bowtie2_dir="$software/bowtie2-2.5.1-linux-x86_64/"
+
+fastqc_dir="$software/FastQC/"
+
 samtools_m=32
 
 fasterq_dump_cores=6
