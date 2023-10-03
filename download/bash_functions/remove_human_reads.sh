@@ -33,6 +33,7 @@ remove_human_reads() {
 			--trf $trf_dir \
 			--trimmomatic $trimmomatic_dir \
 			--sequencer-source none \
+			--bypass-trim \
 			--bypass-trf \
 			--threads $num_cores
 
@@ -52,6 +53,7 @@ remove_human_reads() {
 			--trf $trf_dir \
 			--trimmomatic $trimmomatic_dir \
 			--sequencer-source none \
+			--bypass-trim \
 			--bypass-trf \
 			--threads $num_cores
 
