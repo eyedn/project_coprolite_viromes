@@ -9,14 +9,16 @@
 # create final.contigs.fa with megahit assembly from fastq/fasta files
 assemble_libraries() {
 	local sample=$1
-	local fastq_trimmed_dir=$2
+	local fastq_clean_dir=$2
 	local assembly_dir=$3
 	local assembly_extra_dir=$4
 	local num_cores=$5
 
 	# identyify all libraries
 	mkdir -p $assembly_dir
-	python3 megahit_assembly/identify_fastq_files.py $fastq_trimmed_dir > $assembly_dir/id_paths.txt
+	echo "$(timestamp): ${fastq_clean_dir} contents:"
+	ls $fastq_clean_dir
+	python3 megahit_assembly/identify_fastq_files.py $fastq_clean_dir > $assembly_dir/id_paths.txt
 	single_end_data="$(head -n 1 $assembly_dir/id_paths.txt | cut -f 1)"
 	paired_end_data_1="$(head -n 1 $assembly_dir/id_paths.txt | cut -f 2)"
 	paired_end_data_2="$(head -n 1 $assembly_dir/id_paths.txt | cut -f 3)"
