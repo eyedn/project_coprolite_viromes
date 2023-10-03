@@ -58,9 +58,9 @@ remove_human_reads() {
 			--threads $num_cores
 
 		mv ${fastq_clean_dir}/${id}/${id}_trimmed_kneaddata.fastq \
-			> ${fastq_clean_dir}/${id}/${id}_RU.fastq
+			${fastq_clean_dir}/${id}/${id}_RU.fastq
 		mv ${fastq_clean_dir}/${id}/${id}_trimmed_kneaddata.log \
-			> ${fastq_clean_dir}/${id}/${id}.log 
+			${fastq_clean_dir}/${id}/${id}.log 
 	else
 		echo "$(timestamp): quality_check_fastq: ERROR! trimmed fastq files not found"
 		exit 1
