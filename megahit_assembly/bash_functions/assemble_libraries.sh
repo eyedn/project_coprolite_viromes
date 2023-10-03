@@ -17,12 +17,11 @@ assemble_libraries() {
 	# identyify all libraries
 	mkdir -p $assembly_dir
 	echo "$(timestamp): ${fastq_clean_dir} contents:"
-	ls $fastq_clean_dir
+	ls $fastq_clean_dir/*
 	python3 megahit_assembly/identify_fastq_files.py $fastq_clean_dir > $assembly_dir/id_paths.txt
 	single_end_data="$(head -n 1 $assembly_dir/id_paths.txt | cut -f 1)"
 	paired_end_data_1="$(head -n 1 $assembly_dir/id_paths.txt | cut -f 2)"
 	paired_end_data_2="$(head -n 1 $assembly_dir/id_paths.txt | cut -f 3)"
-	rm $assembly_dir/id_paths.txt
 
 	# assembly fastq.gz files with meaghit
 	echo "$(timestamp): assemble_libraries: $sample"
@@ -48,4 +47,5 @@ assemble_libraries() {
 		${assembly_dir}/${origin}_${sample}_all_contigs.fa
 	mv $assembly_extra_dir/log \
 		${assembly_dir}/${origin}_${sample}_log.txt
+	rm $assembly_dir/id_paths.txt
 }
