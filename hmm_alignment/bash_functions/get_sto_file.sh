@@ -27,7 +27,7 @@ get_sto_file() {
     fi
 
     # reformat fastsa to sto
-    esl_reformat stockholm $aa_file > $sto_file
+    $esl_reformat stockholm $aa_file > $sto_file
 
     # compress fasta file
     gzip $aa_file

@@ -41,7 +41,7 @@ align_w_db() {
     fi
 
     # align hmm_file to database
-    hmmsearch \
+    $hmmsearch \
         -o $results_out \
         --tblout $table_out \
         --cpu $num_cores \

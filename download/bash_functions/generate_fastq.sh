@@ -38,7 +38,7 @@ generate_fastq() {
 
 	# convert sra to fastq format
 	mkdir -p $fastq_raw_dir
-	fasterq-dump-orig.3.0.5 \
+	$fasterq_dump \
 		"$sra_file" \
 		--split-3 \
 		-O "${fastq_raw_dir}/${id}" \

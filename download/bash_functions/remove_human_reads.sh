@@ -23,7 +23,7 @@ remove_human_reads() {
 	mkdir -p $fastq_clean_dir
 	if [ -f "${fastq_trimmed_dir}/${id}/${id}_val_1.fq.gz" ] && \
 	[ -f "${fastq_trimmed_dir}/${id}/${id}_val_2.fq.gz" ]; then
-		kneaddata \
+		$kneaddata \
 			--input1 ${fastq_trimmed_dir}/${id}/${id}_val_1.fq.gz \
 			--input2 ${fastq_trimmed_dir}/${id}/${id}_val_2.fq.gz \
 			--reference-db $ref_db \
@@ -39,7 +39,7 @@ remove_human_reads() {
 		mv ${fastq_clean_dir}/${id}/${id}_val_1_kneaddata.log \
 			> ${fastq_clean_dir}/${id}/${id}.log 
 	elif [ -f "${fastq_trimmed_dir}/${id}/${id}_trimmed.fq.gz" ]; then
-		kneaddata \
+		$kneaddata \
 			--unpaired ${fastq_trimmed_dir}/${id}/${id}_trimmed.fq.gz \
 			--reference-db $ref_db \
 			--output ${fastq_clean_dir}/${id} \

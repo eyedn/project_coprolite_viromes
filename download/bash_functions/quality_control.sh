@@ -43,7 +43,7 @@ quality_control() {
 	mkdir -p $fastq_trimmed_dir
 	if [ -f "${fastq_raw_dir}/${id}/${id}_1.fastq.gz" ] && \
 	[ -f "${fastq_raw_dir}/${id}/${id}_2.fastq.gz" ]; then
-		trim_galore \
+		$trim_galore \
 			--paired \
 			-o ${fastq_trimmed_dir}/${id} \
 			--basename ${id} \
@@ -52,7 +52,7 @@ quality_control() {
 			${fastq_raw_dir}/${id}/${id}_1.fastq.gz \
 			${fastq_raw_dir}/${id}/${id}_2.fastq.gz
 	elif [ -f "${fastq_raw_dir}/${id}/${id}.fastq.gz" ]; then
-		trim_galore \
+		$trim_galore \
 			-o ${fastq_trimmed_dir}/${id} \
 			--basename ${id} \
 			--gzip \
