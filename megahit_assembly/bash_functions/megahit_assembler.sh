@@ -21,8 +21,11 @@ megahit_assembler() {
 	# run assembly based on the libraries available
 	if ! [ "$single_end_data" == "no_data" ] && \
 	! [ "$paired_end_data_1" == "no_data" ] && \
-	! [ "$paired_end_data_1" == "no_data" ]; then 
-		echo "$(timestamp): megahit_assembler: assembling with both paired-ended and single-ended data"
+	! [ "$paired_end_data_2" == "no_data" ]; then 
+		echo "$(timestamp): megahit_assembler: assembling with both paired-ended and single-ended data:"
+		echo "$single_end_data"
+		echo "$paired_end_data_1"
+		echo "$paired_end_data_2"
 		$megahit \
 			-1 $paired_end_data_1 \
 			-2 $paired_end_data_2 \
@@ -31,8 +34,9 @@ megahit_assembler() {
 			-o $output_dir
 	elif ! [ "$single_end_data" == "no_data" ] && \
 	[ "$paired_end_data_1" == "no_data" ] && \
-	[ "$paired_end_data_1" == "no_data" ]; then 
+	[ "$paired_end_data_2" == "no_data" ]; then 
 		echo "$(timestamp): megahit_assembler: assembling with single-ended data"
+		echo "$single_end_data"
 		$megahit \
 			-r $single_end_data \
 			-t $num_cores \
@@ -40,7 +44,9 @@ megahit_assembler() {
 	elif [ "$single_end_data" == "no_data" ] && \
 	! [ "$paired_end_data_1" == "no_data" ] && \
 	! [ "$paired_end_data_1" == "no_data" ]; then 
-		echo "$(timestamp): megahit_assembler: assembling with paired-ended data"
+		echo "$(timestamp): megahit_assembler: assembling with paired-ended data:"
+		echo "$paired_end_data_1"
+		echo "$paired_end_data_2"
 		$megahit \
 			-1 $paired_end_data_1 \
 			-2 $paired_end_data_2 \
