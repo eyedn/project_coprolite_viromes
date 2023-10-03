@@ -29,6 +29,7 @@ remove_human_reads() {
 			--reference-db $ref_db \
 			--output ${fastq_clean_dir}/${id} \
 			--trf $trf_dir \
+			--trimmomatic $trimmomatic_dir \
 			--sequencer-source none \
 			--threads $num_cores
 
