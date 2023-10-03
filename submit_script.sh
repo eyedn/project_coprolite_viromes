@@ -9,12 +9,12 @@ for FILE in general_bash_functions/* ; do source $FILE ; done
 
 
 # paleo samples labeled as pal-{location} :
-#       pal-AWC pal-BEL pal-BMS pal-ENG pal-ITA pal-PER pal-ZAF pal-ZAP
+#       pal-AWC pal-BEL pal-BMS pal-ENG pal-ZAF pal-ZAP
 # industrial samples labeled as ind-{location} :
 #       ind-DNK ind-ESP ind-USA
 # pre-industrial samples labeled as pre-{location} :
 #       pre-FJI pre-MDG pre-MEX pre-PER pre-TZA
-valid_ori=( pal-AWC pal-BEL pal-BMS pal-ENG pal-ITA pal-PER pal-ZAF pal-ZAP \
+valid_ori=( pal-AWC pal-BEL pal-BMS pal-ENG pal-ZAF pal-ZAP \
             ind-DNK ind-ESP ind-USA \
             pre-FJI pre-MDG pre-MEX pre-PER pre-TZA \
             test all )
