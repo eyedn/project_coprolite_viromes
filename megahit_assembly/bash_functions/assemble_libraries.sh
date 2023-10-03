@@ -3,6 +3,7 @@
 #		Project Coprolite Viromes
 #		assemble_libraries.sh 
 ###############################################################################
+#!/bin/bash
 
 
 # create final.contigs.fa with megahit assembly from fastq/fasta files

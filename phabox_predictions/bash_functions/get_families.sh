@@ -3,6 +3,7 @@
 #		Project Coprolite Viromes
 #		get_families.sh 
 ###############################################################################
+#!/bin/bash
 
 
 # use PhaTYP from PhaBOX to predict viral lifestyles

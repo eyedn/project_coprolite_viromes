@@ -3,6 +3,7 @@
 #       Project Coprolite Viromes
 #       remove_human_reads.sh 
 ###############################################################################
+#!/bin/bash
 
 
 # use kneaddata to remove human reads

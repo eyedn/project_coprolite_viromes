@@ -3,6 +3,7 @@
 #		Project Coprolite Viromes
 #		timestamp.sh 
 ###############################################################################
+#!/bin/bash
 
 
 # define timestamp for all echo commands 

@@ -3,6 +3,7 @@
 #		Project Coprolite Viromes
 #		annotate_contigs.sh 
 ###############################################################################
+#!/bin/bash
 
 
 # generate informative files by annotating contigs file 
