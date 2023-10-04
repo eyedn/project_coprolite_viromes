@@ -28,8 +28,13 @@ remove_human_reads() {
 			-x $hum_genome_ref \
 			-1 ${fastq_trimmed_dir}/${id}/${id}_val_1.fq.gz \
 			-2 ${fastq_trimmed_dir}/${id}/${id}_val_2.fq.gz \
-			--un-conc-gz ${fastq_clean_dir}/${id} \
+			--un-conc-gz --un-conc-gz ${fastq_clean_dir}/${id}/${id} \
 			-S ${fastq_clean_dir}/${id}/${id}_SAMPLE_mapped_and_unmapped.sam
+		
+		mv ${fastq_clean_dir}/${id}/${id}.1 \
+			${fastq_clean_dir}/${id}/${id}_R1.fastq.gz
+		mv ${fastq_clean_dir}/${id}/${id}.2 \
+			${fastq_clean_dir}/${id}/${id}_R2.fastq.gz
 	elif [ -f "${fastq_trimmed_dir}/${id}/${id}_trimmed.fq.gz" ]; then
 		$bowtie2 \
 			-p $num_cores \
