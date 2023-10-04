@@ -26,7 +26,7 @@ megahit="$software/MEGAHIT-1.2.9-Linux-x86_64-static/bin/megahit"
 
 python_env="$HOME/my_py/bin/activate"
 
-hum_genome_ref="$HOME/references/GRCh38_noalt_as"
+hum_genome_ref="$HOME/references/GRCh38_noalt_as/GRCh38_noalt_as"
 
 phabox="$software/PhaBOX"
 
