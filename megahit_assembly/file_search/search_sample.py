@@ -5,11 +5,11 @@
 ###############################################################################
 import os
 import typing
-from . import search_sub_directory as search_sub
+from . import search_acc_id as search
 
 
 # look through the sample directory to get all fastq files
-def search_directory(dir: typing.Union[str, os.PathLike]) \
+def search_sample(dir: typing.Union[str, os.PathLike]) \
     -> typing.Tuple[typing.List[typing.Union[str, os.PathLike]], 
                     typing.List[typing.Union[str, os.PathLike]], 
                     typing.List[typing.Union[str, os.PathLike]]]:
@@ -19,7 +19,7 @@ def search_directory(dir: typing.Union[str, os.PathLike]) \
     # find all trimmed fastq files
     for sub_dir in os.listdir(dir):
         sub_dir_path = os.path.join(dir, sub_dir)
-        new_single, new_paired_1, new_paired_2 = search_sub.get_file_names(sub_dir_path)
+        new_single, new_paired_1, new_paired_2 = search.get_file_names(sub_dir_path)
         if new_single != "":
             all_single_data.append(new_single)
         if new_paired_1 != "":

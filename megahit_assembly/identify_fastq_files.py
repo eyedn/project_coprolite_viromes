@@ -9,5 +9,5 @@ import file_search as fs
 
 if __name__ == "__main__":
     fastq_dir = argv[1]
-    single_data, paired_data_1, paried_data_2 = fs.search_main.search_directory(fastq_dir)
-    print(fs.format.format_output(single_data, paired_data_1, paried_data_2))
+    single_data, paired_data_1, paried_data_2 = fs.search_sample(fastq_dir)
+    print(fs.format_output(single_data, paired_data_1, paried_data_2))
