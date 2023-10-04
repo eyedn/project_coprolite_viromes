@@ -1,9 +1,9 @@
+#!/bin/bash
 ###############################################################################
 #       Aydin Karatas
 #		Project Coprolite Viromes
 #		3_predict_viral_character.sh 
 ###############################################################################
-#!/bin/bash
 cd $HOME/project_coprolite_viromes
 
 

@@ -1,9 +1,9 @@
+#!/bin/bash
 ###############################################################################
 #       Aydin Karatas
 #       Project Coprolite Viromes
 #       download_sra.sh 
 ###############################################################################
-#!/bin/bash
 
 
 # use prefetch to download sra file of accession id

@@ -1,9 +1,9 @@
+#!/bin/bash
 ###############################################################################
 #       Aydin Karatas
 #		Project Coprolite Viromes
 #		build_hmm_file.sh 
 ###############################################################################
-#!/bin/bash
 cd $HOME/project_coprolite_viromes
 for FILE in hmm_alignment/bash_functions/* ; do source $FILE ; done
 for FILE in general_bash_functions/* ; do source $FILE ; done

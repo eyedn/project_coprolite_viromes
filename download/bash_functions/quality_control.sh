@@ -1,9 +1,9 @@
+#!/bin/bash
 ###############################################################################
 #       Aydin Karatas
 #       Project Coprolite Viromes
 #       quality_control.sh 
 ###############################################################################
-#!/bin/bash
 
 
 # use trim galore to remove adapters and trim reads for quality

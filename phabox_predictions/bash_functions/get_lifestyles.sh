@@ -1,9 +1,9 @@
+#!/bin/bash
 ###############################################################################
 #       Aydin Karatas
 #		Project Coprolite Viromes
 #		get_lifestyles.sh 
 ###############################################################################
-#!/bin/bash
 
 
 # use PhaTYP from PhaBOX to predict viral lifestyles

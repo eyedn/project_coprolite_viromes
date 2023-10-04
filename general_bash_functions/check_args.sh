@@ -1,9 +1,9 @@
+#!/bin/bash
 ###############################################################################
 #		Aydin Karatas
 #		Project Coprolite Viromes
 #		general_functions.sh 
 ###############################################################################
-#!/bin/bash
 
 
 # check the arguments given to the submission script are valid

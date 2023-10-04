@@ -1,9 +1,9 @@
+#!/bin/bash
 ###############################################################################
 #       Aydin Karatas
 #       Project Coprolite Viromes
 #       generate_fastq.sh 
 ###############################################################################
-#!/bin/bash
 
 
 # use fasterq dump to download fastq files

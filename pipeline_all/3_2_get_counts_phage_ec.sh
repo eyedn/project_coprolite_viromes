@@ -1,9 +1,9 @@
+#!/bin/bash
 ###############################################################################
 #       Aydin Karatas
 #		Project Coprolite Viromes
 #		3_2_get_counts_phage_ec.sh 
 ###############################################################################
-#!/bin/bash
 cd $HOME/project_coprolite_viromes
 for FILE in general_bash_functions/* ; do source $FILE ; done
 source /u/local/Modules/default/init/modules.sh

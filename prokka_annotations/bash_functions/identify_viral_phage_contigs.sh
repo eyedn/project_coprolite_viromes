@@ -1,9 +1,9 @@
+#!/bin/bash
 ###############################################################################
 #       Aydin Karatas
 #		Project Coprolite Viromes
 #		identify_viral_phage_contigs.sh 
 ###############################################################################
-#!/bin/bash
 
 
 # create a contigs file with only contigs with viral annotations

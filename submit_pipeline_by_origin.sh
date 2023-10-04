@@ -1,9 +1,9 @@
+#!/bin/bash
 ###############################################################################
 #     Aydin Karatas
 #     Project Coprolite Viromes
 #	  submit_pipeline.sh 
 ###############################################################################
-#!/bin/bash
 cd $HOME/project_coprolite_viromes
 
 script=$1

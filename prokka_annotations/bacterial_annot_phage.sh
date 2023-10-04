@@ -1,9 +1,9 @@
+#!/bin/bash
 ###############################################################################
 #       Aydin Karatas
 #		Project Coprolite Viromes
 #		bacterial_annot_phage.sh 
 ###############################################################################
-#!/bin/bash
 cd $HOME/project_coprolite_viromes
 for FILE in prokka_annotations/bash_functions/* ; do source $FILE ; done
 for FILE in general_bash_functions/* ; do source $FILE ; done

@@ -1,9 +1,9 @@
+#!/bin/bash
 ###############################################################################
 #       Aydin Karatas
 #		Project Coprolite Viromes
 #		2_annotate_all_for_viruses.sh 
 ###############################################################################
-#!/bin/bash
 cd $HOME/project_coprolite_viromes
 
 
