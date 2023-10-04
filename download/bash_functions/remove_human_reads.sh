@@ -21,6 +21,7 @@ remove_human_reads() {
 
 	# remove host sequences based on if data is paired or unpaired
 	mkdir -p $fastq_clean_dir
+	orig_dir=$(pwd)
 	cd ${fastq_trimmed_dir}/${id}
 	if [ -f "${fastq_trimmed_dir}/${id}/${id}_val_1.fq.gz" ] && \
 	[ -f "${fastq_trimmed_dir}/${id}/${id}_val_2.fq.gz" ]; then
@@ -56,12 +57,6 @@ remove_human_reads() {
 			${id}_SAMPLE_host_removed \
 			> ${id}_SAMPLE_mapped_and_unmapped.sam
 
-		# check if bowtie2 ran correctly
-		if [ $? -ne 0 ]; then
-			echo "$(timestamp): Error running bowtie2 for sample $id"
-			exit 1
-		fi
-
 		echo "$(timestamp): bowtie2 results"
 		ls
 
@@ -72,6 +67,7 @@ remove_human_reads() {
 		echo "$(timestamp): remove_human_reads: ERROR! trimmed fastq files not found"
 		exit 1
 	fi
+	cd $orig_dir
 
 	# check if cleaned file(s) created
 	if ls ${fastq_clean_dir}/${id}/*R*fastq.gz 1> /dev/null 2>&1; then
