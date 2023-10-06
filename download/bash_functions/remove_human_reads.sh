@@ -72,6 +72,6 @@ remove_human_reads() {
 	fi
 
 	echo "$(timestamp): remove_human_reads: clean fastq files created"
-		rm $fastq_trimmed_dir/$id/*fq*
-		rm $fastq_clean_dir/$id/*sam
+	rm $fastq_trimmed_dir/$id/*fq*
+	rm $fastq_clean_dir/$id/*sam
 }
