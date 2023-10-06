@@ -63,8 +63,8 @@ remove_human_reads() {
 		num_2=$($seqtk comp ${fastq_clean_dir}/${id}/${id}_R2.fastq.gz | wc -l)
 		echo $((num_1 + num_2)) >> $fastq_stats
 
-		len_1=$(seqtk comp ${fastq_clean_dir}/${id}/${id}_R1.fastq.gz | awk '{sum += $2} END {print sum}')
-		len_2=$(seqtk comp ${fastq_clean_dir}/${id}/${id}_R2.fastq.gz | awk '{sum += $2} END {print sum}')
+		len_1=$($seqtk comp ${fastq_clean_dir}/${id}/${id}_R1.fastq.gz | awk '{sum += $2} END {print sum}')
+		len_2=$($seqtk comp ${fastq_clean_dir}/${id}/${id}_R2.fastq.gz | awk '{sum += $2} END {print sum}')
 		echo $((len_1 + len_2)) >> $fastq_stats
 	elif ls ${fastq_clean_dir}/${id}/*.fastq.gz 1> /dev/null 2>&1; then
 		echo "$(timestamp): remove_human_reads: clean fastq files created"

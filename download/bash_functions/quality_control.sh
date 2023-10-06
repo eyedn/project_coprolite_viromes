@@ -49,8 +49,8 @@ quality_control() {
 		num_2=$($seqtk comp ${fastq_raw_dir}/${id}/${id}_2.fastq.gz | wc -l)
 		echo $((num_1 + num_2)) >> $fastq_stats
 
-		len_1=$(seqtk comp ${fastq_raw_dir}/${id}/${id}_1.fastq.gz | awk '{sum += $2} END {print sum}')
-		len_2=$(seqtk comp ${fastq_raw_dir}/${id}/${id}_2.fastq.gz | awk '{sum += $2} END {print sum}')
+		len_1=$($seqtk comp ${fastq_raw_dir}/${id}/${id}_1.fastq.gz | awk '{sum += $2} END {print sum}')
+		len_2=$($seqtk comp ${fastq_raw_dir}/${id}/${id}_2.fastq.gz | awk '{sum += $2} END {print sum}')
 		echo $((len_1 + len_2)) >> $fastq_stats
 
 		$trim_galore \
@@ -84,8 +84,8 @@ quality_control() {
 		num_2=$($seqtk comp ${fastq_trimmed_dir}/${id}/${id}_val_2.fq.gz | wc -l)
 		echo $((num_1 + num_2)) >> $fastq_stats
 
-		len_1=$(seqtk comp ${fastq_trimmed_dir}/${id}/${id}_val_1.fq.gz | awk '{sum += $2} END {print sum}')
-		len_2=$(seqtk comp ${fastq_trimmed_dir}/${id}/${id}_val_2.fq.gz | awk '{sum += $2} END {print sum}')
+		len_1=$($seqtk comp ${fastq_trimmed_dir}/${id}/${id}_val_1.fq.gz | awk '{sum += $2} END {print sum}')
+		len_2=$($seqtk comp ${fastq_trimmed_dir}/${id}/${id}_val_2.fq.gz | awk '{sum += $2} END {print sum}')
 		echo $((len_1 + len_2)) >> $fastq_stats
 	elif ls ${fastq_trimmed_dir}/${id}/*.fq.gz 1> /dev/null 2>&1; then
 		echo "$(timestamp): quality_control: trimmed fastq files created"
