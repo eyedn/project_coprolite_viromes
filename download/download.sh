@@ -82,8 +82,4 @@ if [ -d "$fastq_raw_dir" ]; then
 	rm -r "$fastq_raw_dir"
 fi
 
-if [ -d "$fastq_trimmed_dir" ]; then
-	rm $fastq_trimmed_dir/*fq*
-fi
-
 echo "$(timestamp): download_and_pre_process: pre-processing complete for $sample"
