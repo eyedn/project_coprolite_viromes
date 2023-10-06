@@ -46,8 +46,11 @@ origins.
 The `download` directory contains the scripts that use *prefetch* and
 *fasterq-dump* from the *SRA-Toolkit* to download all accession runs for a
 given sample. Adpater trimming and quality contol is performed with the tool
-*Trim Galore*. Further quality control and host removal was performed with
-the tool *KneadData*.
+*Trim Galore*. Further host removal was performed with the tool *Bowtie2*, by
+aligning trimmed reads to a reference human genome (GRCH38_noalt_as) and
+retaining unaligned reads for further processing. For paired reads, both reads
+must align to the reference genome for that pair to be discarded. If only one
+read of the pair aligns, both reads will be retained for further processing.
 
 ## megahit_assembly
 The `megahit_assembly` directory contains the scripts that use *MEGAHIT* to
