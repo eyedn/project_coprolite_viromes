@@ -33,6 +33,7 @@ data_dir="$project_dir/data/read_stats"
 
 for id in $accession_ids; do
 	fastq_stats="$data_dir/${origin}_${sample}_${id}_read_stats.txt"
+	mkdir -p $data_dir
 	echo "${origin}_${sample}_${id}" > $fastq_stats
 
 	# check if download was already complete for this id
