@@ -11,7 +11,8 @@ remove_human_reads() {
 	local id=$1
 	local fastq_trimmed_dir=$2
 	local fastq_clean_dir=$3
-	local num_cores=$4
+	local fastq_stats=$4
+	local num_cores=$5
 
 	# check if clean file(s) already exists, return from pre-processing
 	if ls ${fastq_clean_dir}/${id}/*R*fastq.gz 1> /dev/null 2>&1; then
@@ -57,8 +58,31 @@ remove_human_reads() {
 	fi
 
 	# check if cleaned file(s) created
-	if ls ${fastq_clean_dir}/${id}/*R*fastq.gz 1> /dev/null 2>&1; then
+	if ls ${fastq_clean_dir}/${id}/*_R1.fastq.gz 1> /dev/null 2>&1; then
 		echo "$(timestamp): remove_human_reads: clean fastq files created"
+
+		# save read stats
+		num_1=$($seqtk comp ${fastq_clean_dir}/${id}/${id}_R1.fastq.gz | \
+			wc -l)
+		num_2=$($seqtk comp ${fastq_clean_dir}/${id}/${id}_R2.fastq.gz | \
+			wc -l)
+		echo $((num_1 + num_2)) >> $fastq_stats
+
+		len_1=$(seqtk comp ${fastq_clean_dir}/${id}/${id}_R1.fastq.gz | \
+			awk '{sum += $2} END {print sum}')
+		len_2=$(seqtk comp ${fastq_clean_dir}/${id}/${id}_R2.fastq.gz | \
+			awk '{sum += $2} END {print sum}')
+		echo $((len_1 + len_2)) >> $fastq_stats
+	elif ls ${fastq_clean_dir}/${id}/*.fastq.gz 1> /dev/null 2>&1; then
+		echo "$(timestamp): remove_human_reads: clean fastq files created"
+
+		# save reads stats
+		$seqtk comp ${fastq_clean_dir}/${id}/${id}_RU.fastq.gz | wc -l \	
+			>> $fastq_stats
+
+		$seqtk comp ${fastq_clean_dir}/${id}/${id}_RU.fastq.gz | \
+		awk '{sum += $2} END {print sum}' \
+			>> $fastq_stats
 	else
 		echo "$(timestamp): remove_human_reads: ERROR! clean fastq files not found"
 		exit 1

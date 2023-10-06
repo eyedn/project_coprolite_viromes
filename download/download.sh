@@ -29,8 +29,12 @@ sra_dir="$reads_dir/${origin}_${sample}_sra"
 fastq_raw_dir="$reads_dir/${origin}_${sample}_fastq_raw"
 fastq_trimmed_dir="$reads_dir/${origin}_${sample}_fastq_trimmed"
 fastq_clean_dir="$reads_dir/${origin}_${sample}_fastq_clean"
+data_dir="$project_dir/data/read_stats"
 
 for id in $accession_ids; do
+	fastq_stats="$data_dir/${origin}_${sample}_${id}_read_stats.txt"
+	echo "${origin}_${sample}_${id}" > $fastq_stats
+
 	# check if download was already complete for this id
 	if ls $fastq_clean_dir/$id/*.txt 1> /dev/null 2>&1; then
 		echo "$(timestamp): download: pre-processing for ${id} already complete"
@@ -49,21 +53,21 @@ for id in $accession_ids; do
 	echo "$(timestamp): download: converting sra file to fastq files: $origin; $sample; $id"
 	echo "===================================================================================================="
 	# uses fasterq-dump from sra tool kit
-	generate_fastq "$id" "$sra_dir" "$fastq_raw_dir" "$num_cores"
+	generate_fastq "$id" "$sra_dir" "$fastq_raw_dir" "$fastq_stats" "$num_cores"
 
 	# quality control fastq files by removing adapters and low quality reads
 	echo "===================================================================================================="
 	echo "$(timestamp): download: quality control fastq files: $origin; $sample; $id"
 	echo "===================================================================================================="
 	# quality control uses trim-galore to remove adapters and low quality sequences
-	quality_control "$id" "$fastq_raw_dir" "$fastq_trimmed_dir" "$num_cores"
+	quality_control "$id" "$fastq_raw_dir" "$fastq_trimmed_dir" "$fastq_stats" "$num_cores"
 
 	# remove human reads from fastq files
 	echo "===================================================================================================="
 	echo "$(timestamp): download: remove human dna from trimmed reads: $origin; $sample; $id"
 	echo "===================================================================================================="
 	# host removal uses kneaddata 
-	remove_human_reads "$id" "$fastq_trimmed_dir" "$fastq_clean_dir" "$num_cores"
+	remove_human_reads "$id" "$fastq_trimmed_dir" "$fastq_clean_dir" "$fastq_stats" "$num_cores"
 
 	echo "$(timestamp): download: pre-processing complete for $id"
 done

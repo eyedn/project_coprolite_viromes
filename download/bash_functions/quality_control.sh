@@ -11,11 +11,12 @@ quality_control() {
 	local id=$1
 	local fastq_raw_dir=$2
 	local fastq_trimmed_dir=$3
-	local num_cores=$4
+	local fastq_stats=$4
+	local num_cores=$5
 
 	# check if trimmed file(s) already exists, return from pre-processing
 	if ls ${fastq_trimmed_dir}/${id}/*.txt 1> /dev/null 2>&1; then
-	echo "$(timestamp): quality_check_fastq: trimmed fastq files found. skipping to final data compression steps"
+		echo "$(timestamp): quality_control: trimmed fastq files found. skipping to final data compression steps"
 		return 0
 	fi
 
@@ -43,6 +44,17 @@ quality_control() {
 	mkdir -p $fastq_trimmed_dir
 	if [ -f "${fastq_raw_dir}/${id}/${id}_1.fastq.gz" ] && \
 	[ -f "${fastq_raw_dir}/${id}/${id}_2.fastq.gz" ]; then
+		# first, save raw reads stats
+		num_1=$($seqtk comp ${fastq_raw_dir}/${id}/${id}_1.fastq.gz | wc -l)
+		num_2=$($seqtk comp ${fastq_raw_dir}/${id}/${id}_2.fastq.gz | wc -l)
+		echo $((num_1 + num_2)) >> $fastq_stats
+
+		len_1=$(seqtk comp ${fastq_raw_dir}/${id}/${id}_1.fastq.gz | \
+			awk '{sum += $2} END {print sum}')
+		len_2=$(seqtk comp ${fastq_raw_dir}/${id}/${id}_2.fastq.gz | \
+			awk '{sum += $2} END {print sum}')
+		echo $((len_1 + len_2)) >> $fastq_stats
+
 		$trim_galore \
 			--paired \
 			-o ${fastq_trimmed_dir}/${id} \
@@ -52,6 +64,14 @@ quality_control() {
 			${fastq_raw_dir}/${id}/${id}_1.fastq.gz \
 			${fastq_raw_dir}/${id}/${id}_2.fastq.gz
 	elif [ -f "${fastq_raw_dir}/${id}/${id}.fastq.gz" ]; then
+		# first, save raw reads stats
+		$seqtk comp ${fastq_raw_dir}/${id}/${id}.fastq.gz | wc -l \	
+			>> $fastq_stats
+
+		$seqtk comp ${fastq_raw_dir}/${id}/${id}.fastq.gz | \
+		awk '{sum += $2} END {print sum}' \
+			>> $fastq_stats
+
 		$trim_galore \
 			-o ${fastq_trimmed_dir}/${id} \
 			--basename ${id} \
@@ -61,11 +81,35 @@ quality_control() {
 	fi
 
 	# check if trimmd file(s) created
-	if ls ${fastq_trimmed_dir}/${id}/*.fq.gz 1> /dev/null 2>&1; then
-		echo "$(timestamp): quality_check_fastq: trimmed fastq files created"
+	if ls ${fastq_trimmed_dir}/${id}/*_1.fq.gz 1> /dev/null 2>&1; then
+		echo "$(timestamp): quality_control: trimmed fastq files created"
 		rm -r ${fastq_raw_dir}/${id}
+
+		# save read stats
+		num_1=$($seqtk comp ${fastq_trimmed_dir}/${id}/${id}_val_1.fq.gz | \
+			wc -l)
+		num_2=$($seqtk comp ${fastq_trimmed_dir}/${id}/${id}_val_2.fq.gz | \
+			wc -l)
+		echo $((num_1 + num_2)) >> $fastq_stats
+
+		len_1=$(seqtk comp ${fastq_trimmed_dir}/${id}/${id}_val_1.fq.gz | \
+			awk '{sum += $2} END {print sum}')
+		len_2=$(seqtk comp ${fastq_trimmed_dir}/${id}/${id}_val_2.fq.gz | \
+			awk '{sum += $2} END {print sum}')
+		echo $((len_1 + len_2)) >> $fastq_stats
+	elif ls ${fastq_trimmed_dir}/${id}/*.fq.gz 1> /dev/null 2>&1; then
+		echo "$(timestamp): quality_control: trimmed fastq files created"
+		rm -r ${fastq_raw_dir}/${id}
+
+		# save reads stats
+		$seqtk comp ${fastq_trimmed_dir}/${id}/${id}_trimmed.fq.gz | wc -l \	
+			>> $fastq_stats
+
+		$seqtk comp ${fastq_trimmed_dir}/${id}/${id}_trimmed.fq.gz | \
+		awk '{sum += $2} END {print sum}' \
+			>> $fastq_stats
 	else
-		echo "$(timestamp): quality_check_fastq: ERROR! trimmed fastq files not found"
+		echo "$(timestamp): quality_control: ERROR! trimmed fastq files not found"
 		exit 1
 	fi
 }
