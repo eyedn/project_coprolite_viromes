@@ -29,7 +29,7 @@ remove_human_reads() {
 			-x $hum_genome_ref \
 			-1 ${fastq_trimmed_dir}/${id}/${id}_val_1.fq.gz \
 			-2 ${fastq_trimmed_dir}/${id}/${id}_val_2.fq.gz \
-			--un-conc-gz ${fastq_clean_dir}/${id}/${id}_%.fastq.gz \
+			--un-conc-gz ${fastq_clean_dir}/${id}/${id}_R%.fastq.gz \
 			-S ${fastq_clean_dir}/${id}/${id}_SAMPLE_mapped_and_unmapped.sam
 	elif [ -f "${fastq_trimmed_dir}/${id}/${id}_trimmed.fq.gz" ]; then
 		$bowtie2 \
