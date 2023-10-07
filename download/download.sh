@@ -31,16 +31,17 @@ fastq_trimmed_dir="$reads_dir/${origin}_${sample}_fastq_trimmed"
 fastq_clean_dir="$reads_dir/${origin}_${sample}_fastq_clean"
 data_dir="$project_dir/data/read_stats"
 
+# check if download process already was complete for this sample
+if ls ${reads_dir}/${origin}_${sample}_DONE.txt 1> /dev/null 2>&1; then
+	echo "$(timestamp): download: ${reads_dir}/${origin}_${sample}_DONE.txt found."
+	return 0
+fi
+
 for id in $accession_ids; do
 	fastq_stats="$data_dir/${origin}_${sample}_${id}_read_stats.txt"
+	fastq_stats_done="$data_dir/${origin}_${sample}_${id}_read_stats_DONE.txt"
 	mkdir -p $data_dir
 	echo "${origin}_${sample}_${id}" > $fastq_stats
-
-	# check if download was already complete for this id
-	if ls $fastq_clean_dir/$id/*.txt 1> /dev/null 2>&1; then
-		echo "$(timestamp): download: pre-processing for ${id} already complete"
-		continue
-	fi
 
 	# download sra file for each accesion id
 	echo "===================================================================================================="
@@ -71,15 +72,8 @@ for id in $accession_ids; do
 	remove_human_reads "$id" "$fastq_trimmed_dir" "$fastq_clean_dir" "$fastq_stats" "$num_cores"
 
 	echo "$(timestamp): download: pre-processing complete for $id"
+	mv $fastq_stats $fastq_stats_done
 done
 
-# deleted unnecessary directories
-if [ -d "$sra_dir" ]; then
-	rm -r "$sra_dir"
-fi
-
-if [ -d "$fastq_raw_dir" ]; then
-	rm -r "$fastq_raw_dir"
-fi
-
+touch ${reads_dir}/${origin}_${sample}_DONE.txt
 echo "$(timestamp): download_and_pre_process: pre-processing complete for $sample"

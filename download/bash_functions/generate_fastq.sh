@@ -13,9 +13,9 @@ generate_fastq() {
 	local fastq_raw_dir=$3
 	local num_cores=$4
 
-	# if fastq already exists, skip to quality control
-	if ls ${fastq_raw_dir}/${id}/*.fastq.gz 1> /dev/null 2>&1; then
-		echo "$(timestamp): convert_sra_to_fastq: fastq files(s) found. skipping to quality control"
+	# check if sra to fastq conversion was already completed
+	if ls ${fastq_raw_dir}/${id}_DONE.txt 1> /dev/null 2>&1; then
+		echo "$(timestamp): convert_sra_to_fastq: ${fastq_raw_dir}/${id}_DONE.txt found"
 		return 0
 	fi
 
@@ -46,13 +46,15 @@ generate_fastq() {
 		-t "${fastq_raw_dir}/${id}_tmp"
 	rm -r ${fastq_raw_dir}/${id}_tmp
 
-	# check if fastq was created; compress fastq file(s) and delete sra file
+	# check if fastq was created
 	if ls ${fastq_raw_dir}/${id}/*.fastq 1> /dev/null 2>&1; then
 		gzip ${fastq_raw_dir}/${id}/*.fastq
 		echo "$(timestamp): convert_sra_to_fastq: fastq.gz created"
-		rm $sra_file
 	else
 		echo "$(timestamp): convert_sra_to_fastq: ERROR! trimmed fastq files not found"
 		exit 1
 	fi
+
+	# create file to indicate completion of sra to fastq conversion
+	touch ${fastq_raw_dir}/${id}_DONE.txt
 }
