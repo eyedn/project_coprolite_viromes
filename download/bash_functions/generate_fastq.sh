@@ -50,6 +50,7 @@ generate_fastq() {
 	if ls ${fastq_raw_dir}/${id}/*.fastq 1> /dev/null 2>&1; then
 		gzip ${fastq_raw_dir}/${id}/*.fastq
 		echo "$(timestamp): convert_sra_to_fastq: fastq.gz created"
+		rm $sra_file
 	else
 		echo "$(timestamp): convert_sra_to_fastq: ERROR! trimmed fastq files not found"
 		exit 1
