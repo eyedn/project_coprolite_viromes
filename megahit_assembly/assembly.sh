@@ -48,17 +48,6 @@ echo "$(timestamp): assembly: assemble all libraries associated with this sample
 echo "===================================================================================================="
 assemble_libraries "$sample" "$fastq_clean_dir" "$assembly_dir" "$assembly_extra_dir" "$num_cores"
 
-# compress fastq files and extra assembly files
-# Check if the directories exist before attempting to create compressed archives
-if [ -d "$contigs_dir/${origin}_${sample}_assembly_extra" ]; then
-	echo "$(timestamp): assembly: compressing extra files from assembly of $sample"
-	rm "$fastq_clean_dir"/*/*.gz
-	cd "$contigs_dir"
-	tar -czvf "${origin}_${sample}_assembly_extra.tar.gz" "${origin}_${sample}_assembly_extra"
-	rm -r "${origin}_${sample}_assembly_extra"
-else
-	echo "Error: Directory '${origin}_${sample}_assembly_extra' not found. Skipping compression."
-fi
-
+rm "$fastq_clean_dir"/*/*.gz
+rm -r "${origin}_${sample}_assembly_extra"
 echo "$(timestamp): assembly: assembly complete for $sample"
-cd "$HOME/project_coprolite_viromes"
