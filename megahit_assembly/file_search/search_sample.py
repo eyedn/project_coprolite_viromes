@@ -19,7 +19,10 @@ def search_sample(dir: typing.Union[str, os.PathLike]) \
     # find all trimmed fastq files
     for sub_dir in os.listdir(dir):
         sub_dir_path = os.path.join(dir, sub_dir)
-        new_single, new_paired_1, new_paired_2 = search.get_file_names(sub_dir_path)
+        if os.path.isdir(sub_dir_path):
+            new_single, new_paired_1, new_paired_2 = search.get_file_names(sub_dir_path)
+        else:
+            continue
         if new_single != "":
             all_single_data.append(new_single)
         if new_paired_1 != "":
