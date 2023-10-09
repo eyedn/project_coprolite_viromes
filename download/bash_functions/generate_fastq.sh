@@ -57,4 +57,5 @@ generate_fastq() {
 
 	# create file to indicate completion of sra to fastq conversion
 	touch ${fastq_raw_dir}/${id}_DONE.txt
+	rm -r ${sra_dir}/${id}
 }
