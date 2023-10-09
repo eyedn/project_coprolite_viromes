@@ -48,6 +48,7 @@ echo "$(timestamp): assembly: assemble all libraries associated with this sample
 echo "===================================================================================================="
 assemble_libraries "$sample" "$fastq_clean_dir" "$assembly_dir" "$assembly_extra_dir" "$num_cores"
 
-rm "$fastq_clean_dir"/*/*.gz
+rm $fastq_clean_dir/*/*.gz
+rmdir $fastq_clean_dir/*
 rm -r $assembly_extra_dir
 echo "$(timestamp): assembly: assembly complete for $sample"
