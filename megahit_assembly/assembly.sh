@@ -49,5 +49,5 @@ echo "==========================================================================
 assemble_libraries "$sample" "$fastq_clean_dir" "$assembly_dir" "$assembly_extra_dir" "$num_cores"
 
 rm "$fastq_clean_dir"/*/*.gz
-rm -r "${origin}_${sample}_assembly_extra"
+rm -r $assembly_extra_dir
 echo "$(timestamp): assembly: assembly complete for $sample"
