@@ -24,7 +24,7 @@ sample=$(head -n ${SGE_TASK_ID} ${project_dir}/samples/${origin}_samples.txt | \
 contigs_dir="${project_dir}/contigs"
 prokka_annotations="${project_dir}/genome_annotation"
 data_dir="$project_dir/data/indiv_viral_prop"
-fa_file="$contigs_dir/${origin}_${sample}_assembly/${origin}_${sample}_viral_contigs.fa.gz"
+fa_file="$contigs_dir/${origin}_${sample}_assembly/${origin}_${sample}_all_contigs.fa.gz"
 gff_file="$prokka_annotations/${origin}_${sample}_annotation_viruses/${sample}.gff.gz"
 csv_path="$data_dir/${origin}_${sample}_viral_prop.csv"
 
