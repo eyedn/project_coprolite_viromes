@@ -29,11 +29,17 @@ predict_dir="${project_dir}/phage_predictions/${origin}_${sample}_prediction"
 contigs_file="${assembly_dir}/${origin}_${sample}_all_contigs.fa"
 phage_file="${predict_dir}/predicted_phage.fa"
 
+# check if predictions already was complete for this sample
+if ls $predict_dir/${sample}_DONE.txt 1> /dev/null 2>&1; then
+	echo "$(timestamp): phage_predictions: $predict_dir/${sample}_DONE.txt found."
+	return 0
+fi
+
 # check if contigs file exists
 if ls ${contigs_file}* 1> /dev/null 2>&1; then
-	echo "$(timestamp): predict_lifestyle: contigs file found"
+	echo "$(timestamp): phage_predictions: contigs file found"
 else
-	echo "$(timestamp): predict_lifestyle: contigs file not found"
+	echo "$(timestamp): phage_predictions: contigs file not found"
 	rmdir $annot_dir
 	exit 1
 fi
@@ -74,3 +80,4 @@ else
 fi
 
 cd "$HOME/project_coprolite_viromes"
+touch $predict_dir/${sample}_DONE.txt
