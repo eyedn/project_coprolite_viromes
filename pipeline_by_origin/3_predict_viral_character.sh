@@ -15,4 +15,4 @@ num_cores=$3
 . phabox_predictions/phage_predictions.sh "$origin" "$origin_parent" "$num_cores"
 
 # annotate phages for bacterial genes
-. prokka_annotations/bacterial_annot_phamer.sh "$origin" "$origin_parent" "$num_cores"
+. prokka_annotations/bacterial_annot_phage.sh "$origin" "$origin_parent" "$num_cores"
