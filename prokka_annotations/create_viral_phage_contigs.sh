@@ -40,7 +40,7 @@ else
 fi
 
 # check if viral contigs already indentified
-if ls $viral_contigs_output 1> /dev/null 2>&1; then
+if ls ${viral_contigs_output}* 1> /dev/null 2>&1; then
 	echo "$(timestamp): create_viral_phage_contigs: viral contigs already found"
 	return 0
 fi
