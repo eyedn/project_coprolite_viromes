@@ -10,7 +10,7 @@ library(dplyr)
 library(svglite)
 
 
-# generate violin graph from temperate-to-virulent boostraping
+# generate violin graph from temperate-to-virulent bootstrapping
 create_lifestyle_voilin <- function(data, file_name, plot_dir) {
   
   melted_data <- melt(data)
@@ -30,16 +30,17 @@ create_lifestyle_voilin <- function(data, file_name, plot_dir) {
     scale_fill_manual(values = replicate(3, brewer.pal(9, "Greys")[2]),
                       guide = "none") +
     stat_summary(aes(x = cat, y = value), fun = median, geom = "point", 
-                 fill = brewer.pal(9, "Greys")[8], pch = 23, size = 5,
-                 stroke = 1, inherit.aes = FALSE) +
+                 fill = brewer.pal(9, "Greys")[8],
+                 color = brewer.pal(9, "Greys")[2],
+                 stroke = 1, pch = 23, size = 5.5, inherit.aes = FALSE) +
     annotate("text", x = 3.35, 
              y = (ci_data[[3, "ymin"]] + ci_data[[3, "ymax"]]) / 2,
-             label = "95% CI", angle = '-90', face = "bold",
+             label = "95% CI", angle = '-90',
              size = 8, color = brewer.pal(11, "RdBu")[10]) +
     annotate("segment", x = 1.575, xend = 1.575,
              y = ci_data[[1, "ymin"]], yend = ci_data[[1, "ymax"]],
              size = 2, color = brewer.pal(11, "RdBu")[10]) +
-    annotate("segment", x = 2.5, xend = 2.5,
+    annotate("segment", x = 2.6, xend = 2.6,
              y = ci_data[[2, "ymin"]], yend = ci_data[[2, "ymax"]], 
              size = 2, color = brewer.pal(11, "RdBu")[10]) +
     annotate("segment", x = 3.2, xend = 3.2,

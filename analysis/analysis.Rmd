@@ -38,9 +38,14 @@ color_range <- 10
 star_bounds <- list(list(0.1, 0.9), list(0.025, 0.975), list(0.01, 0.99),
                     list(0.001, 0.999))
 
-violin_dir <- "../project_coprolite_viromes_NOT_CODE/figures/violin"
-heat_dir <- "../project_coprolite_viromes_NOT_CODE/figures/heat"
-jitter_dir <- "../project_coprolite_viromes_NOT_CODE/figures/jitter"
+data <- "~/Documents/Research/project_coprolite_viromes_NOT_CODE/data"
+vir_phage_ec_prop_data <- paste0(data, "/vir_phage_ec_counts.csv")
+lifestyle_counts_data <- paste0(data, "/lifestyle_counts.csv")
+
+figures <- "~/Documents/Research/project_coprolite_viromes_NOT_CODE/figures"
+violin_dir <- paste0(figures, "/violin")
+heat_dir <- paste0(figures, "/heat")
+jitter_dir <- paste0(figures, "/jitter")
 
 voilin_vir_ec <- paste0("clustering_vir_ec_", k)
 voilin_lifestyle <- "lifestyle"
@@ -62,8 +67,7 @@ jitter_phage_classes <- paste0("phage_classes_", subset_top)
 First examine what the optimal k for k-means should be 
 ```{r vir ec prep}
 # read in raw counts data
-vir_ec_counts <- read.csv("~/Documents/Research/project_coprolite_viromes_NOT_CODE/data/vir_phage_ec_counts.csv",
-                          header = TRUE, row.names = 1)
+vir_ec_counts <- read.csv(vir_phage_ec_prop_data, header = TRUE, row.names = 1)
 
 # normalize observations within a sample and transform to log( CPM + 1 )
 vir_ec_norm <- normalize_data(vir_ec_counts)
@@ -74,12 +78,15 @@ vir_ec_optimal_wss <- get_optimal_clusters(vir_ec_t_mat, "wss")
 vir_ec_optimal_wss
 ```
 
-Next, perform the bootstrap and permutation k-means; produce a violin plot
-```{r vir ec vioin}
+Next, perform the bootstrap and permutation k-means
+```{r vir ec boot/perm}
 # perform kmeans with boostraping and permutations
 vir_ec_boot_res <- kmeans_bootstrap(vir_ec_t_mat, k, iterations)
 vir_ec_perm_res <- kmeans_permute(vir_ec_t_mat, k, iterations)
+```
 
+Produce a violin plot
+```{r vir ec violin}
 # show clustering results by combining bootstrap and permutation res
 vir_ec_clus_res <- get_clustering_res(vir_ec_boot_res, vir_ec_perm_res,
                                       star_bounds, iterations)
@@ -103,13 +110,17 @@ get_diff_repres_class(vir_ec_median)
 vir_ec_jitter <- create_jitter(vir_ec_median, c(1:7), jitter_vir_classes,
                                jitter_dir)
 ```
-## Lifestyle prediction 
-```{r lifestyle}
-# test lifestyle counts
-lifestyle_counts <- read.csv("../project_coprolite_viromes_NOT_CODE/data/lifestyle_counts.csv",
-                             header = TRUE, row.names = 1)
-lifestyle_boot_res <- get_median_lifestyles(lifestyle_counts, iterations)
 
+## Lifestyle prediction 
+First, bootstrap lifestyle stats
+```{r lifestyle boot}
+# test lifestyle counts
+lifestyle_counts <- read.csv(lifestyle_counts_data, header = TRUE, row.names = 1)
+lifestyle_boot_res <- get_median_lifestyles(lifestyle_counts, iterations)
+```
+
+Produce a violin plot
+```{r lifestyle violin}
 lifestyle_voilin <- create_lifestyle_voilin(lifestyle_boot_res,
                                             voilin_lifestyle, violin_dir)
 lifestyle <- melt(lifestyle_boot_res)

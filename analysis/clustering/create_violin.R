@@ -53,8 +53,8 @@ create_violin <- function(boot_data, clus_res, file_name, plot_dir) {
              y = max(c(ci[4:6, "upper"], boot_data[, 1])) + 0.025,
              size = 12, color = brewer.pal(9, "Greys")[8]) +
     stat_summary(aes(x = pair, y = prob), fun = median, geom = "point", 
-                 fill = brewer.pal(9, "Greys")[8], pch = 23, size = 6,
-                 stroke = 1, inherit.aes = FALSE) +
+                 fill = brewer.pal(9, "Greys")[8],
+                 pch = 23, size = 6, inherit.aes = FALSE) +
     scale_y_continuous(limits = c(0, 1.05),
                        breaks = c(0, 0.25, 0.5, 0.75, 1)) +
     theme_bw() +
@@ -99,8 +99,8 @@ create_violin <- function(boot_data, clus_res, file_name, plot_dir) {
              y = max(c(ci[4:6, "upper"], boot_data[, 4])) + 0.025,
              size = 12, color = brewer.pal(9, "Greys")[8]) +
     stat_summary(aes(x = pair, y = prob), fun = median, geom = "point", 
-                 fill = brewer.pal(9, "Greys")[8], pch = 23, size = 6,
-                 stroke = 1, inherit.aes = FALSE) +
+                 fill = brewer.pal(9, "Greys")[8],
+                 pch = 23, size = 6, inherit.aes = FALSE) +
     scale_y_continuous(limits = c(0, 1.05),
                        breaks = c(0, 0.25, 0.5, 0.75, 1)) +
     theme_bw() +
