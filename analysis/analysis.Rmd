@@ -86,6 +86,7 @@ vir_ec_clus_res <- get_clustering_res(vir_ec_boot_res, vir_ec_perm_res,
 vir_ec_clus_violin <- create_violin(vir_ec_boot_res, vir_ec_clus_res,
                                     voilin_vir_ec, violin_dir)
 ```
+
 Produce heatmap of most differential represented metabolic genes
 ```{r vir ec heat}
 # show differential representation results
