@@ -11,20 +11,20 @@ sample_labels <- c("ind" = "Modern, Industrial",
                    "pre" = "Modern, Pre-Industrial")
 
 # label sample categories for facet graph
-origin_labels <- c("ind.DNK" = "Denmark",
-                   "ind.ESP" = "Spain",
-                   "ind.USA" = "USA",
-                   "pre.FJI" = "Fiji",
-                   "pre.MDG" = "Madagascar",
-                   "pre.MEX" = "Mexico",
-                   "pre.PER" = "Peru",
-                   "pre.TZA" = "Tanzania",
-                   "pal.AWC" = "AWC (USA)",
-                   "pal.BEL" = "Beligum",
-                   "pal.BMS" = "BMS (US)",
-                   "pal.ENG" = "England",
-                   "pal.ZAF" = "South Africa",
-                   "pal.ZAP" = "Zape (MEX)")
+origin_labels <- c("ind.DNK" = "Denmark (n = 109)",
+                   "ind.ESP" = "Spain (n = 140)",
+                   "ind.USA" = "USA (n = 169)",
+                   "pre.FJI" = "Fiji (n = 174)",
+                   "pre.MDG" = "Madagascar (n = 112)",
+                   "pre.MEX" = "Mexico (n = 22)",
+                   "pre.PER" = "Peru (n = 36)",
+                   "pre.TZA" = "Tanzania (n = 27)",
+                   "pal.AWC" = "AWC (USA) (n = 3)",
+                   "pal.BEL" = "Beligum (n = 1)",
+                   "pal.BMS" = "BMS (USA) (n = 2)",
+                   "pal.ENG" = "England (n = 1)",
+                   "pal.ZAF" = "South Africa (n = 3)",
+                   "pal.ZAP" = "Zape (MEX) (n = 3)")
 
 # labels for heatmap and barplots
 ind_label <- c("ind.DNK", "ind.ESP", "ind.USA")

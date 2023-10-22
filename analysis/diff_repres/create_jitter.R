@@ -10,6 +10,7 @@ library(reshape2)
 
 # create a beeswarms plot of paired-cluserting tendencies
 create_jitter <- function(data, classes_to_use, file_name, plot_dir) {
+  
   ec_classes <- c("Oxidoreductases", "Transferases", "Hydrolases", "Lyases",
                   "Isomerases", "Ligases", "Translocases")
   ec_classes <- ec_classes[classes_to_use]
@@ -30,12 +31,41 @@ create_jitter <- function(data, classes_to_use, file_name, plot_dir) {
   melted_data$ec <- substr(melted_data$ec, 0, 1)
   melted_data$ec <- factor(melted_data$ec)
     
+  star_height = max(melted_data$value)
   jitter <- ggplot(melted_data, aes(x = ec, y = value, fill = cat)) +
-    geom_point(color = "black", pch = 21, size = 5, 
+    geom_point(color = "black", pch = 21, size = 4, 
                position = position_jitterdodge(jitter.width = 0.55,
                                                dodge.width = 0.85)) +
     scale_fill_manual(labels = c("Industrial", "Pre-Industrial", "Paleosample"),
                       values = brewer.pal(9, "Greys")[c(3,5,8)]) +
+    # annotate("text", label = "**", x = 1, y = star_height + 1,
+    #          size = 12, color = brewer.pal(11, "RdBu")[8]) +
+    # annotate("text", label = "**", x = 1, y = star_height + 3,
+    #          size = 12, color = brewer.pal(11, "RdBu")[3]) +
+    # # annotate("text", label = "**", x = 2, y = star_height + 1,
+    # #          size = 12, color = brewer.pal(11, "RdBu")[8]) +
+    # annotate("text", label = "**", x = 2, y = star_height + 3,
+    #          size = 12, color = brewer.pal(11, "RdBu")[3]) +
+    # annotate("text", label = "**", x = 3, y = star_height + 1,
+    #          size = 12, color = brewer.pal(11, "RdBu")[8]) +
+    # annotate("text", label = "**", x = 3, y = star_height + 3,
+    #          size = 12, color = brewer.pal(11, "RdBu")[3]) +
+    # annotate("text", label = "**", x = 4, y = star_height + 1,
+    #          size = 12, color = brewer.pal(11, "RdBu")[8]) +
+    # annotate("text", label = "**", x = 4, y = star_height + 3,
+    #          size = 12, color = brewer.pal(11, "RdBu")[3]) +
+    # annotate("text", label = "**", x = 5, y = star_height + 1,
+    #          size = 12, color = brewer.pal(11, "RdBu")[8]) +
+    # # annotate("text", label = "**", x = 5, y = star_height + 3,
+    # #          size = 12, color = brewer.pal(11, "RdBu")[3]) +
+    # annotate("text", label = "**", x = 6, y = star_height + 1,
+    #          size = 12, color = brewer.pal(11, "RdBu")[8]) +
+    # annotate("text", label = "**", x = 6, y = star_height + 3,
+    #          size = 12, color = brewer.pal(11, "RdBu")[3]) +
+    # annotate("text", label = "**", x = 7, y = star_height + 1,
+    #          size = 12, color = brewer.pal(11, "RdBu")[8]) +
+    # annotate("text", label = "**", x = 7, y = star_height + 3,
+    #          size = 12, color = brewer.pal(11, "RdBu")[3]) +
     labs(fill = "Categories", y = "Scaled log(CPM + 1)",
          x = "Enzyme Class",
          title = "Enzyme Classes of Most Differentially Represented Genes") +
@@ -62,6 +92,7 @@ create_jitter <- function(data, classes_to_use, file_name, plot_dir) {
     )
   
   # save image to svg file
+  file_name <- append_time_to_filename(file_name)
   ggsave(filename = paste0(plot_dir, "/", file_name, ".svg"),
          plot = jitter,
          height = 8,

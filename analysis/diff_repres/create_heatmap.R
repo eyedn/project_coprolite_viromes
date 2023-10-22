@@ -6,10 +6,13 @@
 library(gplots)
 library(svglite)
 library(RColorBrewer)
+library(dendextend)
+
 
 # generate a heatmap based on differential expression
 create_heatmap <- function(data, kruskal_res, color_range, max_items, 
                            file_name, plot_dir) {
+  
   sig_data <- data[, rownames(kruskal_res)[1:max_items]]
   
   sig_data_concat <- matrix(ncol = ncol(sig_data), nrow = length(cat_labels))
@@ -29,9 +32,11 @@ create_heatmap <- function(data, kruskal_res, color_range, max_items,
     sig_data_concat[cat_labels[i], ] <- cat_stats
   }
   
-  # define row dendrogram order
-  row_hc <- hclust(dist(sig_data_concat))
-  row_dend <- as.dendrogram(row_hc)
+  # define dendrogram order
+  dend_width <- 15
+  hc <- hclust(dist(sig_data_concat))
+  dend_raw <- as.dendrogram(hc)
+  dend <- set(dend_raw, "branches_lwd", dend_width)
   weights <- c()
   groups <- rownames(sig_data_concat)
   for (i in seq_len(length(groups))) {
@@ -47,7 +52,11 @@ create_heatmap <- function(data, kruskal_res, color_range, max_items,
       weights <- c(weights, 0)
     }
   }
-  reordered_dend <- reorder(row_dend, wts = weights, agglo.FUN = mean)
+  reordered_dend <- reorder(dend, wts = weights, agglo.FUN = mean)
+  
+  hc_2 <- hclust(dist(t(sig_data_concat)))
+  dend_raw_2 <- as.dendrogram(hc_2)
+  dend_2 <- set(dend_raw_2, "branches_lwd", dend_width)
   
   # define column colors and labels
   group_col_set <- rev(brewer.pal(9, "Greys")[c(3,5,8)])
@@ -87,28 +96,40 @@ create_heatmap <- function(data, kruskal_res, color_range, max_items,
   }
   
   # save plot to svg file
+  file_name <- append_time_to_filename(file_name)
   svglite(filename = paste0(plot_dir, "/", file_name, ".svg"),
-          width = 25,
-          height = 35)
+          width = 35,
+          height = 45)
+  
   heatmap.2(t(sig_data_concat),
             trace = "none",
             Colv = reordered_dend, 
+            Rowv = dend_2,
             col = rev(brewer.pal(11, "RdBu")),
-            key.xlab = "scaled log(CPM + 1)",
-            key.title = "Median EC Representation",
-            ylab = "EC Enzymes",
-            xlab = "Sample Groups",
-            srtCol = 45,
-            adjCol = c(1, 0.5),
+            srtCol = 325,
+            adjCol = c(0, 1),
             ColSideColors = group_col,
             labCol = col_labels,
             RowSideColors = ec_col,
-            main = "Differentially Represented Viral Metabolic Genes across Sample Groups",
-            margins = c(15, 10),
-            cexRow = 2,
-            cexCol = 3,
-            keysize = 1, 
-            key.par = list(cex = 1.5),
-            density.info = "none")
+            margins = c(25, 20),
+            cexRow = 3,
+            cexCol = 3.5,
+            lhei = c(0.8, 3),
+            lwid = c(0.8, 3),
+            key = FALSE,
+            key.xlab = "scaled log(CPM + 1)",
+            key.title = "Median EC Representation",
+            keysize = 2,
+            key.par = list(cex = 3),
+            density.info = "none"
+  )
+  
+  # legend("bottomleft",
+  #        legend = c("Oxidoreductases", "Transferases", "Hydrolases", "Lyases",
+  #                   "Isomerases", "Ligases", "Translocases"),
+  #        fill = ec_col_set,
+  #        cex = 3.5,
+  #        bty = "n")
+  
   dev.off()
 }

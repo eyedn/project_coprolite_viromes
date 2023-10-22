@@ -1,0 +1,116 @@
+---
+title: "analysis of viromes"
+author: "Aydin Karatas"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(root.dir = "~/Documents/Research/project_coprolite_viromes/analysis/")
+```
+
+## Source Functions
+
+```{r source functions, echo=FALSE}
+base_dir <- "~/Documents/Research/project_coprolite_viromes/analysis/"
+
+# function to source R files from a specified directory
+source_files_from_dir <- function(directory) {
+  full_path <- file.path(base_dir, directory)
+  functions_list <- list.files(path = full_path, pattern = "*.R", full.names = TRUE)
+  sapply(functions_list, source)
+}
+
+# fource functions from different directories
+source_files_from_dir("general_R_functions")
+source_files_from_dir("clustering")
+source_files_from_dir("diff_repres")
+source_files_from_dir("predictions")
+```
+
+## Define hyperparameters and global variables
+```{r pars and vars}
+set.seed(seed = 123)
+
+k <- 4
+iterations <- 1000
+subset_top <- 100
+color_range <- 10
+star_bounds <- list(list(0.1, 0.9), list(0.025, 0.975), list(0.01, 0.99),
+                    list(0.001, 0.999))
+
+violin_dir <- "../project_coprolite_viromes_NOT_CODE/figures/violin"
+heat_dir <- "../project_coprolite_viromes_NOT_CODE/figures/heat"
+jitter_dir <- "../project_coprolite_viromes_NOT_CODE/figures/jitter"
+
+voilin_vir_ec <- paste0("clustering_vir_ec_", k)
+voilin_lifestyle <- "lifestyle"
+voilin_phage_ec <- paste0("clustering_phage_ec_", k)
+voilin_phage_fam <- paste0("clustering_phage_fam_", k)
+voilin_phage_host <- paste0("clustering_phage_host_", k)
+
+heat_vir_ec <- paste0("diff_repres_vir_ec_", subset_top)
+heat_vir_ec_no_key <- paste0("diff_repres_vir_ec_no_key", subset_top)
+heat_phage_ec <- paste0("diff_repres_phage_ec_", subset_top)
+heat_phage_fam <- paste0("diff_repres_phage_fam_", subset_top)
+heat_phage_host <- paste0("diff_repres_phage_host_", subset_top)
+
+jitter_vir_classes <- paste0("vir_classes_", subset_top)
+jitter_phage_classes <- paste0("phage_classes_", subset_top)
+```
+
+## Analysis of viral metabolic ec counts
+First examine what the optimal k for k-means should be 
+```{r vir ec prep}
+# read in raw counts data
+vir_ec_counts <- read.csv("~/Documents/Research/project_coprolite_viromes_NOT_CODE/data/vir_phage_ec_counts.csv",
+                          header = TRUE, row.names = 1)
+
+# normalize observations within a sample and transform to log( CPM + 1 )
+vir_ec_norm <- normalize_data(vir_ec_counts)
+vir_ec_t_mat <- scale(t(vir_ec_norm))
+
+# find optimal number of clusters with a wss plot
+vir_ec_optimal_wss <- get_optimal_clusters(vir_ec_t_mat, "wss")
+vir_ec_optimal_wss
+```
+
+Next, perform the bootstrap and permutation k-means; produce a violin plot
+```{r vir ec vioin}
+# perform kmeans with boostraping and permutations
+vir_ec_boot_res <- kmeans_bootstrap(vir_ec_t_mat, k, iterations)
+vir_ec_perm_res <- kmeans_permute(vir_ec_t_mat, k, iterations)
+
+# show clustering results by combining bootstrap and permutation res
+vir_ec_clus_res <- get_clustering_res(vir_ec_boot_res, vir_ec_perm_res,
+                                      star_bounds, iterations)
+vir_ec_clus_violin <- create_violin(vir_ec_boot_res, vir_ec_clus_res,
+                                    voilin_vir_ec, violin_dir)
+```
+Produce heatmap of most differential represented metabolic genes
+```{r vir ec heat}
+# show differential representation results
+vir_ec_diff_repres <- get_diff_repres_ec(vir_ec_t_mat)
+vir_ec_heatmap <- create_heatmap(vir_ec_t_mat, vir_ec_diff_repres, color_range,
+                                 subset_top, heat_vir_ec, heat_dir)
+```
+
+Produce jitter plot of enzyme categories
+```{r vir ec ezy}
+# show ec proportions
+vir_ec_median <- get_cat_medians(vir_ec_t_mat[, rownames(vir_ec_diff_repres)[1:subset_top]])
+get_diff_repres_class(vir_ec_median)
+vir_ec_jitter <- create_jitter(vir_ec_median, c(1:7), jitter_vir_classes,
+                               jitter_dir)
+```
+## Lifestyle prediction 
+```{r lifestyle}
+# test lifestyle counts
+lifestyle_counts <- read.csv("../project_coprolite_viromes_NOT_CODE/data/lifestyle_counts.csv",
+                             header = TRUE, row.names = 1)
+lifestyle_boot_res <- get_median_lifestyles(lifestyle_counts, iterations)
+
+lifestyle_voilin <- create_lifestyle_voilin(lifestyle_boot_res,
+                                            voilin_lifestyle, violin_dir)
+lifestyle <- melt(lifestyle_boot_res)
+kruskal.test(lifestyle$value, lifestyle$Var2)
+```

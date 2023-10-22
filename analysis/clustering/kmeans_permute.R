@@ -4,11 +4,16 @@
 #   permute_kmeans.R
 ###############################################################################
 library(stats)
+library(progress)
 
 
 # run kmeans many times on subsets of the data to find concensus clustering
 kmeans_permute <- function(data_t_matrix, k, num_iter) {
+  
   permute_stats <- matrix(nrow = num_iter, ncol = 6)
+  
+  # initialize progress bar
+  pb <- progress_bar$new(format = "Time: :elapsedfull [:bar] Iteration :current/:total (:percent)", total = num_iter)
   
   # perform kmeans for each permutation
   for (i in seq_len(num_iter)) {
@@ -25,8 +30,9 @@ kmeans_permute <- function(data_t_matrix, k, num_iter) {
     # calculate category, pair-wise clustering probabilities
     permute_stats[i, ] <- get_pair_wise_clustering_probs(cluster_assignments,
                                                        data_t_matrix_permute, k)
-
-    print(paste0(Sys.time(), " | iterations complete:", i))
+  
+    # update progress bar
+    pb$tick()
   }
 
   return(permute_stats)
