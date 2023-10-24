@@ -18,11 +18,11 @@ seqtk="$software/seqtk/seqtk"
 
 bowtie2="$software/bowtie2-2.5.1-linux-x86_64/bowtie2"
 
-hmmsearch="$software/hmmer-3.3.2/src/hmmsearch"
+hmmsearch="$software/hmmer-3.4/src/hmmsearch"
 
-hmmbuild="$software/hmmer-3.3.2/src/hmmbuild"
+hmmbuild="$software/hmmer-3.4/src/hmmbuild"
 
-esl_reformat="$software/hmmer-3.3.2/easel/esl_reformat"
+esl_reformat="$software/hmmer-3.4/easel/miniapps/esl_reformat"
 
 megahit="$software/MEGAHIT-1.2.9-Linux-x86_64-static/bin/megahit"
 
