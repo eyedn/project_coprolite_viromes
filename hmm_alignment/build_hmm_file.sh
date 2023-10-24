@@ -32,6 +32,7 @@ hmm_file="${sample_alignment}/${origin}_${sample}.hmm"
 echo "===================================================================================================="
 echo "$(timestamp): build_hmm_file: format files $origin; $sample"
 echo "===================================================================================================="
+mkdir -p $sample_alignment
 get_sto_file $aa_file $sto_file
 
 # use sto file to create a hmm file (multiple sequence alignment)
