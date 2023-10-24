@@ -22,7 +22,7 @@ hmmsearch="$software/hmmer-3.4/src/hmmsearch"
 
 hmmbuild="$software/hmmer-3.4/src/hmmbuild"
 
-esl_reformat="$software/hmmer-3.4/easel/miniapps/esl_reformat"
+esl_reformat="$software/hmmer-3.4/easel/miniapps/esl-reformat"
 
 megahit="$software/MEGAHIT-1.2.9-Linux-x86_64-static/bin/megahit"
 
