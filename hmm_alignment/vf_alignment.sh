@@ -22,9 +22,8 @@ label="phage"
 # define directories and files
 alignment_dir="${project_dir}/alignment"
 sample_alignment="${alignment_dir}/${origin}_${sample}_alignment"
-references_dir="${project_dir}/references"
 hmm_file="${sample_alignment}/${origin}_${sample}.hmm"
-db_file="${references_dir}/VFDB_setB_pro.fas" 
+db_file="${ref_db}/VFDB_setB_pro.fas" 
 
 # align to database
 echo "===================================================================================================="
