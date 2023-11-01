@@ -44,6 +44,7 @@ align_w_db() {
     fi
 
     # align hmm_file to database
+	mkdir -p $sample_align_dir
     $hmmsearch \
         -o $results_out \
         --tblout $table_out \
