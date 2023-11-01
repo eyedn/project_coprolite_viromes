@@ -17,7 +17,7 @@ get_hmm_file() {
 	fi
 
     # check if sto file exists
-    if ls ${sto_file}.gz 1> /dev/null 2>&1; then
+    if ls $sto_file 1> /dev/null 2>&1; then
 		echo "$(timestamp): get_hmm_file: sto file found"
     else
         echo "$(timestamp): get_hmm_file: ERROR! sto file not found"
