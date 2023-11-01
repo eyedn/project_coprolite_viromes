@@ -7,6 +7,9 @@
 cd $HOME/project_coprolite_viromes
 for FILE in hmm_alignment/bash_functions/* ; do source $FILE ; done
 for FILE in general_bash_functions/* ; do source $FILE ; done
+source /u/local/Modules/default/init/modules.sh
+module load anaconda3
+conda activate msa
 
 
 # define inputs variables
@@ -24,7 +27,8 @@ alignment_dir="${project_dir}/alignment"
 sample_alignment="${alignment_dir}/${origin}_${sample}_alignment"
 annotations_dir="${project_dir}/genome_annotation"
 annot_dir="${annotations_dir}/${origin}_${sample}_annotation_${label}"
-aa_file="${annot_dir}/${sample}.faa"
+predicted_orfs="${annot_dir}/${sample}.faa"
+aligned_orfs="${sample_alignment}/${origin}_${sample}_aligned.fasta"
 sto_file="${sample_alignment}/${origin}_${sample}.sto"
 hmm_file="${sample_alignment}/${origin}_${sample}.hmm"
 
@@ -33,7 +37,7 @@ echo "==========================================================================
 echo "$(timestamp): build_hmm_file: format files $origin; $sample"
 echo "===================================================================================================="
 mkdir -p $sample_alignment
-get_sto_file $aa_file $sto_file
+get_sto_file $predicted_orfs $aligned_orfs $sto_file
 
 # use sto file to create a hmm file (multiple sequence alignment)
 echo "===================================================================================================="
