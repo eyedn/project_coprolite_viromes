@@ -25,7 +25,7 @@ alignment_dir="${project_dir}/alignment"
 sample_alignment="${alignment_dir}/${origin}_${sample}_alignment"
 sample_alignment_output="${alignment_dir}/${origin}_${sample}_cazy"
 hmm_file="${sample_alignment}/${origin}_${sample}.hmm"
-db_file="${ref_db}/CAZyDB.08062022.fa" 
+db_file="${ref_db}/dbCAN-HMMdb-V12.txt" 
 
 # align to database
 echo "===================================================================================================="

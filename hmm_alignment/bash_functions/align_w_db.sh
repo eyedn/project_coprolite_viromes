@@ -8,7 +8,7 @@
 
 align_w_db() {
     sample=$1
-    hmm_file=$2
+    orfs_file=$2
     db_file=$3
     sample_align_dir=$4
 	num_cores=$5
@@ -30,10 +30,10 @@ align_w_db() {
 	fi
 
     # check both hmm and db files exist
-    if ls $hmm_file 1> /dev/null 2>&1; then
-		echo "$(timestamp): align_w_db: hmm_file found"
+    if ls $orfs_file 1> /dev/null 2>&1; then
+		echo "$(timestamp): align_w_db: orfs_file found"
 	else
-        echo "$(timestamp): align_w_db: ERROR! hmm_file not found"
+        echo "$(timestamp): align_w_db: ERROR! orfs_file not found"
         exit 1
     fi
     if ls $db_file 1> /dev/null 2>&1; then
@@ -43,15 +43,15 @@ align_w_db() {
         exit 1
     fi
 
-    # align hmm_file to database
+    # align orfs_file to database
 	mkdir -p $sample_align_dir
     $hmmsearch \
         -o $results_out \
         --tblout $table_out \
         --cpu $num_cores \
         --incE $incE \
-        $hmm_file \
-        $db_file
+		$db_file \
+        $orfs_file 
 
     # check that output files were created and are not empty
 	if ls $results_out 1> /dev/null 2>&1; then

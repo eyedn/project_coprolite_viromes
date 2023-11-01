@@ -25,7 +25,7 @@ alignment_dir="${project_dir}/alignment"
 sample_alignment="${alignment_dir}/${origin}_${sample}_alignment"
 sample_alignment_output="${alignment_dir}/${origin}_${sample}_vf"
 hmm_file="${sample_alignment}/${origin}_${sample}.hmm"
-db_file="${ref_db}/VFDB_setB_pro.fas" 
+db_file="${ref_db}/VFDB_setB_pro.hmm" 
 
 # align to database
 echo "===================================================================================================="

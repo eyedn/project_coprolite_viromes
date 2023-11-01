@@ -13,9 +13,6 @@ num_cores=$3
 vf_incE="1e-3"
 cazy_incE="1e-5"
 
-# build hmm files for alignment
-. hmm_alignment/build_hmm_file.sh "$origin" "$origin_parent" "$num_cores"
-
 # align phages to vfdb
 . hmm_alignment/vf_alignment.sh "$origin" "$origin_parent" "$num_cores" "$vf_incE"
 
