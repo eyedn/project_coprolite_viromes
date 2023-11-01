@@ -22,7 +22,8 @@ label="phage"
 
 # define directories and files
 alignment_dir="${project_dir}/alignment"
-sample_alignment="${alignment_dir}/${origin}_${sample}_alignment_cazy"
+sample_alignment="${alignment_dir}/${origin}_${sample}_alignment"
+sample_alignment_output="${alignment_dir}/${origin}_${sample}_cazy"
 hmm_file="${sample_alignment}/${origin}_${sample}.hmm"
 db_file="${ref_db}/CAZyDB.08062022.fa" 
 
@@ -30,4 +31,4 @@ db_file="${ref_db}/CAZyDB.08062022.fa"
 echo "===================================================================================================="
 echo "$(timestamp): cazy_alignment: format files $origin; $sample"
 echo "===================================================================================================="
-align_w_db $sample $hmm_file $db_file $sample_alignment $num_cores $incE
+align_w_db $sample $hmm_file $db_file $sample_alignment_output $num_cores $incE
