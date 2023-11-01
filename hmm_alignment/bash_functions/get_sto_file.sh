@@ -36,7 +36,7 @@ get_sto_file() {
 
     # compress fasta files
     gzip $predicted_orfs
-	gzip $aligned_orfsmaf	
+	gzip $aligned_orfs	
 
     # check that sto file was created and is not empty
 	if ls $sto_file 1> /dev/null 2>&1; then
