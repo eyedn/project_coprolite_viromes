@@ -13,12 +13,12 @@ for FILE in general_bash_functions/* ; do source $FILE ; done
 origin=$1
 project_dir=$2
 num_cores=$3
-incE=$4
 
 # define sample variables
 sample=$(head -n ${SGE_TASK_ID} ${project_dir}/samples/${origin}_samples.txt | \
 		tail -n 1 | cut -d ' ' -f 1)
 label="phage"
+incE="1e-5"
 
 # define directories and files
 alignment_dir="${project_dir}/alignment"
