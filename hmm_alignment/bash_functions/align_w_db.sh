@@ -52,7 +52,7 @@ align_w_db() {
         -o $results_out \
         --tblout $table_out \
         --cpu $num_cores \
-        --incE $incE \
+        --incE 1e-5 \
 		$db_file \
         $orfs_file 
 	gzip $orfs_file

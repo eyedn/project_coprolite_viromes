@@ -18,7 +18,6 @@ num_cores=$3
 sample=$(head -n ${SGE_TASK_ID} ${project_dir}/samples/${origin}_samples.txt | \
 		tail -n 1 | cut -d ' ' -f 1)
 label="phage"
-incE="1e-3"
 
 # define directories and files
 alignment_dir="${project_dir}/alignment"
@@ -31,4 +30,4 @@ db_file="${ref_db}/VFDB_setB_pro.hmm
 echo "===================================================================================================="
 echo "$(timestamp): vf_alignment: format files $origin; $sample"
 echo "===================================================================================================="
-align_w_db $sample $hmm_file $db_file $sample_alignment_output $num_cores $incE
+align_w_db $sample $hmm_file $db_file $sample_alignment_output $num_cores
