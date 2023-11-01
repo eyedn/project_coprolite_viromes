@@ -12,7 +12,6 @@ align_w_db() {
     db_file=$3
     sample_align_dir=$4
 	num_cores=$5
-	incE=$6
 
     # define output variables
     results_out="${sample_align_dir}/results.txt"
