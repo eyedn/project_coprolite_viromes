@@ -13,6 +13,7 @@ for FILE in general_bash_functions/* ; do source $FILE ; done
 origin=$1
 project_dir=$2
 num_cores=$3
+incE=$4
 
 # define sample variables
 sample=$(head -n ${SGE_TASK_ID} ${project_dir}/samples/${origin}_samples.txt | \
@@ -29,4 +30,4 @@ db_file="${ref_db}/VFDB_setB_pro.fas"
 echo "===================================================================================================="
 echo "$(timestamp): vf_alignment: format files $origin; $sample"
 echo "===================================================================================================="
-align_w_db $sample $hmm_file $db_file $sample_alignment $num_cores
+align_w_db $sample $hmm_file $db_file $sample_alignment $num_cores $incE
