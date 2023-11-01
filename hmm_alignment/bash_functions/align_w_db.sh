@@ -32,6 +32,9 @@ align_w_db() {
     # check both hmm and db files exist
     if ls $orfs_file 1> /dev/null 2>&1; then
 		echo "$(timestamp): align_w_db: orfs_file found"
+	elif ls ${orfs_file}.gz /dev/null 2>&1; then
+		echo "$(timestamp): align_w_db: decompressing orfs_file"
+		gunzip ${orfs_file}.gz
 	else
         echo "$(timestamp): align_w_db: ERROR! orfs_file not found"
         exit 1
@@ -52,6 +55,7 @@ align_w_db() {
         --incE $incE \
 		$db_file \
         $orfs_file 
+	gzip $orfs_file
 
     # check that output files were created and are not empty
 	if ls $results_out 1> /dev/null 2>&1; then

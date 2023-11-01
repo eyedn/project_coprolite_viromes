@@ -22,10 +22,10 @@ incE="1e-3"
 
 # define directories and files
 alignment_dir="${project_dir}/alignment"
-sample_alignment="${alignment_dir}/${origin}_${sample}_alignment"
+annotations_dir="${project_dir}/genome_annotation/${origin}_${sample}_annotation_${label}"
 sample_alignment_output="${alignment_dir}/${origin}_${sample}_vf"
-hmm_file="${sample_alignment}/${origin}_${sample}.hmm"
-db_file="${ref_db}/VFDB_setB_pro.hmm" 
+orfs_file="${annotations_dir}/${sample}.faa"
+db_file="${ref_db}/VFDB_setB_pro.hmm
 
 # align to database
 echo "===================================================================================================="

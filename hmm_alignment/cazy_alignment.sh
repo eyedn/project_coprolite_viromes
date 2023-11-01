@@ -22,13 +22,13 @@ incE="1e-5"
 
 # define directories and files
 alignment_dir="${project_dir}/alignment"
-sample_alignment="${alignment_dir}/${origin}_${sample}_alignment"
+annotations_dir="${project_dir}/genome_annotation/${origin}_${sample}_annotation_${label}"
 sample_alignment_output="${alignment_dir}/${origin}_${sample}_cazy"
-hmm_file="${sample_alignment}/${origin}_${sample}.hmm"
+orfs_file="${annotations_dir}/${sample}.faa"
 db_file="${ref_db}/dbCAN-HMMdb-V12.txt" 
 
 # align to database
 echo "===================================================================================================="
 echo "$(timestamp): cazy_alignment: format files $origin; $sample"
 echo "===================================================================================================="
-align_w_db $sample $hmm_file $db_file $sample_alignment_output $num_cores $incE
+align_w_db $sample $orfs_file $db_file $sample_alignment_output $num_cores $incE
