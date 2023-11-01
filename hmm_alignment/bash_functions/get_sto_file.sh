@@ -7,8 +7,9 @@
 
 
 get_sto_file() {
-    aa_file=$1
-    sto_file=$2
+    predicted_orfs=$1
+	aligned_orfs=$2
+    sto_file=$3
 
     # check if sto file was aleady created
     if ls $sto_file 1> /dev/null 2>&1; then
@@ -17,21 +18,25 @@ get_sto_file() {
 	fi
 
     # check if amino acid fasta exists
-    if ls ${aa_file}.gz 1> /dev/null 2>&1; then
+    if ls ${predicted_orfs}.gz 1> /dev/null 2>&1; then
 		echo "$(timestamp): get_sto_file: decompressing amino acid fasta file"
-		gunzip ${aa_file}.gz
-	elif ls ${aa_file} 1> /dev/null 2>&1; then
+		gunzip ${predicted_orfs}.gz
+	elif ls ${predicted_orfs} 1> /dev/null 2>&1; then
         echo "$(timestamp): get_sto_file: amino acid fasta file already decompressed"
     else
         echo "$(timestamp): get_sto_file: ERROR! amino acid fasta file not found"
         exit 1
     fi
 
-    # reformat fastsa to sto
-    $esl_reformat stockholm $aa_file > $sto_file
+	# align fasta sequences
+	mafft --auto $predicted_orfs > $aligned_orfs
 
-    # compress fasta file
-    gzip $aa_file
+    # reformat fasta to sto
+    $esl_reformat stockholm $aligned_orfs > $sto_file
+
+    # compress fasta files
+    gzip $predicted_orfs
+	gzip $aligned_orfsmaf	
 
     # check that sto file was created and is not empty
 	if ls $sto_file 1> /dev/null 2>&1; then
