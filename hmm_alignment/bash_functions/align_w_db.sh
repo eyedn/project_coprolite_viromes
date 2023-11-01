@@ -16,6 +16,8 @@ align_w_db() {
     # define output variables
     results_out="${sample_align_dir}/results.txt"
     table_out="${sample_align_dir}/table.txt"
+	table_out_signif="${sample_align_dir}/table_signif.txt"
+	theshold="1e-5"
 
     # check if outputs already created
     if ls $results_out 1> /dev/null 2>&1; then
@@ -46,10 +48,9 @@ align_w_db() {
         -o $results_out \
         --tblout $table_out \
         --cpu $num_cores \
-        --incE 1e-5 \
+        --incE $theshold \
         $hmm_file \
         $db_file
-
 
     # check that output files were created and are not empty
 	if ls $results_out 1> /dev/null 2>&1; then
