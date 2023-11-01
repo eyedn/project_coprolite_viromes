@@ -30,4 +30,4 @@ db_file="${ref_db}/VFDB_setB_pro.hmm"
 echo "===================================================================================================="
 echo "$(timestamp): vf_alignment: format files $origin; $sample"
 echo "===================================================================================================="
-align_w_db $sample $hmm_file $db_file $sample_alignment_output $num_cores
+align_w_db $sample $orfs_file $db_file $sample_alignment_output $num_cores
