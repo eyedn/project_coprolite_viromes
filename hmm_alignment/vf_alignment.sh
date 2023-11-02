@@ -24,7 +24,7 @@ alignment_dir="${project_dir}/alignment"
 annotations_dir="${project_dir}/genome_annotation/${origin}_${sample}_annotation_${label}"
 sample_alignment_output="${alignment_dir}/${origin}_${sample}_vf"
 orfs_file="${annotations_dir}/${sample}.faa"
-db_file="${ref_db}/VFDB_setB_pro.hmm"
+db_file="${ref_db}/VFDB_db_profiles.txt"
 
 # align to database
 echo "===================================================================================================="
