@@ -17,7 +17,7 @@ mafft --auto --thread $cores $FAS > $ALN
 # Run hmmbuild on aligned fasta file to produce profile
 software="$HOME/software"
 hmmbuild="$software/hmmer-3.4/src/hmmbuild"
-ALN=$(echo $FILE | sed 's/.aln/.hmm/')
+HMM=$(echo $ALN | sed 's/.aln/.hmm/')
 $hmmbuild --amino --cpu $cores $HMM $ALN
 
 # check if hmm file was created and has content
