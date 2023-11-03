@@ -40,7 +40,7 @@ def print_cluster_files(clusters: typing.Dict[str, typing.List[Protein]],
         paths.append(file)
         with open(file, "w") as f:
             for protein in clusters[clus]:
-                f.write(protein.label)
+                f.write(f"{protein.label}\n")
                 f.write(f"{protein.sequence}\n")
 
     return paths
