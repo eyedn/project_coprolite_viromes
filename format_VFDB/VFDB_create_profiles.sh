@@ -8,7 +8,7 @@ conda activate msa
 cores=$1
 
 # input fasta
-FAS=$(head -n ${SGE_TASK_ID} $SCRATCH/VFDB_clusters/clusters.txt | tail -n 1)
+FAS=$(head -n ${SGE_TASK_ID} $SCRATCH/VFDB_cluster_profiles/clusters.txt | tail -n 1)
 
 # run mafft on fasta file
 ALN=$(echo $FAS | sed 's/.fasta/.aln/')

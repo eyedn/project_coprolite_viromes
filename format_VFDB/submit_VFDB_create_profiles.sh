@@ -2,7 +2,7 @@
 
 
 cores=2
-tot_clusters=$(wc -l < $SCRATCH/VFDB_clusters/clusters.txt)
+tot_clusters=$(wc -l < $SCRATCH/VFDB_cluster_profiles/clusters.txt)
 qsub \
     -cwd \
     -N "create_profiles" \
