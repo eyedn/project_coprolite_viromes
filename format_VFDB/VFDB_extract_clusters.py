@@ -52,19 +52,10 @@ def write_cluster_file_list(cluster_files, list_file):
 
 
 if __name__ == "__main__":
-    fasta_file = "../project_coprolite_viromes_NOT_CODE/references/VFDB_setB_pro.fas"
-    output_dir = "test"
-    cluster_file_list = "test/clusters.txt"
-    my_protein_clusters = get_clusters_dict(fasta_file)
-    my_cluster_file_paths = print_cluster_files(my_protein_clusters, output_dir)
-    write_cluster_file_list(my_cluster_file_paths, cluster_file_list)
-    # if len(argv) != 4:
-    #     print("Usage: python extract_clusters.py <fasta_file> <output_directory> <cluster_file_list>")
-    # else:
-    #     # fasta_file, output_dir, cluster_file_list = argv[1], argv[2], argv[3]
-    #     fasta_file = "../project_coprolite_viromes_NOT_CODE/references/VFDB_setB_pro.fas"
-    #     output_dir = "test"
-    #     cluster_file_list = "test/clusters.txt"
-    #     my_protein_clusters = get_clusters_dict(fasta_file)
-    #     my_cluster_file_paths = print_cluster_files(my_protein_clusters, output_dir)
-    #     write_cluster_file_list(my_cluster_file_paths, cluster_file_list)
+    if len(argv) != 4:
+        print("Usage: python extract_clusters.py <fasta_file> <output_directory> <cluster_file_list>")
+    else:
+        fasta_file, output_dir, cluster_file_list = argv[1], argv[2], argv[3]
+        my_protein_clusters = get_clusters_dict(fasta_file)
+        my_cluster_file_paths = print_cluster_files(my_protein_clusters, output_dir)
+        write_cluster_file_list(my_cluster_file_paths, cluster_file_list)
