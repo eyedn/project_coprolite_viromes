@@ -18,7 +18,13 @@ mafft --auto --thread $cores $FAS > $ALN
 software="$HOME/software"
 hmmbuild="$software/hmmer-3.4/src/hmmbuild"
 HMM=$(echo $ALN | sed 's/.aln/.hmm/')
-$hmmbuild --amino --cpu $cores $HMM $ALN
+
+# if a protein cluster is only composed of one protein use fasta file
+if [ -s "$ALN" ]; then
+  $hmmbuild --amino --cpu $cores $HMM $ALN
+else
+  $hmmbuild --amino --cpu $cores $HMM $FAS
+fi
 
 # check if hmm file was created and has content
 if [ ! -s "$HMM" ]; then
