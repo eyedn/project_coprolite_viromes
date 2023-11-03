@@ -1,44 +1,61 @@
-from Bio import SeqIO
+import typing
 import os
+from sys import argv
 
 
-def extract_clusters(fasta_file, output_dir):
+class Protein:
+    def __init__(self, label) -> None:
+        self.label = label
+        self.sequence = ""
+    def append_sequence(self, sequence):
+        self.sequence += sequence
+
+
+def get_clusters_dict(fasta_file: os.path) \
+    -> typing.Dict[str, typing.List[Protein]]:
+
+    clusters: typing.Dict[str, typing.List[Protein]]
+    with open(fasta_file, "r") as f:
+        for line in f.readlines():
+            if line.startswith(">"):
+                label = line.strip()
+                clus = label.split("[")[1].split("(")[1].split(")")[0]
+                if clus not in clusters:
+                    clusters[clus] = []
+                clusters[clus].append(Protein(label))
+            else:
+                clusters[clus][-1].append_sequence(line.strip)
+    return clusters
+
+def print_cluster_files(clusters: typing.Dict[str, typing.List[Protein]],
+                        output_dir: os.path) -> typing.List[str]:
+
     if not os.path.exists(output_dir):
         os.makedirs(output_dir)
 
-    clusters = {}
-    cluster_files = []
+    paths: typing.List[str] = []
 
-    # Read the FASTA file and group sequences by cluster ID
-    for record in SeqIO.parse(fasta_file, "fasta"):
-        description_parts = record.description.split('[')
-        for part in description_parts:
-            if part.startswith('Phospholipase'):
-                cluster_id = part.split('(')[1].split(')')[0]  # Extracts the cluster ID
-                if cluster_id not in clusters:
-                    clusters[cluster_id] = []
-                clusters[cluster_id].append(record)
-                break
+    for clus in clusters:
+        file = os.path.join(output_dir, f"{clus}.fasta")
+        paths.append(file)
+        with open(file, "w") as f:
+            for protein in clusters[clus]:
+                f.write(protein.label)
+                f.write(protein.sequence)
 
-    # Write sequences to separate FASTA files based on cluster ID
-    for cluster_id, records in clusters.items():
-        cluster_file = os.path.join(output_dir, f"{cluster_id}.fasta")
-        SeqIO.write(records, cluster_file, "fasta")
-        cluster_files.append(cluster_file)
-
-    return cluster_files
+    return paths
 
 def write_cluster_file_list(cluster_files, list_file):
     with open(list_file, 'w') as f:
         for path in cluster_files:
             f.write(path + '\n')
 
+
 if __name__ == "__main__":
-    import sys
-    if len(sys.argv) != 4:
+    if len(argv) != 4:
         print("Usage: python extract_clusters.py <fasta_file> <output_directory> <cluster_file_list>")
     else:
-        fasta_file, output_dir, cluster_file_list = sys.argv[1], sys.argv[2], sys.argv[3]
-        cluster_files = extract_clusters(fasta_file, output_dir)
-        write_cluster_file_list(cluster_files, cluster_file_list)
-        print(f"Cluster file paths written to {cluster_file_list}")
+        fasta_file, output_dir, cluster_file_list = argv[1], argv[2], argv[3]
+        my_protein_clusters = get_clusters_dict(fasta_file)
+        my_cluster_file_paths = print_cluster_files(my_protein_clusters, output_dir)
+        write_cluster_file_list(my_cluster_file_paths, cluster_file_list)
