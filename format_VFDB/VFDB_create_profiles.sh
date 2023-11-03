@@ -18,17 +18,17 @@ mkdir -p "$PROTEIN_DIR"
 mkdir -p "$ALIGN_DIR"
 mkdir -p "$PROFILE_DIR"
 
-# run mafft on fasta file and save the output using profile_name for the filename
+# run mafft on fasta file
 ALN=$(echo $FILE | sed 's/.fasta/.aln/')
 mafft --auto --thread $cores $FILE > $ALN
 
-# Run HMMBUILD on aligned FASTA file to produce profile
+# Run hmmbuild on aligned fasta file to produce profile
 software="$HOME/software"
 hmmbuild="$software/hmmer-3.4/src/hmmbuild"
 HMM=$(echo $FILE | sed 's/.aln/.hmm/')
 $hmmbuild --amino --cpu $cores $HMM $ALN
 
-# Check if the file was created and has content
+# check if hmm file was created and has content
 if [ ! -s "$HMM" ]; then
     echo $HMM >> $SCRATCH/VFDB_profile_errors.txt
     exit 1
