@@ -24,7 +24,7 @@ def get_clusters_dict(fasta_file: os.path) \
                     clusters[clus] = []
                 clusters[clus].append(Protein(label))
             else:
-                clusters[clus][-1].append_sequence(line.strip)
+                clusters[clus][-1].append_sequence(line.strip())
     return clusters
 
 def print_cluster_files(clusters: typing.Dict[str, typing.List[Protein]],
