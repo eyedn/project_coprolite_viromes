@@ -19,7 +19,7 @@ def split_clusters(cluster_file, sequence_file, output_dir):
         for line in seq_file:
             if line.startswith(">"):
                 seq_id = line.strip().replace(">", "").split("(")[0]
-                sequences[seq_id]: typing.List[str, str] = [None, None]
+                sequences[seq_id]: typing.List[str, str] = ["", ""]
                 sequences[seq_id][0] = line
             else:
                 sequences[seq_id][1] += line
