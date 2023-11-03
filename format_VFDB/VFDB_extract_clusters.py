@@ -19,7 +19,7 @@ def get_clusters_dict(fasta_file: os.path) \
         for line in f.readlines():
             if line.startswith(">"):
                 label = line.strip()
-                clus = label.split("[")[1].split("(")[1].split(")")[0]
+                clus = label.split(") - ")[0].split("(")[-1]
                 if clus not in clusters:
                     clusters[clus] = []
                 clusters[clus].append(Protein(label))
@@ -41,21 +41,30 @@ def print_cluster_files(clusters: typing.Dict[str, typing.List[Protein]],
         with open(file, "w") as f:
             for protein in clusters[clus]:
                 f.write(protein.label)
-                f.write(protein.sequence)
+                f.write(f"{protein.sequence}\n")
 
     return paths
 
 def write_cluster_file_list(cluster_files, list_file):
     with open(list_file, 'w') as f:
         for path in cluster_files:
-            f.write(path + '\n')
+            f.write(f"{path}\n")
 
 
 if __name__ == "__main__":
-    if len(argv) != 4:
-        print("Usage: python extract_clusters.py <fasta_file> <output_directory> <cluster_file_list>")
-    else:
-        fasta_file, output_dir, cluster_file_list = argv[1], argv[2], argv[3]
-        my_protein_clusters = get_clusters_dict(fasta_file)
-        my_cluster_file_paths = print_cluster_files(my_protein_clusters, output_dir)
-        write_cluster_file_list(my_cluster_file_paths, cluster_file_list)
+    fasta_file = "../project_coprolite_viromes_NOT_CODE/references/VFDB_setB_pro.fas"
+    output_dir = "test"
+    cluster_file_list = "test/clusters.txt"
+    my_protein_clusters = get_clusters_dict(fasta_file)
+    my_cluster_file_paths = print_cluster_files(my_protein_clusters, output_dir)
+    write_cluster_file_list(my_cluster_file_paths, cluster_file_list)
+    # if len(argv) != 4:
+    #     print("Usage: python extract_clusters.py <fasta_file> <output_directory> <cluster_file_list>")
+    # else:
+    #     # fasta_file, output_dir, cluster_file_list = argv[1], argv[2], argv[3]
+    #     fasta_file = "../project_coprolite_viromes_NOT_CODE/references/VFDB_setB_pro.fas"
+    #     output_dir = "test"
+    #     cluster_file_list = "test/clusters.txt"
+    #     my_protein_clusters = get_clusters_dict(fasta_file)
+    #     my_cluster_file_paths = print_cluster_files(my_protein_clusters, output_dir)
+    #     write_cluster_file_list(my_cluster_file_paths, cluster_file_list)
