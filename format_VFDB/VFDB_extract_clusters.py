@@ -8,7 +8,7 @@ def split_clusters(cluster_file, sequence_file, output_dir):
         cluster_id = ""
         for line in clstr_file:
             if line.startswith(">"):
-                cluster_id = line.strip().split()[0]
+                cluster_id = line.strip().split(" ")[1]
                 clusters[cluster_id] = []
             else:
                 sequence_id = line.split(">")[1].split("(")[0]
