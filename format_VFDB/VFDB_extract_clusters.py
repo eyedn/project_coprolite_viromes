@@ -14,7 +14,7 @@ class Protein:
 def get_clusters_dict(fasta_file: os.path) \
     -> typing.Dict[str, typing.List[Protein]]:
 
-    clusters: typing.Dict[str, typing.List[Protein]]
+    clusters: typing.Dict[str, typing.List[Protein]] = {}
     with open(fasta_file, "r") as f:
         for line in f.readlines():
             if line.startswith(">"):
