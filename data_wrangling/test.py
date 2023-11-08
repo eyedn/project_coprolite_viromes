@@ -2,5 +2,7 @@ from collect_alignments import get_table_counts
 from sys import argv
 
 parent_template_path = argv[1]
+output_csv = argv[2]
 
-get_table_counts.get_table_counts(parent_template_path)
+counts = get_table_counts.get_table_counts(parent_template_path)
+counts.to_csv(output_csv)

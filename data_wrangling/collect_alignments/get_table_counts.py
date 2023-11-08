@@ -11,8 +11,7 @@ from get_df import get_df
 from hit import Hit
 
 
-def get_table_counts(template_path: str) \
-    -> typing.Tuple[typing.List[str], typing.List[Hit]]:
+def get_table_counts(template_path: str) -> pd.DataFrame:
 
     pattern = f"{template_path}/table.txt"
     table_paths = glob(pattern)
