@@ -4,7 +4,6 @@
 #       hit.py
 ###############################################################################
 import typing
-from contig import Contig
 
 
 # annotations are obtained fom a gff file after annotation
