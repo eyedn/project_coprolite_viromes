@@ -8,7 +8,6 @@ import pandas as pd
 from glob import glob
 from read_table import read_table
 from get_df import get_df
-from hit import Hit
 
 
 def get_table_counts(template_path: str) -> pd.DataFrame:
