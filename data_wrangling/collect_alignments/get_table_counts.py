@@ -15,6 +15,7 @@ def get_table_counts(template_path: str) -> pd.DataFrame:
     pattern = f"{template_path}/table.txt"
     table_paths = glob(pattern)
     counts_dict: typing.Dict[str, typing.Dict[str, int]] = {}
+    print(len(table_paths))
 
     for table in table_paths:
         _, hits = read_table.read_table(table, 1e-5)
