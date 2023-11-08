@@ -4,7 +4,7 @@
 #       annotation.py
 ###############################################################################
 import typing
-from contig import Contig
+from . import contig
 
 
 # annotations are obtained fom a gff file after annotation
@@ -14,7 +14,7 @@ class Protein:
         self.start: int = None
         self.end: int = None
         self.aligned_bases: typing.Set[int] = set()
-        self.contig: Contig = None
+        self.contig: contig.Contig = None
 
     def add_start_end(self, start: int, end: int) -> None:
         self.start: int = start
@@ -24,7 +24,7 @@ class Protein:
         aligned_bases = list(range(start, end + 1))
         self.aligned_bases.update(aligned_bases)
 
-    def add_contig(self, contig: Contig) -> None:
+    def add_contig(self, contig: contig.Contig) -> None:
         self.contig = contig
         bases_on_contg = list(range(self.start, self.end + 1))
         self.contig.add_covered_bases(bases_on_contg)
