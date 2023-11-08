@@ -12,8 +12,7 @@ from . import get_df
 
 def get_table_counts(template_path: str) -> pd.DataFrame:
 
-    pattern = f"{template_path}/table.txt"
-    table_paths = glob(pattern)
+    table_paths = glob(template_path)
     counts_dict: typing.Dict[str, typing.Dict[str, int]] = {}
     print(len(table_paths))
 
