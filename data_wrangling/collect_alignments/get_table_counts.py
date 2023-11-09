@@ -15,10 +15,10 @@ def get_table_counts(template_path: str) -> pd.DataFrame:
     counts_dict: typing.Dict[str, typing.Dict[str, int]] = {}
 
     for table in glob(template_path, recursive=True):
+        print(table)
         _, hits = read_table.read_table(table, 1e-5)
         label = table.split("/")[-2]
         counts_dict = get_df.get_df(label, hits, counts_dict)
     counts_df = pd.DataFrame(counts_dict)
-    print(counts_dict)
-    print(counts_df)
+
     return counts_df
