@@ -16,7 +16,7 @@ def get_clusters_dict(fasta_file: os.path) \
         for line in f.readlines():
             if line.startswith(">"):
                 label = line.strip()
-                clus = label.split(") - ")[1].split(")]")[0].split("(")[-1]
+                clus = label.split(") - ")[0].split("(")[-1]
                 if clus not in clusters:
                     clusters[clus] = []
                 clusters[clus].append(protein.Protein(label))
