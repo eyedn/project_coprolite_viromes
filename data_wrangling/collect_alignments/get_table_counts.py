@@ -6,13 +6,15 @@
 import typing
 import pandas as pd
 from glob import glob
-from . import read_table
-from . import update_counts_df
+from . import read_table, update_counts_df
 
 
 def get_table_counts(template_path: str) -> pd.DataFrame:
 
     counts_dict: typing.Dict[str, typing.Dict[str, int]] = {}
+
+    print(template_path)
+    print(glob(template_path, recursive = True))
 
     for table in glob(template_path, recursive = True):
         print(table)
