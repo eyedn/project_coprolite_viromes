@@ -17,7 +17,7 @@ def print_files(clusters: typing.Dict[str, typing.List[protein.Protein]],
     paths: typing.List[str] = []
 
     for clus in clusters:
-        file = os.path.join(output_dir, f"{clus}.fasta")
+        file = os.path.join(output_dir, f"{clus}.fas")
         paths.append(file)
         with open(file, "w") as f:
             for protein in clusters[clus]:

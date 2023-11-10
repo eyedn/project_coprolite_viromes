@@ -11,7 +11,7 @@ cores=$1
 FAS=$(head -n ${SGE_TASK_ID} $SCRATCH/VFDB_cluster_profiles/clusters.txt | tail -n 1)
 
 # run mafft on fasta file
-ALN=$(echo $FAS | sed 's/.fasta/.aln/')
+ALN=$(echo $FAS | sed 's/.fas/.aln/')
 mafft --auto --thread $cores $FAS > $ALN
 
 # Run hmmbuild on aligned fasta file to produce profile
