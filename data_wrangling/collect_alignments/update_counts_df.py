@@ -1,19 +1,18 @@
 ###############################################################################
 #       Aydin Karatas
 #       Project Coporlite Viromes
-#       hit.py
+#       update_counts_df.py
 ###############################################################################
 import typing
-import pandas as pd
 from . import hit
 
-def get_df(label: str, hits: typing.List[hit.Hit],
-    counts_dict: typing.Dict[str, typing.Dict[str, int]] = {}) -> pd.DataFrame:
+def update_counts_df(label: str, hits: typing.List[hit.Hit],
+    counts_dict: typing.Dict[str, typing.Dict[str, int]]) \
+    -> typing.Dict[str, typing.Dict[str, int]]:
 
     counts_dict[label] = {}
 
     for hit in hits:
         counts_dict[label][hit.label] = len(hit.queries)
-    counts_df = pd.DataFrame(counts_dict)
 
-    return counts_df
+    return counts_dict

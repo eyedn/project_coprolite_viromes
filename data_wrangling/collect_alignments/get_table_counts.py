@@ -7,18 +7,20 @@ import typing
 import pandas as pd
 from glob import glob
 from . import read_table
-from . import get_df
+from . import update_counts_df
 
 
 def get_table_counts(template_path: str) -> pd.DataFrame:
 
     counts_dict: typing.Dict[str, typing.Dict[str, int]] = {}
 
-    for table in glob(template_path, recursive=True):
+    for table in glob(template_path, recursive = True):
         print(table)
         _, hits = read_table.read_table(table, 1e-5)
         label = table.split("/")[-2]
-        counts_dict = get_df.get_df(label, hits, counts_dict)
+        counts_dict = update_counts_df.update_counts_df(label, hits,
+                                                        counts_dict)
+
     counts_df = pd.DataFrame(counts_dict)
 
     return counts_df
