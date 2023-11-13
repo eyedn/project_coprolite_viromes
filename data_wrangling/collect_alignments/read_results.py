@@ -1,53 +1,48 @@
 ###############################################################################
 #       Aydin Karatas
 #       Project Coporlite Viromes
-#       read_table.py
+#       read_results.py
 ###############################################################################
 import typing
 import numpy as np
-from hit import Hit
-from protein import Protein
+from . import hit
+from . import protein
 
-def read_results(hits_file: typing.TextIO, proteins_file: typing.TextIO,
-    hit_labels: typing.List[str], hits_list: typing.List[Hit]) -> None:
-    hit_counter = -1
-    protein_labels: typing.List[str] = []
-    proteins: typing.List[Protein] = []
-    with open(hits_file) as h:
-        with open(proteins_file) as p:
-            hits_lines = h.readlines()
-            for i, h_line in enumerate(hits_lines):
-                hit_data = h_line.strip().replace(":", "\t").split()
-                if hit_data[2] not in hit_labels:
+def read_results(results_file: typing.TextIO, 
+    proteins: typing.Dict[str, protein.Protein],
+    hits: typing.Dict[str, hit.Hit], eval: float) -> None:
+
+    with open(results_file) as f:
+        curr_hit = ""
+        domain = False
+        lines_to_info = -1
+        lines = f.readlines()
+
+        for line in lines:
+            curr_line = line.strip()
+            if lines_to_info > 0:
+                lines_to_info -= 1
+            elif curr_line.startswith("#") or len(curr_line) == 0:
+                lines_to_info = -1
+                domain = False
+            elif curr_line.startswith("Query:"):
+                curr_hit = curr_line.split()[1]
+                if curr_hit not in hits.keys():
+                    curr_hit = ""
                     continue
-
-                try:
-                    next_hit_data = hits_lines[i+1].strip().replace(":", "\t").split()
-                except:
-                    next_hit_data = [np.inf]
-                hit_counter += 1
-
-                lines_per_protein, inspect_protein = 4, True
-                for p_line in p.readlines():
-                    if lines_per_protein < 0:
-                        lines_per_protein, inspect_protein = 4, True
-                    elif not inspect_protein:
-                        lines_per_protein -= 1
-                        continue
-
-                    if lines_per_protein == 4:
-                        protein_data = p_line.strip().replace(":>>", "\t").split()
-                        if int(protein_data[0]) < int(hit_data[0]) or \
-                            int(protein_data[0]) >= int(next_hit_data[0]):
-                            continue
-                        if protein_data[1] not in hits_list[hit_counter].queries:
-                            inspect_protein = False
-                        protein_label = protein_data[1]
-                    elif lines_per_protein == 1:
-                        protein_data = p_line.strip().split()
-                        proteins.append(Protein(protein_label))
-                        proteins[-1].add_aligned_bases(int(protein_data[10]),
-                                                       int(protein_data[11]))
-                        protein_labels.append(protein_label)
-                    lines_per_protein -= 1
-    return protein_labels, proteins  
+            elif curr_line.startswith(">>") and len(curr_hit) > 0:
+                curr_protein = curr_line.split()[1]
+                if curr_protein not in hits[curr_hit].queries:
+                    lines_to_info = -1
+                    domain = False
+                    continue
+                proteins[curr_protein].contig.add_hit_protein()
+                domain = True
+                lines_to_info = 2
+            elif domain and lines_to_info == 0:
+                hit_result = curr_line.split()
+                if float(hit_result[4]) > eval:
+                    continue
+                aln_start = int(hit_result[9])
+                aln_end = int(hit_result[10])
+                proteins[curr_protein].add_aligned_bases(aln_start, aln_end)

@@ -11,9 +11,13 @@ class Contig:
     def __init__(self, label: str, len: int) -> None:
         self.label: str = label
         self.len: int = len
+        self.hit_proteins: int = 0 
         self.covered_bases: typing.List[int] = []
         self.perc_covered: float = 0.0
         self.coverage_depth: float = 0.0
+
+    def add_hit_protein(self) -> None:
+        self.hit_proteins += 1
 
     def add_covered_bases(self, bases: typing.List[int]) -> None:
         self.covered_bases.append(bases)

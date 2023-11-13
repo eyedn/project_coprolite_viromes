@@ -26,5 +26,3 @@ class Protein:
 
     def add_contig(self, contig: contig.Contig) -> None:
         self.contig = contig
-        bases_on_contg = list(range(self.start, self.end + 1))
-        self.contig.add_covered_bases(bases_on_contg)
