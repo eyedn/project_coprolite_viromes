@@ -17,20 +17,20 @@ def get_align_info(alignment_path: str, annotations_path: str, eval: float) \
     counts_dict: typing.Dict[str, typing.Dict[str, int]] = {}
 
     for align_path in glob(alignment_path, recursive = True):
-        label_w_db = align_path.split("/")[-1]
-        label_wo_db = "_".join(label_w_db.split("_")[:-1])
+        label = "_".join(align_path.split("/")[-1].split("_")[:-1])
         table_txt = f"{align_path}/table.txt"
         results_txt = f"{align_path}/results.txt"
-        gff_gz = f"{annotations_path}/{label_wo_db}_annotation_phage/*gff*"
+        annotations_path.replace("**", label)
+        gff_gz = f"{annotations_path}/*gff*"
 
         curr_contigs, proteins = read_gff.read_gff(gff_gz)
         hits = read_table.read_table(table_txt, eval)
         read_results.read_results(results_txt, proteins, hits, eval)
         
-        counts_dict = update_counts_df.update_counts_df(label_w_db, hits,
+        counts_dict = update_counts_df.update_counts_df(label, hits,
                                                         counts_dict)
         contigs_hits_dict = update_contig_hits_dict.update_contig_hits_dict(
-            label_w_db, curr_contigs, contigs_hits_dict)
+            label, curr_contigs, contigs_hits_dict)
 
     counts_df = pd.DataFrame(counts_dict)
     contigs_hits_df = pd.DataFrame(contigs_hits_dict)
