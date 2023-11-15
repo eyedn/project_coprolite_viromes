@@ -18,6 +18,7 @@ def get_align_info(alignment_path: str, annotations_path: str, eval: float) \
 
     for align_path in glob(alignment_path, recursive = True):
         label = "_".join(align_path.split("/")[-1].split("_")[:-1])
+        print(align_path)
         print(label, end = " ")
         table_txt = f"{align_path}/table.txt"
         results_txt = f"{align_path}/results.txt"
