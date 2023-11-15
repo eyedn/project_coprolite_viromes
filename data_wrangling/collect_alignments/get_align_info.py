@@ -18,8 +18,6 @@ def get_align_info(alignment_path: str, annotations_path: str, eval: float) \
 
     for align_path in glob(alignment_path, recursive = True):
         label = "_".join(align_path.split("/")[-1].split("_")[:-1])
-        print(align_path)
-        print(label, end = " ")
         table_txt = f"{align_path}/table.txt"
         results_txt = f"{align_path}/results.txt"
         sample_annotations_path = annotations_path.replace("**", label)
@@ -33,7 +31,6 @@ def get_align_info(alignment_path: str, annotations_path: str, eval: float) \
                                                         counts_dict)
         contigs_hits_dict = update_contig_hits_dict.update_contig_hits_dict(
             label, curr_contigs, contigs_hits_dict)
-        print("DONE")
 
     counts_df = pd.DataFrame(counts_dict)
     contigs_hits_df = pd.DataFrame(contigs_hits_dict)
