@@ -45,7 +45,7 @@ python3 data_wrangling/get_alignment_counts.py \
 
 # check if raw counts was created 
 if ls $data_dir/*alignment* 1> /dev/null 2>&1; then
-	echo "$(timestamp): ERROR: collect_alignment_counts: alignment files found"
+	echo "$(timestamp): collect_alignment_counts: alignment files found"
 else
 	echo "$(timestamp): ERROR: collect_alignment_counts: alignment files NOT found"
 	exit 1
