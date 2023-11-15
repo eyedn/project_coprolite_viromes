@@ -16,13 +16,14 @@ def get_align_info(alignment_path: str, annotations_path: str, eval: float) \
     contigs_hits_dict: typing.Dict[str, typing.List[int]] = {}
     counts_dict: typing.Dict[str, typing.Dict[str, int]] = {}
 
+    alignment_path = alignment_path.replace("!", "**")
     for align_path in glob(alignment_path, recursive = True):
         label = "_".join(align_path.split("/")[-1].split("_")[:-1])
         print(align_path)
         print(label, end = " ")
         table_txt = f"{align_path}/table.txt"
         results_txt = f"{align_path}/results.txt"
-        sample_annotations_path = annotations_path.replace("**", label)
+        sample_annotations_path = annotations_path.replace("!", label)
         gff_gz = f"{sample_annotations_path}/{label[8:]}.gff.gz"
 
         curr_contigs, proteins = read_gff.read_gff(gff_gz)
