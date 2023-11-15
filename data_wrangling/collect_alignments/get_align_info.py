@@ -34,9 +34,12 @@ def get_align_info(alignment_path: str, annotations_path: str, eval: float) \
                                                         counts_dict)
         contigs_hits_dict = update_contig_hits_dict.update_contig_hits_dict(
             label, curr_contigs, contigs_hits_dict)
-        print("DONE")
+        print(counts_dict)
+        print(contigs_hits_dict)
 
     counts_df = pd.DataFrame(counts_dict)
+    counts_df = counts_df.fillna(0)
     contigs_hits_df = pd.DataFrame(contigs_hits_dict)
+    contigs_hits_df = contigs_hits_df.fillna(0)
 
     return counts_df, contigs_hits_df
