@@ -20,7 +20,7 @@ def get_align_info(alignment_path: str, annotations_path: str, eval: float) \
         label = "_".join(align_path.split("/")[-1].split("_")[:-1])
         table_txt = f"{align_path}/table.txt"
         results_txt = f"{align_path}/results.txt"
-        annotations_path.replace("**", label)
+        annotations_path = annotations_path.replace("**", label)
         gff_gz = f"{annotations_path}/*gff*"
 
         curr_contigs, proteins = read_gff.read_gff(gff_gz)
