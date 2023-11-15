@@ -21,7 +21,7 @@ def get_align_info(alignment_path: str, annotations_path: str, eval: float) \
         table_txt = f"{align_path}/table.txt"
         results_txt = f"{align_path}/results.txt"
         annotations_path = annotations_path.replace("**", label)
-        gff_gz = f"{annotations_path}/{label}.gff.gz"
+        gff_gz = f"{annotations_path}/{label[8:]}.gff.gz"
 
         curr_contigs, proteins = read_gff.read_gff(gff_gz)
         hits = read_table.read_table(table_txt, eval)
