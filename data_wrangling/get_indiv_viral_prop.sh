@@ -38,13 +38,13 @@ fi
 if ls $fa_file 1> /dev/null 2>&1; then
 	echo "$(timestamp): get_indiv_viral_prop: fa file found"
 else
-	echo "$(timestamp): get_indiv_viral_prop: fa file not found"
+	echo "$(timestamp): get_indiv_viral_prop: ERROR! fa file not found"
 	exit 1
 fi
 if ls $gff_file 1> /dev/null 2>&1; then
 	echo "$(timestamp): get_indiv_viral_prop: gff file found"
 else
-	echo "$(timestamp): get_indiv_viral_prop: gff file not found"
+	echo "$(timestamp): get_indiv_viral_prop: ERROR! gff file not found"
 	exit 1
 fi
 
@@ -62,6 +62,6 @@ python3 data_wrangling/get_indiv_viral_prop.py \
 if ls $csv_path 1> /dev/null 2>&1; then
 	echo "$(timestamp): get_indiv_viral_prop: viral prop csv created"
 else
-	echo "$(timestamp): get_indiv_viral_prop: viral prop csv not found"
+	echo "$(timestamp): get_indiv_viral_prop: ERROR! viral prop csv not found"
 	exit 1
 fi

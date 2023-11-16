@@ -38,7 +38,7 @@ fi
 if ls $fastq_clean_dir/*/*fastq.gz 1> /dev/null 2>&1; then
 	echo "$(timestamp): assembly: fastq file(s) found"
 else
-	echo "$(timestamp): assembly: clean fastq files not found"
+	echo "$(timestamp): assembly: ERROR! clean fastq files not found"
 	exit 1
 fi
 

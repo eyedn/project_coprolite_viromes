@@ -43,6 +43,6 @@ rm $gff_list
 if ls $csv_path 1> /dev/null 2>&1; then
 	echo "$(timestamp): collect_all_ec_counts: bacterial gene counts csv created"
 else
-	echo "$(timestamp): collect_all_ec_counts: bacterial gene counts csv not found"
+	echo "$(timestamp): collect_all_ec_counts: ERROR! bacterial gene counts csv not found"
 	exit 1
 fi

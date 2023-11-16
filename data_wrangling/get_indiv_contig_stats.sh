@@ -36,7 +36,7 @@ fi
 if ls $stats_file 1> /dev/null 2>&1; then
 	echo "$(timestamp): get_indiv_contig_stats: stats file found"
 else
-	echo "$(timestamp): get_indiv_contig_stats: stats file not found"
+	echo "$(timestamp): get_indiv_contig_stats: ERROR! stats file not found"
 	exit 1
 fi
 
@@ -56,6 +56,6 @@ rm $data_dir/${origin}_${sample}_contig_stats_tmp.txt
 if ls $csv_path 1> /dev/null 2>&1; then
 	echo "$(timestamp): get_indiv_contig_stats: viral prop csv created"
 else
-	echo "$(timestamp): get_indiv_contig_stats: viral prop csv not found"
+	echo "$(timestamp): get_indiv_contig_stats: ERROR! viral prop csv not found"
 	exit 1
 fi
