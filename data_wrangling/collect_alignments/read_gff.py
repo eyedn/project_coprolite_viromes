@@ -26,7 +26,7 @@ def read_gff(gff_file: typing.BinaryIO) \
             elif curr_line.startswith("##sequence-region"):
                 contig_data = curr_line.split()
                 contigs[contig_data[1]] = contig.Contig(contig_data[1],
-                                                        contig_data[3])
+                                                        int(contig_data[3]))
             elif curr_line.startswith("#"):
                 continue
             else:

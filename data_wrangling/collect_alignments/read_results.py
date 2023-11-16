@@ -36,7 +36,6 @@ def read_results(results_file: typing.TextIO,
                     lines_to_info = -1
                     domain = False
                     continue
-                proteins[curr_protein].contig.add_hit_protein()
                 domain = True
                 lines_to_info = 2
             elif domain and lines_to_info == 0:
@@ -46,3 +45,6 @@ def read_results(results_file: typing.TextIO,
                 aln_start = int(hit_result[9])
                 aln_end = int(hit_result[10])
                 proteins[curr_protein].add_aligned_bases(aln_start, aln_end)
+                proteins[curr_protein].contig.add_covered_bases(
+                    proteins[curr_protein].aligned_bases
+                    )

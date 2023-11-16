@@ -21,7 +21,7 @@ class Protein:
         self.end: int = end
 
     def add_aligned_bases(self, start: int, end: int) -> None:
-        aligned_bases = list(range(start, end + 1))
+        aligned_bases = list(range(start + self.start - 1, end + self.start))
         self.aligned_bases.update(aligned_bases)
 
     def add_contig(self, contig: contig.Contig) -> None:

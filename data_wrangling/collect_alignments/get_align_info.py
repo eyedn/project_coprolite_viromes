@@ -35,7 +35,6 @@ def get_align_info(alignment_path: str, annotations_path: str, eval: float) \
 
     counts_df = pd.DataFrame(counts_dict)
     counts_df = counts_df.fillna(0)
-    contigs_hits_df = pd.DataFrame.from_dict(contigs_hits_dict, 
-                                             orient = "index").transpose()
+    contigs_hits_df = pd.DataFrame.from_dict(contigs_hits_dict)
 
     return counts_df, contigs_hits_df
