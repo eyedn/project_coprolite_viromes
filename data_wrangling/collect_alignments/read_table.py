@@ -7,6 +7,7 @@ import typing
 from . import hit
 
 
+# read table file to produce dict of hits
 def read_table(table: typing.TextIO, eval: float) -> typing.Dict[str, hit.Hit]:
 
     hits: typing.Dict[str, hit.Hit] = {}
