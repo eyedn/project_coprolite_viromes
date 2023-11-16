@@ -123,13 +123,4 @@ create_heatmap <- function(data, kruskal_res, color_range, max_items,
             key.par = list(cex = 3),
             density.info = "none"
   )
-  
-  # legend("bottomleft",
-  #        legend = c("Oxidoreductases", "Transferases", "Hydrolases", "Lyases",
-  #                   "Isomerases", "Ligases", "Translocases"),
-  #        fill = ec_col_set,
-  #        cex = 3.5,
-  #        bty = "n")
-  
-  dev.off()
 }
