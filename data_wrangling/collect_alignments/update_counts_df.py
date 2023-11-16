@@ -6,6 +6,7 @@
 import typing
 from . import hit
 
+
 def update_counts_df(label: str, hits: typing.Dict[str, hit.Hit],
     counts_dict: typing.Dict[str, typing.Dict[str, int]]) \
     -> typing.Dict[str, typing.Dict[str, int]]:
