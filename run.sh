@@ -2,7 +2,7 @@
 ###############################################################################
 #     Aydin Karatas
 #		  Project Coprolite Viromes
-#		  submit_script.sh 
+#		  run.sh 
 ###############################################################################
 cd $HOME/project_coprolite_viromes
 for FILE in general_bash_functions/* ; do source $FILE ; done
