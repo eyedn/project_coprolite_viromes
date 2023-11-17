@@ -93,7 +93,7 @@ de novo metagenomic assembly of reads after download and quality control.
 Scripts involved in library preparation are also found here, as many scripts 
 had multiple accession runs that contained both paired and unpaired reads.
 
-## `./prokka_annotations/` [2,3,4]
+### `./prokka_annotations/` [2,3,4]
 The `prokka_annotations` directory contains scripts that use *Prokka* for 
 genome annotation. Scripts that identify which assembled contigs contain a 
 viral gene annotation are also found here.
