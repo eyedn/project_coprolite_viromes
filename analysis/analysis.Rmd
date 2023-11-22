@@ -1,38 +1,42 @@
 ---
-title: "analysis of viromes"
+title: "Analysis of Viromes"
 author: "Aydin Karatas"
 output: html_document
 ---
 
+## Set directory of functions
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(root.dir = "~/Documents/Research/project_coprolite_viromes/analysis/")
+dir = "~/Documents/Research/project_coprolite_viromes/analysis/"
+knitr::opts_chunk$set(root.dir = dir)
 ```
 
 ## Source Functions
-
 ```{r source functions, echo=FALSE}
 base_dir <- "~/Documents/Research/project_coprolite_viromes/analysis/"
 
 # function to source R files from a specified directory
 source_files_from_dir <- function(directory) {
   full_path <- file.path(base_dir, directory)
-  functions_list <- list.files(path = full_path, pattern = "*.R", full.names = TRUE)
+  functions_list <- list.files(
+    path = full_path,
+    pattern = "*.R",
+    full.names = TRUE
+    )
   sapply(functions_list, source)
 }
 
-# fource functions from different directories
-source_files_from_dir("general_R_functions")
-source_files_from_dir("clustering")
-source_files_from_dir("diff_repres")
-source_files_from_dir("predictions")
+# source functions from different directories
+source_files_from_dir("stats")
+source_files_from_dir("graphing")
+source_files_from_dir("misc")
 ```
 
 ## Define hyperparameters and global variables
-```{r pars and vars}
+```{r hyperpars and vars}
 set.seed(seed = 123)
 
 k <- 4
-iterations <- 1000
+max_iter <- 1000
 subset_top <- 100
 color_range <- 10
 star_bounds <- list(list(0.1, 0.9), list(0.025, 0.975), list(0.01, 0.99),
@@ -41,6 +45,11 @@ star_bounds <- list(list(0.1, 0.9), list(0.025, 0.975), list(0.01, 0.99),
 data <- "~/Documents/Research/project_coprolite_viromes_NOT_CODE/data"
 vir_phage_ec_prop_data <- paste0(data, "/vir_phage_ec_counts.csv")
 lifestyle_counts_data <- paste0(data, "/lifestyle_counts.csv")
+cazy_prop_data <- paste0(data, "/cazy_alignment_counts.csv")
+cazy_contig_hits_data <- paste0(data, "/cazy_alignment_contig_hits.csv")
+vf_prop_data <- paste0(data, "/vf_alignment_counts.csv")
+vf_contig_hits_data <- paste0(data, "/vf_alignment_contig_hits.csv")
+vf_reference <- paste0(data, "/VFs.csv")
 
 figures <- "~/Documents/Research/project_coprolite_viromes_NOT_CODE/figures"
 violin_dir <- paste0(figures, "/violin")
@@ -49,6 +58,8 @@ jitter_dir <- paste0(figures, "/jitter")
 
 voilin_vir_ec <- paste0("clustering_vir_ec_", k)
 voilin_lifestyle <- "lifestyle"
+voilin_vf_aln <- "vf_aln"
+voilin_cazy_aln <- "cazy_aln"
 voilin_phage_ec <- paste0("clustering_phage_ec_", k)
 voilin_phage_fam <- paste0("clustering_phage_fam_", k)
 voilin_phage_host <- paste0("clustering_phage_host_", k)
@@ -67,62 +78,230 @@ jitter_phage_classes <- paste0("phage_classes_", subset_top)
 First examine what the optimal k for k-means should be 
 ```{r vir ec prep}
 # read in raw counts data
-vir_ec_counts <- read.csv(vir_phage_ec_prop_data, header = TRUE, row.names = 1)
+vir_ec_counts <- read.csv(
+  file = vir_phage_ec_prop_data,
+  header = TRUE,
+  row.names = 1
+  )
 
 # normalize observations within a sample and transform to log( CPM + 1 )
-vir_ec_norm <- normalize_data(vir_ec_counts)
+vir_ec_norm <- normalize_data(df = vir_ec_counts)
 vir_ec_t_mat <- scale(t(vir_ec_norm))
 
 # find optimal number of clusters with a wss plot
-vir_ec_optimal_wss <- get_optimal_clusters(vir_ec_t_mat, "wss")
+vir_ec_optimal_wss <- get_optimal_clusters(
+  data = vir_ec_t_mat,
+  method = "wss"
+  )
 vir_ec_optimal_wss
 ```
 
 Next, perform the bootstrap and permutation k-means
 ```{r vir ec boot/perm}
-# perform kmeans with boostraping and permutations
-vir_ec_boot_res <- kmeans_bootstrap(vir_ec_t_mat, k, iterations)
-vir_ec_perm_res <- kmeans_permute(vir_ec_t_mat, k, iterations)
+# perform kmeans with bootstrap resampling
+vir_ec_boot_res <- kmeans_bootstrap(
+  data = vir_ec_t_mat,
+  k = k,
+  num_iter = max_iter
+  )
+
+# perform kmeans with permutations
+vir_ec_perm_res <- kmeans_permute(
+  data = vir_ec_t_mat,
+  k = k,
+  num_iter = max_iter
+  )
 ```
 
 Produce a violin plot
 ```{r vir ec violin}
-# show clustering results by combining bootstrap and permutation res
-vir_ec_clus_res <- get_clustering_res(vir_ec_boot_res, vir_ec_perm_res,
-                                      star_bounds, iterations)
-vir_ec_clus_violin <- create_violin(vir_ec_boot_res, vir_ec_clus_res,
-                                    voilin_vir_ec, violin_dir)
+# combining bootstrap and permutation results
+vir_ec_clus_res <- get_clustering_res(
+  boot_data = vir_ec_boot_res,
+  perm_data = vir_ec_perm_res,
+  star_bounds = star_bounds,
+  num_iter = max_iter
+  )
+
+# plot clustering results
+vir_ec_clus_violin <- create_clus_violin(
+  boot_data = vir_ec_boot_res,
+  clus_res = vir_ec_clus_res,
+  file_name = voilin_vir_ec,
+  plot_dir = violin_dir
+  )
+vir_ec_clus_violin
 ```
 
 Produce heatmap of most differential represented metabolic genes
 ```{r vir ec heat}
-# show differential representation results
-vir_ec_diff_repres <- get_diff_repres_ec(vir_ec_t_mat)
-vir_ec_heatmap <- create_heatmap(vir_ec_t_mat, vir_ec_diff_repres, color_range,
-                                 subset_top, heat_vir_ec, heat_dir)
+# get differential represented genes
+vir_ec_diff_repres <- get_diff_repres_ec(data = vir_ec_t_mat)
+
+# generate heatmap of most differential represented genes
+create_heatmap(
+  data = vir_ec_t_mat,
+  signif_res = vir_ec_diff_repres,
+  color_range = color_range,
+  subset = subset_top,
+  file_name = heat_vir_ec,
+  plot_dir = heat_dir
+  )
 ```
 
 Produce jitter plot of enzyme categories
 ```{r vir ec ezy}
 # show ec proportions
-vir_ec_median <- get_cat_medians(vir_ec_t_mat[, rownames(vir_ec_diff_repres)[1:subset_top]])
-get_diff_repres_class(vir_ec_median)
-vir_ec_jitter <- create_jitter(vir_ec_median, c(1:7), jitter_vir_classes,
-                               jitter_dir)
+vir_ec_median <- get_cat_medians(
+  data = vir_ec_t_mat[, rownames(vir_ec_diff_repres)[1:subset_top]]
+  )
+
+# print stats testing of ec classes
+get_diff_repres_class(data = vir_ec_median)
+
+# plot jitter plot
+vir_ec_jitter <- create_jitter(
+  data = vir_ec_median,
+  classes_to_use = c(1:7),
+  file_name = jitter_vir_classes,
+  plot_dir = jitter_dir
+  )
 ```
 
 ## Lifestyle prediction 
 First, bootstrap lifestyle stats
 ```{r lifestyle boot}
-# test lifestyle counts
-lifestyle_counts <- read.csv(lifestyle_counts_data, header = TRUE, row.names = 1)
-lifestyle_boot_res <- get_median_lifestyles(lifestyle_counts, iterations)
+# read in lifestyle counts
+lifestyle_counts <- read.csv(
+  file = lifestyle_counts_data,
+  header = TRUE,
+  row.names = 1
+  )
+
+# bootstrap median ratio of temperate-to-lytic viruses
+lifestyle_boot_res <- get_median_ratios(
+  data = lifestyle_counts,
+  num_iter = max_iter,
+  numer = 1,
+  denom = 2
+  )
 ```
 
 Produce a violin plot
 ```{r lifestyle violin}
-lifestyle_voilin <- create_lifestyle_voilin(lifestyle_boot_res,
-                                            voilin_lifestyle, violin_dir)
+# plot violin plot of lifestyles by category
+lifestyle_voilin <- create_cat_voilins(
+  data = lifestyle_boot_res,
+  file_name = voilin_lifestyle,
+  plot_dir = violin_dir)
+lifestyle_voilin
+
+# print stats testing of lifestyles preferences between categories
 lifestyle <- melt(lifestyle_boot_res)
 kruskal.test(lifestyle$value, lifestyle$Var2)
 ```
+
+## Alignment Results
+### CAZY Alignment Counts
+```{r cazy alignment}
+# read in cazy counts data
+cazy_counts <- read.csv(
+  file = cazy_prop_data,
+  header = TRUE,
+  row.names = 1
+  )
+
+#TODO: format cazy counts
+
+```
+
+### CAZY Contig Hits
+First, bootstrap median coverage of db proteins
+```{r cazy contig hits boot}
+# read in cazy counts data
+cazy_contig_hits <- read.csv(
+  file = cazy_contig_hits_data, 
+  header = TRUE,
+  row.names = 1)
+
+# bootstrap median ratio of cazy coverage-to-total contig lengths
+cazy_aln_boot_res <- get_median_ratios(
+  data = cazy_contig_hits,
+  num_iter = max_iter,
+  numer = 2,
+  denom = 1)
+```
+
+Produce violin plot.
+```{r cazy contig hits violin}
+# plot violin plot of coverage by category
+cazy_aln_voilin <- create_cat_voilins(
+  data = cazy_aln_boot_res,
+  file_name = voilin_cazy_aln,
+  plot_dir = violin_dir)
+cazy_aln_voilin
+
+# print stats testing of coverage between categories
+cazy_aln <- melt(cazy_aln_boot_res)
+kruskal.test(cazy_aln$value, cazy_aln$Var2)
+```
+
+### VFDB Alignment
+```{r vfdb alignment}
+# read vf reference
+vf_to_vfc <- read.csv(
+  file = vf_reference,
+  header = TRUE)
+
+# format vf reference
+colnames(vf_to_vfc) <- vf_to_vfc[1, ]
+vf_to_vfc <- vf_to_vfc[-1, c("VFID", "VFCID")]
+
+# read in vf counts data
+vf_counts <- read.csv(
+  file = vf_prop_data,
+  header = TRUE,
+  row.names = 1
+  )
+
+#TODO: format vf counts
+vfc_counts <- format_vf_counts(
+  data = vf_counts,
+  vf_ref = vf_to_vfc
+)
+```
+
+### VFDB Contig Hits
+First, bootstrap median coverage of db proteins
+```{r vf contig htis}
+# read in vf counts data
+vf_contig_hits <- read.csv(
+  file = vf_contig_hits_data,
+  header = TRUE,
+  row.names = 1)
+
+# bootstrap median ratio of vf coverage to total contig lengths
+vf_aln_boot_res <- get_median_ratios(
+  data = vf_contig_hits,
+  num_iter = max_iter,
+  numer = 2,
+  denom = 1
+  )
+```
+
+Produce violin plots
+```{r vf contig hits violin}
+# plot violin plot of coverage by category
+vf_aln_voilin <- create_cat_voilins(
+  data = vf_aln_boot_res,
+  file_name = voilin_vf_aln,
+  plot_dir = violin_dir)
+vf_aln_voilin
+
+# print stats testing of coverage between categories
+vf_aln <- melt(vf_aln_boot_res)
+kruskal.test(vf_aln$value, vf_aln$Var2)
+```
+
+
+

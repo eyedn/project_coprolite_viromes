@@ -10,10 +10,10 @@ library(dendextend)
 
 
 # generate a heatmap based on differential expression
-create_heatmap <- function(data, kruskal_res, color_range, max_items, 
+create_heatmap <- function(data, signif_res, color_range, subset, 
                            file_name, plot_dir) {
   
-  sig_data <- data[, rownames(kruskal_res)[1:max_items]]
+  sig_data <- data[, rownames(signif_res)[1:subset]]
   
   sig_data_concat <- matrix(ncol = ncol(sig_data), nrow = length(cat_labels))
   colnames(sig_data_concat) <- colnames(sig_data)

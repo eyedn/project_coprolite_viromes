@@ -8,16 +8,16 @@ library(progress)
 
 
 # run kmeans many times on subsets of the data to find concensus clustering
-kmeans_bootstrap <- function(data_t_matrix, k, num_iter) {
+kmeans_bootstrap <- function(data, k, num_iter) {
   boot_stats <- matrix(nrow = num_iter, ncol = 6)
 
   # initialize progress bar
   pb <- progress_bar$new(format = "Time: :elapsedfull [:bar] Iteration :current/:total (:percent)", total = num_iter)
   
   # subset data by category for re-sampling later
-  ind_subset <- data_t_matrix[grep("ind", rownames(data_t_matrix)), ]
-  pal_subset <- data_t_matrix[grep("pal", rownames(data_t_matrix)), ]
-  pre_subset <- data_t_matrix[grep("pre", rownames(data_t_matrix)), ]
+  ind_subset <- data[grep("ind", rownames(data)), ]
+  pal_subset <- data[grep("pal", rownames(data)), ]
+  pre_subset <- data[grep("pre", rownames(data)), ]
 
   # perform kmeans for each bootstrap iteration
   for (i in seq_len(num_iter)) {
@@ -28,15 +28,15 @@ kmeans_bootstrap <- function(data_t_matrix, k, num_iter) {
                                       replace = TRUE), ]
     pre_resample <- pre_subset[sample(nrow(pre_subset), nrow(pre_subset),
                                       replace = TRUE), ]
-    data_t_matrix_resample <- rbind(ind_resample, pal_resample, pre_resample)
+    data_resample <- rbind(ind_resample, pal_resample, pre_resample)
 
     # run kmeans
-    kmeans_result <- kmeans(data_t_matrix_resample, centers = k)
+    kmeans_result <- kmeans(data_resample, centers = k)
     cluster_assignments <- kmeans_result$cluster
 
     # calculate category, pair-wise clustering probabilities
     boot_stats[i, ] <- get_pair_wise_clustering_probs(
-      cluster_assignments, data_t_matrix_resample, k)
+      cluster_assignments, data_resample, k)
 
     # update progress bar
     pb$tick()

@@ -11,7 +11,7 @@ library(svglite)
 
 
 # generate violin graph from temperate-to-virulent bootstrapping
-create_lifestyle_voilin <- function(data, file_name, plot_dir) {
+create_cat_voilins <- function(data, file_name, plot_dir) {
   
   melted_data <- melt(data)
   colnames(melted_data) <- c("point", "cat", "value")
@@ -51,7 +51,7 @@ create_lifestyle_voilin <- function(data, file_name, plot_dir) {
       plot.margin = margin(20, 5, 20, 20, "points"),
       axis.title.x = element_blank(),
       axis.title.y = element_blank(),
-      axis.text.x = element_blank(),
+      # axis.text.x = element_blank(),
       axis.text.y = element_text(size = 14, color = "black",
                                  face = "bold", hjust = -0.5),
       panel.grid.major = element_blank(),
