@@ -63,7 +63,7 @@ if [ -d "$predict_dir/midfolder" ]; then
 	tar -czvf midfolder.tar.gz midfolder
 	rm -r midfolder
 else
-	echo "Error: Directory 'midfolder' not found. Skipping compression."
+	echo "phage_predictions: Directory 'midfolder' not found. Skipping compression."
 fi
 
 if [ -d "$predict_dir/CNN_temp" ]; then
@@ -71,7 +71,7 @@ if [ -d "$predict_dir/CNN_temp" ]; then
 	tar -czvf CNN_temp.tar.gz CNN_temp
 	rm -r CNN_temp
 else
-	echo "Error: Directory 'CNN_temp' not found. Skipping compression."
+	echo "phage_predictions: Directory 'CNN_temp' not found. Skipping compression."
 fi
 
 cd "$HOME/project_coprolite_viromes"
