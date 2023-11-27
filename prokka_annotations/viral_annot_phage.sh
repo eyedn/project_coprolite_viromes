@@ -21,7 +21,7 @@ num_cores=$3
 sample=$(head -n ${SGE_TASK_ID} ${project_dir}/samples/${origin}_samples.txt | \
 		tail -n 1 | cut -d ' ' -f 1)
 type="Viruses"
-label="vir_on_phages"
+label="vir_on_phage"
 
 # define directories and files
 contigs_dir="${project_dir}/contigs"
