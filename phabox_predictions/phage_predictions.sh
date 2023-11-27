@@ -48,6 +48,8 @@ fi
 echo "===================================================================================================="
 echo "$(timestamp): phage_predictions: $origin; $sample"
 echo "===================================================================================================="
+# identify contigs that are phages
+get_phages "$sample" "$contigs_file" "$predict_dir" "$num_cores"
 # identify is phages are virulent or temperate
 get_lifestyles "$sample" "$phage_file" "$predict_dir" "$num_cores"
 
