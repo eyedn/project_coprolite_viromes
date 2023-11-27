@@ -16,3 +16,6 @@ num_cores=$3
 
 # annotate phages for bacterial genes
 . prokka_annotations/bacterial_annot_phage.sh "$origin" "$origin_parent" "$num_cores"
+
+# annotate phages for bacterial genes
+. prokka_annotations/viral_annot_phage.sh "$origin" "$origin_parent" "$num_cores"
