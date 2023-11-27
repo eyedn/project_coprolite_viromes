@@ -2,7 +2,7 @@
 ###############################################################################
 #     Aydin Karatas
 #     Project Coprolite Viromes
-#	  submit_pipeline.sh 
+#	  loop_runs.sh 
 ###############################################################################
 cd $HOME/project_coprolite_viromes
 
