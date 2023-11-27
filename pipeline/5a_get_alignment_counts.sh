@@ -21,7 +21,7 @@ prokka_annotations="${project_dir}/genome_annotation"
 vf_alignments="${project_dir}/alignment/!vf"
 cazy_alignments="${project_dir}/alignment/!cazy"
 data_dir="$project_dir/data"
-search_dir="$prokka_annotations/!_annotation_phage"
+search_dir="$prokka_annotations/!_annotation_bac_on_phage"
 
 # generate counts with python script
 mkdir -p $data_dir

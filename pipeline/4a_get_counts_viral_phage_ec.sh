@@ -19,7 +19,7 @@ num_cores=$3
 # define directories and file
 prokka_annotations="${project_dir}/genome_annotation"
 data_dir="$project_dir/data"
-search_dir="$prokka_annotations/*viral_phage"
+search_dir="$prokka_annotations/*bac_on_virus_and_phage"
 gff_list="$data_dir/vir_phage_ec_counts_tmp.txt"
 csv_path="$data_dir/vir_phage_ec_counts.csv"
 
