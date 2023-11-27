@@ -12,7 +12,4 @@ origin_parent=$2
 num_cores=$3
 
 # run after pipeline_indiv/1_download_and_assembly.sh ran
-. pipeline_all/3b_1_get_counts_hosts.sh "$origin" "$origin_parent" "$num_cores"
-. pipeline_all/3b_2_get_counts_phage_ec.sh "$origin" "$origin_parent" "$num_cores"
 . pipeline_all/3b_3_get_counts_viral_lifestyle.sh "$origin" "$origin_parent" "$num_cores"
-. pipeline_all/3b_4_get_counts_viral_taxonomy.sh "$origin" "$origin_parent" "$num_cores"
