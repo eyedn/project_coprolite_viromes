@@ -23,10 +23,10 @@ needed for analysis. These auxiliary files are distinguished by the file name
 template `{number}a_{name}.sh`, and can be run once the major step file has 
 run.
 
-The one exception to this rule is step **(3.)**. The auxiliary file calls for 4 
+The one exception to this rule is step **(3.)**. The auxiliary file calls on 
 "sub-auxiliary" data wrangling steps, distinguished by the file name prefix 
-`3b_{number}...`. Running `3a_...` will complete all 4 sub-auxiliary steps, but 
-they could be directly run in any order if desired.
+`3b_{number}...`. Running `3a_...` will complete all necessary sub-auxiliary
+steps, but they could be directly run in any order if desired.
 
 ## Description of Pipeline Files and Directories in `main`
 The step(s) each directory is associated with are provided in "[]" at the end 
@@ -74,8 +74,8 @@ Here are the naming conventions again:
     + `./pipeline/{number}_{name}.sh`
 * Auxiliary step: all sample origins run together with `-o all`
     + `./pipeline/{number}a_{name}.sh`
-* Sub-auxiliary step: specific to step **(3.)**; not necessary to run
-    + `./pipeline/{number}b_{number}_{name}.sh`
+* Sub-auxiliar functions for step **(3.)** in `./pipeline/3a_supplement`
+    + `./pipeline/3a_supplement/{number}b_{number}_{name}.sh`
 
 ### `./download/` [1]
 The `download` directory contains scripts that use *prefetch* and 
