@@ -17,7 +17,7 @@ num_cores=$3
 # define sample variables
 sample=$(head -n ${SGE_TASK_ID} ${project_dir}/samples/${origin}_samples.txt | \
 		tail -n 1 | cut -d ' ' -f 1)
-label="phage"
+label="bac_on_phage"
 
 # define directories and files
 alignment_dir="${project_dir}/alignment"
