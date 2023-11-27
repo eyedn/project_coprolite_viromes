@@ -2,7 +2,7 @@
 ###############################################################################
 #     Aydin Karatas
 #		  Project Coprolite Viromes
-#		  run.sh 
+#		  run_ori.sh 
 ###############################################################################
 cd $HOME/project_coprolite_viromes
 for FILE in general_bash_functions/* ; do source $FILE ; done
@@ -37,7 +37,7 @@ for arg in "${args[@]}"; do
   # if an argument is empty, it may have not been provided to the script
   if [ -z "${!arg}" ]; then
     echo "ERROR: missing <$arg>."
-    echo "Usage Instructions: ./run_pipeline.sh -s <script_name> -o <origin> -p <project_dir> -d <data_per_core> -c <cores>"
+    echo "Usage Instructions: ./run_ori.sh -s <script_name> -o <origin> -p <project_dir> -d <data_per_core> -c <cores>"
     exit 1
   # check orgin name to be in the list of valid origins
   elif [ "$arg" == "origin" ]; then
