@@ -25,8 +25,8 @@ sample=$(head -n ${SGE_TASK_ID} ${project_dir}/samples/${origin}_samples.txt | \
 contigs_dir="${project_dir}/contigs"
 annotations_dir="${project_dir}/genome_annotation"
 assembly_dir="${contigs_dir}/${origin}_${sample}_assembly"
-viral_contigs="${assembly_dir}/${origin}_${sample}_all_contigs.fa"
-phage_contigs="${project_dir}/phage_predictions/${origin}_${sample}_prediction/phage_contigs.fa"
+all_contigs="${assembly_dir}/${origin}_${sample}_all_contigs.fa"
+phage_contigs="${project_dir}/phage_predictions/${origin}_${sample}_prediction/predicted_phage.fa"
 annot_dir="${annotations_dir}/${origin}_${sample}_annotation_viruses"
 gff_file="$annot_dir/${sample}.gff.gz"
 viral_contigs_output="$assembly_dir/${origin}_${sample}_viral_phage_contigs.fa"
@@ -48,6 +48,6 @@ fi
 echo "===================================================================================================="
 echo "$(timestamp): create_viral_phage_contigs: identify viral contigs: $origin; $sample"
 echo "===================================================================================================="
-identify_viral_phage_contigs "$viral_contigs" "$phage_contigs" "$gff_file" "$viral_contigs_output"
+identify_viral_phage_contigs "$all_contigs" "$phage_contigs" "$gff_file" "$viral_contigs_output"
 
 gzip $viral_contigs_output

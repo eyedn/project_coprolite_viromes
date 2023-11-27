@@ -26,7 +26,7 @@ label="vir_on_phage"
 # define directories and files
 contigs_dir="${project_dir}/contigs"
 annotations_dir="${project_dir}/genome_annotation"
-contigs_file="${project_dir}/phage_predictions/${origin}_${sample}_prediction/phage_contigs.fa"
+contigs_file="${project_dir}/phage_predictions/${origin}_${sample}_prediction/predicted_phage.fa"
 sample_annot_dir="${annotations_dir}/${origin}_${sample}_annotation_${label}"
 custom_db="no_data"
 

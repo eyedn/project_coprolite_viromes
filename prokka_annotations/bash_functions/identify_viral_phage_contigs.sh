@@ -8,7 +8,7 @@
 
 # create a contigs file with only contigs with viral annotations
 identify_viral_phage_contigs() {
-	viral_contigs=$1
+	all_contigs=$1
 	phage_contigs=$2
 	gff_file=$3
 	viral_phage_contigs=$4
@@ -20,18 +20,18 @@ identify_viral_phage_contigs() {
 	fi
 
 	# decompress contigs file if needed
-	if ls ${viral_contigs}.gz 1> /dev/null 2>&1; then
-		gunzip ${viral_contigs}.gz
+	if ls ${all_contigs}.gz 1> /dev/null 2>&1; then
+		gunzip ${all_contigs}.gz
 	fi
 	if ls ${phage_contigs}.gz 1> /dev/null 2>&1; then
 		gunzip ${phage_contigs}.gz
 	fi
 	
 	python3 prokka_annotations/identify_viral_phage_contigs.py \
-		$viral_contigs $phage_contigs $gff_file > $viral_phage_contigs
+		$all_contigs $phage_contigs $gff_file > $viral_phage_contigs
 
-	if ls ${viral_contigs} 1> /dev/null 2>&1; then
-		gzip ${viral_contigs}
+	if ls ${all_contigs} 1> /dev/null 2>&1; then
+		gzip ${all_contigs}
 	fi
 	if ls ${phage_contigs} 1> /dev/null 2>&1; then
 		gzip ${phage_contigs}
