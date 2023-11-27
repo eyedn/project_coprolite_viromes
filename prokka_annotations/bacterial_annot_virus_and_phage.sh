@@ -2,7 +2,7 @@
 ###############################################################################
 #       Aydin Karatas
 #		Project Coprolite Viromes
-#		bacterial_annot_viral_phage.sh 
+#		bacterial_annot_virus_and_phage.sh 
 ###############################################################################
 cd $HOME/project_coprolite_viromes
 for FILE in prokka_annotations/bash_functions/* ; do source $FILE ; done
@@ -21,7 +21,7 @@ num_cores=$3
 sample=$(head -n ${SGE_TASK_ID} ${project_dir}/samples/${origin}_samples.txt | \
 		tail -n 1 | cut -d ' ' -f 1)
 type="Bacteria"
-label="viral_phage"
+label="bac_on_virus_and_phage"
 
 # define directories and files
 contigs_dir="${project_dir}/contigs"
@@ -33,22 +33,22 @@ custom_db="no_data"
 
 # check if contigs file exists
 if ls ${contigs_file}* 1> /dev/null 2>&1; then
-	echo "$(timestamp): bacterial_annot_viral_phage: contigs file found"
+	echo "$(timestamp): bacterial_annot_virus_and_phage: contigs file found"
 else
-	echo "$(timestamp): bacterial_annot_viral_phage: contigs file not found"
+	echo "$(timestamp): bacterial_annot_virus_and_phage: contigs file not found"
 	rmdir $annot_dir
 	exit 1
 fi
 
 # check if annotations already completed
 if ls $sample_annot_dir 1> /dev/null 2>&1; then
-	echo "$(timestamp): bacterial_annot_viral_phage: annotations already completed"
+	echo "$(timestamp): bacterial_annot_virus_and_phage: annotations already completed"
 	return 0
 fi
 
 # annotation function uses prokka
 echo "===================================================================================================="
-echo "$(timestamp): bacterial_annot_viral_phage: $origin; $sample"
+echo "$(timestamp): bacterial_annot_virus_and_phage: $origin; $sample"
 echo "===================================================================================================="
 annotate_contigs "$sample" "$contigs_file" "$custom_db" "$sample_annot_dir" \
 	"$type" "$label" "$num_cores"
