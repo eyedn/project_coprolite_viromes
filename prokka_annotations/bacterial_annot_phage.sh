@@ -35,7 +35,6 @@ if ls ${contigs_file}* 1> /dev/null 2>&1; then
 	echo "$(timestamp): bacterial_annot_phage: contigs file found"
 else
 	echo "$(timestamp): bacterial_annot_phage: contigs file not found"
-	rmdir $annot_dir
 	exit 1
 fi
 
