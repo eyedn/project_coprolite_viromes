@@ -6,9 +6,11 @@
 ###############################################################################
 cd $HOME/project_coprolite_viromes
 
-script=$1
 
-if [[ $script =~ ^[0-9]+_ ]]; then
+script=$1
+filename=$(basename "$script")
+
+if [[ $filename =~ ^[0-9]+_ ]]; then
     # run pal samples
     ./run_ori.sh -s $script -d 8 -c 8 -p $SCRATCH/project_coprolite_viromes -o pal-AWC
     ./run_ori.sh -s $script -d 8 -c 8 -p $SCRATCH/project_coprolite_viromes -o pal-BEL
@@ -28,7 +30,7 @@ if [[ $script =~ ^[0-9]+_ ]]; then
     ./run_ori.sh -s $script -d 8 -c 8 -p $SCRATCH/project_coprolite_viromes -o pre-MEX
     ./run_ori.sh -s $script -d 8 -c 8 -p $SCRATCH/project_coprolite_viromes -o pre-PER
     ./run_ori.sh -s $script -d 8 -c 8 -p $SCRATCH/project_coprolite_viromes -o pre-TZA
-elif [[ $script =~ ^[0-9]+a_ ]]; then
+elif [[ $filename =~ ^[0-9]+a_ ]]; then
     # run auxilliar script that is not specific to an origin
     ./run_ori.sh -s $script -d 8 -c 4 -p $SCRATCH/project_coprolite_viromes -o all
 fi
