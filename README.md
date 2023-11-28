@@ -32,27 +32,29 @@ steps, but they could be directly run in any order if desired.
 The step(s) each directory is associated with are provided in "[]" at the end 
 of the subsection header.
 
-### `./run.sh` [General/All]
-`run.sh` is used to submit sections of the pipeline in the `pipeline` directory 
+### `./run_step.sh` [General/All]
+`run_step.sh` is used to run samples from all origins through a given pipeline 
+step, whether major of auxilliary. The pipeline step to be run is designated
+as the one and only argument for this script. Here are the usage instructions
+for `run_step.sh`.
+```
+./run_step.sh pipeline/<script>.sh
+```
+
+### `./run_ori.sh` [General/All]
+`run_ori.sh` is used to submit sections of the pipeline in the `pipeline` directory 
 on the UCLA Hoffman2 Cluster as a job array. `run.sh` requires specifying the 
 "origin" of samples (`-o`). Valid origins are:
 * Industrial samples: ind-DNK ind-ESP ind-USA
 * Non-industrial samples: pre-FJI pre-MDG pre-MEX pre-PER pre-TZA
 * Ancient samples: pal-AWC pal-BEL pal-BMS pal-ENG pal-ZAF pal-ZAP
 * Misc: test all
-In particular, the "all" origin is used when submitting auxiliary steps.
+In particular, the "all" origin is used when submitting auxiliary steps, since
+these steps are not specific to an origin. However, auxilliary steps should
+still be done through `run_step.sh`. Here are the usage instructions for 
+`run_ori.sh`.
 ```
 ./run.sh -p <project_directory> -d <data_per_core> -c <cores> -s <script> -o <sample_origin>
-```
-
-### `./origin_loop.sh` [General/All]
-`origin_loop.sh` is used to automatically run samples from all origins through 
-a given major pipeline step. The major pipeline step to be run is designated as 
-the one and only argument for this script. Note that this script is not 
-preferred if certain origin categories need more resources than others due to 
-large file sizes.
-```
-./submit_pipeline_by_origin.sh pipeline_by_origin/<script>.sh
 ```
 
 ### `./samples/` [General/All]
