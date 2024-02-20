@@ -10,8 +10,8 @@ library(dendextend)
 
 
 # generate a heatmap based on differential expression
-create_heatmap <- function(data, signif_res, color_range, subset, 
-                           file_name, plot_dir) {
+create_cazy_heatmap <- function(data, signif_res, subset, 
+                                     file_name, plot_dir) {
   
   sig_data <- data[, rownames(signif_res)[1:subset]]
   
@@ -41,15 +41,13 @@ create_heatmap <- function(data, signif_res, color_range, subset,
   groups <- rownames(sig_data_concat)
   for (i in seq_len(length(groups))) {
     if (grepl("pal", groups[i])) {
-      weights <- c(weights, 4)
-    } else if (grepl("MEX", groups[i])) {
-      weights <- c(weights, 2)
-    } else if (grepl("pre", groups[i])) {
-      weights <- c(weights, 3)
-    } else if (grepl("ind", groups[i])) {
-      weights <- c(weights, 1)
-    } else {
       weights <- c(weights, 0)
+    } else if (grepl("pre", groups[i])) {
+      weights <- c(weights, 1)
+    } else if (grepl("ind", groups[i])) {
+      weights <- c(weights, 2)
+    } else {
+      weights <- c(weights, 3)
     }
   }
   reordered_dend <- reorder(dend, wts = weights, agglo.FUN = mean)
@@ -73,25 +71,25 @@ create_heatmap <- function(data, signif_res, color_range, subset,
     col_labels <- c(col_labels, origin_labels[[groups[i]]])
   }
   
-  # define row colors
-  ec_col_set <- brewer.pal(7, "PuRd")
-  ecs <- colnames(sig_data_concat)
-  ec_col <- c()
-  for (i in seq_len(length(ecs))) {
-    if (startsWith(ecs[i], "1.")) {
-      ec_col <- c(ec_col, ec_col_set[1])
-    } else if (startsWith(ecs[i], "2.")) {
-      ec_col <- c(ec_col, ec_col_set[2])
-    } else if (startsWith(ecs[i], "3.")) {
-      ec_col <- c(ec_col, ec_col_set[3])
-    } else if (startsWith(ecs[i], "4.")) {
-      ec_col <- c(ec_col, ec_col_set[4])
-    } else if (startsWith(ecs[i], "5.")) {
-      ec_col <- c(ec_col, ec_col_set[5])
-    } else if (startsWith(ecs[i], "6.")) {
-      ec_col <- c(ec_col, ec_col_set[6])
+  # define row colors and labels
+  row_col_range <- brewer.pal(7, "PuRd")
+  rows <- colnames(sig_data_concat)
+  row_col <- c()
+  for (i in seq_len(length(rows))) {
+    if (startsWith(rows[i], "GH")) {
+      row_col <- c(row_col, row_col_range[1])
+    } else if (startsWith(rows[i], "GT")) {
+      row_col <- c(row_col, row_col_range[2])
+    } else if (startsWith(rows[i], "PL")) {
+      row_col <- c(row_col, row_col_range[3])
+    } else if (startsWith(rows[i], "CE")) {
+      row_col <- c(row_col, row_col_range[4])
+    } else if (startsWith(rows[i], "AA")) {
+      row_col <- c(row_col, row_col_range[5])
+    } else if (startsWith(rows[i], "CBM")) {
+      row_col <- c(row_col, row_col_range[6])
     } else {
-      ec_col <- c(ec_col, ec_col_set[7])
+      row_col <- c(row_col, row_col_range[7])
     } 
   }
   
@@ -101,6 +99,7 @@ create_heatmap <- function(data, signif_res, color_range, subset,
           width = 35,
           height = 45)
   
+  # Generate the heatmap with adjusted sizes
   heatmap.2(t(sig_data_concat),
             trace = "none",
             Colv = reordered_dend, 
@@ -109,18 +108,19 @@ create_heatmap <- function(data, signif_res, color_range, subset,
             srtCol = 325,
             adjCol = c(0, 1),
             ColSideColors = group_col,
+            RowSideColors = row_col,
             labCol = col_labels,
-            RowSideColors = ec_col,
             margins = c(25, 20),
             cexRow = 3,
             cexCol = 3.5,
             lhei = c(0.8, 3),
             lwid = c(0.8, 3),
-            key = FALSE,
+            key = TRUE,
             key.xlab = "scaled log(CPM + 1)",
-            key.title = "Median EC Representation",
+            key.title = "Median Representation",
             keysize = 2,
             key.par = list(cex = 3),
             density.info = "none"
   )
+  
 }

@@ -21,9 +21,9 @@ create_jitter <- function(data, classes_to_use, file_name, plot_dir) {
   melted_data$cat <- as.character(melted_data$cat)
   melted_data$cat <- substr(melted_data$cat, 0, 3)
   for (i in seq_len(nrow(melted_data))) {
-    ifelse(melted_data[i, "cat"] == "ind", melted_data[i, "cat"] <- 1,
+    ifelse(melted_data[i, "cat"] == "ind", melted_data[i, "cat"] <- 3,
            ifelse(melted_data[i, "cat"] == "pre", melted_data[i, "cat"] <- 2,
-                  melted_data[i, "cat"] <- 3))
+                  melted_data[i, "cat"] <- 1))
   }
   melted_data$cat <- factor(melted_data$cat)
   
@@ -36,8 +36,8 @@ create_jitter <- function(data, classes_to_use, file_name, plot_dir) {
     geom_point(color = "black", pch = 21, size = 4, 
                position = position_jitterdodge(jitter.width = 0.55,
                                                dodge.width = 0.85)) +
-    scale_fill_manual(labels = c("Industrial", "Pre-Industrial", "Paleosample"),
-                      values = brewer.pal(9, "Greys")[c(3,5,8)]) +
+    scale_fill_manual(labels = c("Paleosample", "Pre-Industrial", "Industrial"),
+                      values = rev(brewer.pal(9, "Greys")[c(3,5,8)])) +
     # annotate("text", label = "**", x = 1, y = star_height + 1,
     #          size = 12, color = brewer.pal(11, "RdBu")[8]) +
     # annotate("text", label = "**", x = 1, y = star_height + 3,

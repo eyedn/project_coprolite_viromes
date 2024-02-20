@@ -4,11 +4,12 @@ module load anaconda3
 conda activate msa
 
 
-# define number of cores to use arguments
+# define arguments
 cores=$1
+profiles_dir=$2
 
 # input fasta
-FAS=$(head -n ${SGE_TASK_ID} $SCRATCH/VFDB_cluster_profiles/clusters.txt | tail -n 1)
+FAS=$(head -n ${SGE_TASK_ID} $profiles_dir/clusters.txt | tail -n 1)
 
 # run mafft on fasta file
 ALN=$(echo $FAS | sed 's/.fas/.aln/')
@@ -28,7 +29,7 @@ fi
 
 # check if hmm file was created and has content
 if [ ! -s "$HMM" ]; then
-    echo $HMM >> $SCRATCH/VFDB_profile_errors.txt
+    echo $HMM >> $profiles_dir/errors.txt
     exit 1
 else
     rm -rf $SCRATCH/joblogs/create_profiles/*.${SGE_TASK_ID}

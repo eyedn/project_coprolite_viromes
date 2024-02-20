@@ -1,8 +1,8 @@
 #!/bin/bash
 
-
+profiles_dir=$1
 cores=2
-tot_clusters=$(wc -l < $SCRATCH/VFDB_cluster_profiles/clusters.txt)
+tot_clusters=$(wc -l < $profiles_dir/clusters.txt)
 qsub \
     -cwd \
     -N "create_profiles" \
@@ -13,4 +13,4 @@ qsub \
     -M $USER@mail \
     -m a \
     -t 1-$tot_clusters:1 \
-    /u/home/a/ayd1n/project_coprolite_viromes/format_VFDB/VFDB_create_profiles.sh $cores
+    /u/home/a/ayd1n/project_coprolite_viromes/format_VFDB/create_profiles.sh $cores $profiles_dir

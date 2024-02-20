@@ -8,22 +8,28 @@
 normalize_data <- function(df) {
   df <- as.matrix(df)
   
-  zero_rows <- which(rowSums(df) == 0)
-  zero_cols <- which(colSums(df) == 0)
+  # identify rows and columns with all zeros
+  zero_rows <- unname(which(rowSums(df) == 0))
+  zero_cols <- unname(which(colSums(df) == 0))
   
-  # re-assign zero_rows/cols to inconsequential numbers if there are none
-  if (is.na(zero_rows[1])) {
-    zero_rows <- nrow(df) * 2
-    }
-  if (is.na(zero_cols[1])) {
-    zero_cols <- ncol(df) * 2
+  # identify rows with all NAs
+  na_rows <- unname(which(is.na(rowSums(df))))
+  
+  # combine zero_rows and na_rows
+  remove_rows <- unique(c(zero_rows, na_rows))
+  
+  # remove rows and columns with all zeros or NAs
+  if (length(remove_rows) > 0) {
+    df <- df[-remove_rows, ]
   }
-  
-  df <- df[-zero_rows, -zero_cols]
+  if (length(zero_cols) > 0) {
+    df <- df[, -zero_cols]
+  }
   
   # normalize by log(CPM + 1)
   for (i in seq_len(ncol(df))) {
-    df[, i] <- log10(10^6 * df[, i] / sum(df[, i]) + 1)
+    df[, i] <- log10(10^6 * df[, i] / sum(df[, i], na.rm = TRUE) + 1)
+    # df[, i] <- 10^6 * df[, i] / sum(df[, i], na.rm = TRUE)
   }
   
   return(df)

@@ -11,10 +11,11 @@ library(svglite)
 
 
 # generate violin graph from temperate-to-virulent bootstrapping
-create_cat_voilins <- function(data, file_name, plot_dir) {
+create_cat_voilins <- function(data, ci_offset, file_name, plot_dir) {
   
   melted_data <- melt(data)
   colnames(melted_data) <- c("point", "cat", "value")
+  melted_data$cat <- factor(melted_data$cat, levels = c("pal", "pre", "ind"))
   
   # calculate 95% CI for each category
   ci_data <- melted_data %>%
@@ -33,17 +34,17 @@ create_cat_voilins <- function(data, file_name, plot_dir) {
                  fill = brewer.pal(9, "Greys")[8],
                  color = brewer.pal(9, "Greys")[2],
                  stroke = 1, pch = 23, size = 5.5, inherit.aes = FALSE) +
-    annotate("text", x = 3.35, 
-             y = (ci_data[[3, "ymin"]] + ci_data[[3, "ymax"]]) / 2,
+    annotate("text", x = (1.1 + ci_offset[1]), 
+             y = (ci_data[[1, "ymin"]] + ci_data[[1, "ymax"]]) / 2,
              label = "95% CI", angle = '-90',
              size = 8, color = brewer.pal(11, "RdBu")[10]) +
-    annotate("segment", x = 1.575, xend = 1.575,
+    annotate("segment", x = (1 + ci_offset[1]), xend = (1 + ci_offset[1]),
              y = ci_data[[1, "ymin"]], yend = ci_data[[1, "ymax"]],
              size = 2, color = brewer.pal(11, "RdBu")[10]) +
-    annotate("segment", x = 2.6, xend = 2.6,
+    annotate("segment", x = (2 + ci_offset[2]), xend = (2 + ci_offset[2]),
              y = ci_data[[2, "ymin"]], yend = ci_data[[2, "ymax"]], 
              size = 2, color = brewer.pal(11, "RdBu")[10]) +
-    annotate("segment", x = 3.2, xend = 3.2,
+    annotate("segment", x = (3 + ci_offset[3]), xend = (3 + ci_offset[3]),
              y = ci_data[[3, "ymin"]], yend = ci_data[[3, "ymax"]], 
              size = 2, color = brewer.pal(11, "RdBu")[10]) +
     theme_bw() +
