@@ -9,11 +9,7 @@ library(reshape2)
 
 
 # create a beeswarms plot of paired-cluserting tendencies
-create_jitter <- function(data, classes_to_use, file_name, plot_dir) {
-  
-  ec_classes <- c("Oxidoreductases", "Transferases", "Hydrolases", "Lyases",
-                  "Isomerases", "Ligases", "Translocases")
-  ec_classes <- ec_classes[classes_to_use]
+create_jitter <- function(data, classes, file_name, plot_dir) {
   
   melted_data <- as.data.frame(melt(data))
   colnames(melted_data) <- c("cat", "ec", "value")
@@ -69,7 +65,7 @@ create_jitter <- function(data, classes_to_use, file_name, plot_dir) {
     labs(fill = "Categories", y = "Scaled log(CPM + 1)",
          x = "Enzyme Class",
          title = "Enzyme Classes of Most Differentially Represented Genes") +
-    scale_x_discrete(labels = ec_classes) +
+    scale_x_discrete(labels = classes) +
     theme_bw() +
     theme(
       plot.margin = margin(20, 20, 20, 20, "points"),

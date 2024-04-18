@@ -68,8 +68,5 @@ get_diff_repres_ec <- function(data) {
     pb_2$tick()
   }
   
-  # order p-values from lowest to highest based on Kruskal test
-  ordered_res <- kruskal_res[order(kruskal_res[, "kruskal_p"]), ]
-  
-  return(ordered_res)
+  return(kruskal_res)
 }

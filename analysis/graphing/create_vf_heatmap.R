@@ -10,10 +10,10 @@ library(dendextend)
 
 
 # generate a heatmap based on differential expression
-create_vf_heatmap <- function(data, signif_res, subset, vf_reference,
-                                file_name, plot_dir) {
+create_vf_heatmap <- function(data, signif_res, subset, vfc_subset, 
+                              vfc_max_colors, file_name, plot_dir) {
   
-  sig_data <- data[, rownames(signif_res)[1:subset]]
+  sig_data <- data[, signif_res[c(1:subset), "VFID"]]
   
   sig_data_concat <- matrix(ncol = ncol(sig_data), nrow = length(cat_labels))
   colnames(sig_data_concat) <- colnames(sig_data)
@@ -72,14 +72,22 @@ create_vf_heatmap <- function(data, signif_res, subset, vf_reference,
   }
   
   # define row colors and labels
-  row_col_range <- c(brewer.pal(9, "PuRd"),
-                     brewer.pal(9, "Purples")[c(5,6,7)],
-                     brewer.pal(9, "Reds")[c(2,3)])
-  rows <- colnames(sig_data_concat)
+  row_col_range <- brewer.pal(vfc_max_colors, "PuRd")
+  vfc_subset$color <- 1
+  for (i in seq_len(nrow(vfc_subset))) {
+    if (i < vfc_max_colors) {
+      vfc_subset[i, "color"] <- vfc_max_colors + 1 - i
+    } else {
+      break
+    }
+  }
+  rownames(vfc_subset) <- vfc_subset[, "Var1"]
+  
   row_col <- c()
-  rownames(vf_reference) = vf_reference[, "VFID"]
-  for (i in seq_len(length(rows))) {
-    row_col <- c(row_col, row_col_range[vf_reference[rows[i], "color"]])
+  for (i in seq_len(subset)) {
+    row_col <- c(row_col,
+                 row_col_range[vfc_subset[signif_res[i, "VFCID"], "color"]]
+                 )
   }
   
   # save plot to svg file

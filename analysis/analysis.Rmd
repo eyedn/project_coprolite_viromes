@@ -4,17 +4,12 @@ author: "Aydin Karatas"
 output: html_document
 ---
 
-## Set directory of functions
+## set up functions and working directory
 ```{r setup, include=FALSE}
-dir = "~/Documents/Research/project_coprolite_viromes/analysis/"
-knitr::opts_chunk$set(root.dir = dir)
-```
-
-## Source Functions and Define Global Variables
-```{r source functions, echo=FALSE}
 base_dir <- "~/Documents/Research/project_coprolite_viromes/analysis/"
+knitr::opts_chunk$set(root.dir = base_dir)
 
-# function to source R files from a specified directory
+# source functions from different directories
 source_files_from_dir <- function(directory) {
   full_path <- file.path(base_dir, directory)
   functions_list <- list.files(
@@ -24,81 +19,33 @@ source_files_from_dir <- function(directory) {
     )
   sapply(functions_list, source)
 }
-
-# source functions from different directories
 source_files_from_dir("stats")
 source_files_from_dir("graphing")
 source_files_from_dir("misc")
 
 # define global variables
 set.seed(seed = 123)
-
+data_dir <- "~/Documents/Research/project_coprolite_viromes_NOT_CODE/data"
+figs_dir <- "~/Documents/Research/project_coprolite_viromes_NOT_CODE/figures"
 k <- 4
 max_iter <- 1000
 subset_top <- 100
 star_bounds <- list(list(0.1, 0.9), list(0.025, 0.975), list(0.01, 0.99),
                     list(0.001, 0.999))
-
-data <- "~/Documents/Research/project_coprolite_viromes_NOT_CODE/data"
-vir_phage_ec_prop_data <- paste0(data, "/vir_phage_ec_counts.csv")
-phage_ec_prop_data <- paste0(data, "/phage_ec_counts.csv")
-vir_on_phage_ec_prop_data <- paste0(data, "/vir_on_phage_ec_counts.csv")
-bac_on_phage_ec_prop_data <- paste0(data, "/bac_on_phage_ec_counts.csv")
-lifestyle_counts_data <- paste0(data, "/lifestyle_counts.csv")
-cazy_prop_data <- paste0(data, "/cazy_alignment_counts.csv")
-cazy_contig_hits_data <- paste0(data, "/cazy_alignment_contig_hits.csv")
-vf_prop_data <- paste0(data, "/vf_alignment_counts.csv")
-vf_contig_hits_data <- paste0(data, "/vf_alignment_contig_hits.csv")
-vf_reference <- paste0(data, "/VFs.csv")
-
-figures <- "~/Documents/Research/project_coprolite_viromes_NOT_CODE/figures"
-violin_dir <- paste0(figures, "/violin")
-heat_dir <- paste0(figures, "/heat")
-jitter_dir <- paste0(figures, "/jitter")
-
-voilin_vir_ec <- paste0("clustering_vir_ec_", k)
-voilin_lifestyle <- "lifestyle"
-voilin_vf_aln <- "vf_aln"
-voilin_cazy_aln <- "cazy_aln"
-voilin_phage_ec <- paste0("clustering_phage_ec_", k)
-voilin_phage_fam <- paste0("clustering_phage_fam_", k)
-voilin_phage_host <- paste0("clustering_phage_host_", k)
-
-heat_vir_ec <- paste0("diff_repres_vir_ec_", subset_top)
-heat_vir_ec_no_key <- paste0("diff_repres_vir_ec_no_key", subset_top)
-heat_phage_ec <- paste0("diff_repres_phage_ec_", subset_top)
-heat_phage_fam <- paste0("diff_repres_phage_fam_", subset_top)
-heat_phage_host <- paste0("diff_repres_phage_host_", subset_top)
-heat_cazy <- "diff_repress_cazy_profiles"
-heat_vf <- "diff_repress_vf_profiles"
-
-jitter_vir_classes <- paste0("vir_classes_", subset_top)
-jitter_phage_classes <- paste0("phage_classes_", subset_top)
 ```
-
 ## Analysis of viral metabolic ec counts
 First examine what the optimal k for k-means should be 
 ```{r vir ec prep}
 # read in raw counts data
 vir_ec_counts <- read.csv(
-  file = vir_phage_ec_prop_data,
+  file = paste0(data_dir, "/vir_phage_ec_counts.csv"),
   header = TRUE,
   row.names = 1
   )
 
-# hist(unlist(vir_ec_counts, use.names = FALSE))
-
 # normalize observations within a sample and transform to log( CPM + 1 )
 vir_ec_norm <- normalize_data(df = vir_ec_counts)
-
-# hist(unlist(vir_ec_norm, use.names = FALSE))
-
-# vir_ec_t_mat <- t(vir_ec_norm)
 vir_ec_t_mat <- scale(t(vir_ec_norm))
-
-# hist(unlist(vir_ec_t_mat, use.names = FALSE))
-
-# ks.test(x = vir_ec_vec, y = 'pnorm', alternative = 'two.sided')
 
 # find optimal number of clusters with a wss plot
 vir_ec_optimal_wss <- get_optimal_clusters(
@@ -107,7 +54,6 @@ vir_ec_optimal_wss <- get_optimal_clusters(
   )
 vir_ec_optimal_wss
 ```
-
 Next, perform the bootstrap and permutation k-means
 ```{r vir ec boot/perm}
 # perform kmeans with bootstrap resampling
@@ -124,7 +70,6 @@ vir_ec_perm_res <- kmeans_permute(
   num_iter = max_iter
   )
 ```
-
 Produce a violin plot
 ```{r vir ec violin}
 # combining bootstrap and permutation results
@@ -139,37 +84,40 @@ vir_ec_clus_res <- get_clustering_res(
 vir_ec_clus_violin <- create_clus_violin(
   boot_data = vir_ec_boot_res,
   clus_res = vir_ec_clus_res,
-  file_name = voilin_vir_ec,
-  plot_dir = violin_dir
+  file_name = paste0("clustering_vir_ec_", k),
+  plot_dir = paste0(figs_dir, "/violin")
   )
 vir_ec_clus_violin
 ```
-
 Produce heatmap of most differential represented metabolic genes
 ```{r vir ec heat}
 # get differential represented genes
 vir_ec_diff_repres <- get_diff_repres_ec(data = vir_ec_t_mat)
+vir_ec_diff_repres <- vir_ec_diff_repres[
+  order(vir_ec_diff_repres[, "kruskal_p"]), 
+  ]
 
-# generate heatmap of most differential represented genes
+# generate heatmap of most differentially represented genes
 create_metabolic_heatmap(
   data = vir_ec_t_mat,
   signif_res = vir_ec_diff_repres,
   subset = subset_top,
-  file_name = heat_vir_ec,
-  plot_dir = heat_dir
+  file_name = paste0("diff_repres_vir_ec_", subset_top),
+  plot_dir = paste0(figs_dir, "/heat")
   )
-met_colors <- brewer.pal(7, "PuRd")
+
 create_row_legend(
-   color_set =  met_colors, 
-   filename = paste0(heat_dir, "/metabolic_legend.svg")
+   color_set =  brewer.pal(7, "PuRd"), 
+   filename = paste0(figs_dir, "/heat/legend_metabolic.svg")
  )
 ```
-
 Produce jitter plot of enzyme categories
 ```{r vir ec jitter}
 # show ec proportions
 vir_ec_median <- get_cat_medians(
-  data = vir_ec_t_mat[, rownames(vir_ec_diff_repres)[1:subset_top]]
+  data = vir_ec_t_mat[, rownames(
+    vir_ec_diff_repres[vir_ec_diff_repres[, 1] <= 0.05, ]
+    )]
   )
 
 # print stats testing of ec classes
@@ -178,18 +126,18 @@ get_diff_repres_class(data = vir_ec_median)
 # plot jitter plot
 vir_ec_jitter <- create_jitter(
   data = vir_ec_median,
-  classes_to_use = c(1:7),
-  file_name = jitter_vir_classes,
-  plot_dir = jitter_dir
+  classes = c("Oxidoreductases", "Transferases", "Hydrolases", "Lyases",
+                  "Isomerases", "Ligases", "Translocases"),
+  file_name = paste0("vir_classes_", subset_top),
+  plot_dir = paste0(figs_dir, "/jitter")
   )
 ```
-
 ## Lifestyle prediction 
 First, bootstrap lifestyle stats
 ```{r lifestyle boot}
 # read in lifestyle counts
 lifestyle_counts <- read.csv(
-  file = lifestyle_counts_data,
+  file = paste0(data_dir, "/lifestyle_counts.csv"),
   header = TRUE,
   row.names = 1
   )
@@ -202,29 +150,28 @@ lifestyle_boot_res <- get_median_ratios(
   denom = 2
   )
 ```
-
 Produce a violin plot
 ```{r lifestyle violin}
 # plot violin plot of lifestyles by category
 lifestyle_voilin <- create_cat_voilins(
   data = lifestyle_boot_res, 
   ci_offset = c(0.15, 0.55, 0.55),
-  file_name = voilin_lifestyle,
-  plot_dir = violin_dir)
+  file_name = "lifestyle",
+  plot_dir = paste0(figs_dir, "/violin")
+  )
 lifestyle_voilin
 
 # print stats testing of lifestyles preferences between categories
 lifestyle <- melt(lifestyle_boot_res)
 kruskal.test(lifestyle$value, lifestyle$Var2)
 ```
-
 ## Alignment Results
 ### CAZY Alignment Counts
 Read in raw counts and format the counts by protein profile.
 ```{r cazy alignment}
 # read in cazy counts data
 cazy_counts <- read.csv(
-  file = cazy_prop_data,
+  file = paste0(data_dir, "/cazy_alignment_counts.csv"),
   header = TRUE,
   row.names = 1
   )
@@ -233,33 +180,52 @@ cazy_counts <- read.csv(
 cazy_norm <- normalize_data(cazy_counts)
 cazy_t_mat <- scale(t(cazy_norm))
 ```
-
 Produce heatmap
 ```{r cazy heat}
 # test for differentially represented cazy cat
 cazy_diff_repres <- get_diff_repres_ec(data = cazy_t_mat)
+cazy_diff_repres <- cazy_diff_repres[order(cazy_diff_repres[, "kruskal_p"]), ]
 
 # generate heatmap of most differential represented genes
 create_cazy_heatmap(
   data = cazy_t_mat,
   signif_res = cazy_diff_repres,
   subset = subset_top,
-  file_name = heat_cazy,
-  plot_dir = heat_dir
+  file_name = "diff_repress_cazy_profiles",
+  plot_dir = paste0(figs_dir, "/heat")
   )
-cazy_colors <- brewer.pal(7, "PuRd")
+
 create_row_legend(
-   color_set =  cazy_colors, 
-   filename = paste0(heat_dir, "/cazy_legend.svg")
+   color_set =  brewer.pal(7, "PuRd"), 
+   filename = paste0(figs_dir, "/heat/legend_cazy.svg")
  )
 ```
+Produce jitter
+```{r cazy jitter}
+# show ec proportions
+cazy_median <- get_cat_medians(
+  data = cazy_t_mat[, rownames(cazy_diff_repres)[1:subset_top]]
+  )
 
+# print stats testing of ec classes
+get_diff_repres_class(data = cazy_median)
+
+# plot jitter plot
+cazy_jitter <- create_jitter(
+  data = cazy_median,
+  classes = c("Glycoside Hydrolase", "Glycosyltransferase",
+              "Polysaccharise Lyase", "Carbohydrate Esterase",
+              "Auxiliary Activies", "Carbohydrate-binding Module", "Other"),
+  file_name = paste0("cazy_classes_", subset_top),
+  plot_dir = jitter_dir <- paste0(figs_dir, "/jitter")
+  )
+```
 ### CAZY Contig Hits
 First, bootstrap median coverage of db proteins
 ```{r cazy contig hits boot}
 # read in cazy counts data
 cazy_contig_hits <- read.csv(
-  file = cazy_contig_hits_data, 
+  file = paste0(data_dir, "/cazy_alignment_contig_hits.csv"), 
   header = TRUE,
   row.names = 1)
 
@@ -270,36 +236,34 @@ cazy_aln_boot_res <- get_median_ratios(
   numer = 2,
   denom = 1)
 ```
-
 Produce violin plot.
 ```{r cazy contig hits violin}
 # plot violin plot of coverage by category
 cazy_aln_voilin <- create_cat_voilins(
   data = cazy_aln_boot_res, 
   ci_offset = c(0.2, 0.55, 0.55),
-  file_name = voilin_cazy_aln,
-  plot_dir = violin_dir)
+  file_name = "cazy_aln",
+  plot_dir = paste0(figs_dir, "/violin"))
 cazy_aln_voilin
 
 # print stats testing of coverage between categories
 cazy_aln <- melt(cazy_aln_boot_res)
 kruskal.test(cazy_aln$value, cazy_aln$Var2)
 ```
-
 ### VFDB Alignment
 Read in vfdb reference df and raw counts.
 ```{r vfdb alignment}
 # read vf reference
-vf_to_vfc <- read.csv(
-  file = vf_reference,
+vf_meta_data <- read.csv(
+  file = paste0(data_dir, "/VFs.csv"),
   header = TRUE)
-
-# format vf reference
-vf_reference <- format_vf_reference(vf_reference = vf_to_vfc)
+vf_reference <- vf_meta_data
+colnames(vf_reference) <- vf_reference[1, ]
+vf_reference <- vf_reference[-1, c("VFID", "VFCID")]
 
 # read in vf counts data
 vf_counts <- read.csv(
-  file = vf_prop_data,
+  file = paste0(data_dir, "/vf_alignment_counts.csv"),
   header = TRUE,
   row.names = 1
   )
@@ -308,36 +272,60 @@ vf_counts <- read.csv(
 vf_norm <- normalize_data(vf_counts)
 vf_t_mat <- scale(t(vf_norm))
 ```
-
-Produce heatmap of the protein profiles
-```{r vir ec heat}
-# get differential represented genes
+Perform diff representation analysis of VF and determine most prominent VFC
+```{r vf diff repres}
+# get differential represented genes and combine with vf categories
 vf_diff_repres <- get_diff_repres_ec(data = vf_t_mat)
+vf_diff_repres <- cbind(rownames(vf_diff_repres), vf_diff_repres)
+colnames(vf_diff_repres) <- c("VFID", colnames(vf_diff_repres)[-1])
+vf_diff_repres <- merge(x = vf_diff_repres, y = vf_reference, by = "VFID")
+vf_diff_repres$kruskal_p <- as.numeric(vf_diff_repres$kruskal_p)
+vf_diff_repres$`ind vs. pre` <- as.numeric(vf_diff_repres$`ind vs. pre`)
+vf_diff_repres$`ind vs. pal` <- as.numeric(vf_diff_repres$`ind vs. pal`)
+vf_diff_repres$`pre vs. pal` <- as.numeric(vf_diff_repres$`pre vs. pal`)
+vf_diff_repres <- vf_diff_repres[order(vf_diff_repres[, "kruskal_p"]), ]
 
+# find most represented vfc
+vfc_sig_freq <- table(vf_diff_repres[vf_diff_repres$kruskal_p <= 0.05, "VFCID"])
+vfc_sig_freq <- vfc_sig_freq[order(unlist(vfc_sig_freq),
+                                         decreasing = TRUE)]
+vfc_sig_freq <- as.data.frame(vfc_sig_freq)
+vfc_sig_freq
+
+vfc_subset_freq <- table(vf_diff_repres[1:subset_top, "VFCID"])
+vfc_subset_freq <- vfc_subset_freq[order(unlist(vfc_subset_freq),
+                                         decreasing = TRUE)]
+vfc_subset_freq <- as.data.frame(vfc_subset_freq)
+vfc_subset_freq
+
+merge(vfc_subset_freq, unique(vf_meta_data[-1, c(5,6)]), by.x = "Var1", by.y = "X.3")
+merge(vfc_sig_freq, unique(vf_meta_data[-1, c(5,6)]), by.x = "Var1", by.y = "X.3")
+```
+Produce heatmap of the protein profiles
+```{r vf heat}
 # generate heatmap of most differential represented genes
+vfc_colors <- 4
 create_vf_heatmap(
   data = vf_t_mat,
   signif_res = vf_diff_repres, 
   subset = subset_top,
-  vf_reference = vf_reference,
-  file_name = heat_vf,
-  plot_dir = heat_dir
+  vfc_subset = vfc_subset_freq,
+  vfc_max_colors = vfc_colors,
+  file_name = paste0("diff_repress_vf_profiles_", vfc_colors),
+  plot_dir = heat_dir <- paste0(figs_dir, "/heat")
   )
-vf_colors <- c(brewer.pal(9, "PuRd"),
-               brewer.pal(9, "Purples")[c(5,6,7)],
-               brewer.pal(9, "Reds")[c(2,3)])
+
 create_row_legend(
-   color_set =  vf_colors, 
-   filename = paste0(heat_dir, "/vf_legend.svg")
+   color_set = brewer.pal(vfc_colors, "PuRd"), 
+   filename = paste0(figs_dir, "/heat/legend_vf_", vfc_colors, ".svg")
  )
 ```
-
 ### VFDB Contig Hits
 First, bootstrap median coverage of db proteins
 ```{r vf contig htis}
 # read in vf counts data
 vf_contig_hits <- read.csv(
-  file = vf_contig_hits_data,
+  file = paste0(data_dir, "/vf_alignment_contig_hits.csv"),
   header = TRUE,
   row.names = 1)
 
@@ -349,15 +337,14 @@ vf_aln_boot_res <- get_median_ratios(
   denom = 1
   )
 ```
-
 Produce violin plots
 ```{r vf contig hits violin}
 # plot violin plot of coverage by category
 vf_aln_voilin <- create_cat_voilins(
   data = vf_aln_boot_res,
   ci_offset = c(0.15, 0.55, 0.55),
-  file_name = voilin_vf_aln,
-  plot_dir = violin_dir)
+  file_name = "vf_aln",
+  plot_dir = paste0(figs_dir, "/violin"))
 vf_aln_voilin
 
 # print stats testing of coverage between categories
@@ -368,7 +355,7 @@ kruskal.test(vf_aln$value, vf_aln$Var2)
 ```{r parse phage pathways}
 # read in raw counts data
 bac_on_phage_counts <- read.csv(
-  file = bac_on_phage_ec_prop_data,
+  file = paste0(data_dir, "/bac_on_phage_ec_counts.csv"),
   header = TRUE,
   row.names = 1
 )
@@ -391,7 +378,8 @@ phage_pathways <- get_pathway_diff(
 brewer.pal(9, "Greys")[c(3, 9)]
 brewer.pal(11, "RdBu")[c(2, 9)]
 
-setdiff(rho_pathways[[1]], intersect(colnames(bac_on_phage_t_mat), rho_pathways[[1]]))
+setdiff(rho_pathways[[1]],
+        intersect(colnames(bac_on_phage_t_mat), rho_pathways[[1]]))
 ```
 
 
