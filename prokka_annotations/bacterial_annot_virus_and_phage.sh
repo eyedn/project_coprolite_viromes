@@ -41,9 +41,11 @@ else
 fi
 
 # check if annotations already completed
-if ls $sample_annot_dir 1> /dev/null 2>&1; then
+if ls ${sample_annot_dir}/*gff.gz  1> /dev/null 2>&1; then
 	echo "$(timestamp): bacterial_annot_virus_and_phage: annotations already completed"
 	return 0
+else
+	rmdir $annot_dir
 fi
 
 # annotation function uses prokka
