@@ -15,7 +15,7 @@ if __name__ == "__main__":
 
 
     viral_gene_coverage_all = gvp.get.get_viral_prop_from_annot(fa_file, gff_file, True)
-    viral_gene_coverage_no_hypo = gvp.get.get_viral_prop_from_annot(fa_file, gff_file, True)
+    viral_gene_coverage_no_hypo = gvp.get.get_viral_prop_from_annot(fa_file, gff_file, False)
 
     viral_gene_coverage_dict = gvp.create.create_df(viral_gene_coverage_all, csv_path_all)
     viral_gene_coverage_dict = gvp.create.create_df(viral_gene_coverage_no_hypo, csv_path_no_hypo)
