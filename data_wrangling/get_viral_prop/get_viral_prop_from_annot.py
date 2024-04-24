@@ -13,7 +13,8 @@ from collections import Counter
 
 
 def get_viral_prop_from_annot(fa_file: typing.Union[str, typing.BinaryIO],
-                                gff_file: typing.Union[str, typing.BinaryIO]) \
+                              gff_file: typing.Union[str, typing.BinaryIO],
+                              include_hypothetical_prot: bool) \
     -> typing.List[typing.Dict[str, any]]: 
     data_list: typing.List[typing.Dict[str, any]] = []
     cat = fa_file.split("/")[-1][0:3]
@@ -21,9 +22,13 @@ def get_viral_prop_from_annot(fa_file: typing.Union[str, typing.BinaryIO],
     sample = gff_file.split("/")[-1].split(".")[0]
     contigs = read_fa.read_contigs(fa_file)
     annotations = read_gff.read_annotations(gff_file)
-    for annot in annotations:
-        if annot.product != "hypothetical protein":
+    if include_hypothetical_prot:
+        for annot in annotations:
             contigs[annot.contig].add_covered_bases(annot)
+    else:
+        for annot in annotations:
+            if annot.product != "hypothetical protein":
+                contigs[annot.contig].add_covered_bases(annot)
     for contig in contigs.keys():
         contig_data = {'cat': cat, 'ori': ori, 'sample': sample,
                         'contig': contigs[contig].label,

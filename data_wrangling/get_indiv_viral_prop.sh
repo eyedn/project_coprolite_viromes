@@ -23,16 +23,12 @@ sample=$(head -n ${SGE_TASK_ID} ${project_dir}/samples/${origin}_samples.txt | \
 # define directories and file
 contigs_dir="${project_dir}/contigs"
 prokka_annotations="${project_dir}/genome_annotation"
-data_dir="$project_dir/data/indiv_viral_prop"
+data_dir_all="$project_dir/data/indiv_viral_prop_all"
+data_dir_no_hypo="$project_dir/data/indiv_viral_prop_no_hypo"
 fa_file="$contigs_dir/${origin}_${sample}_assembly/${origin}_${sample}_all_contigs.fa.gz"
 gff_file="$prokka_annotations/${origin}_${sample}_annotation_viruses/${sample}.gff.gz"
-csv_path="$data_dir/${origin}_${sample}_viral_prop.csv"
-
-# check if assembly was already complete for this sample
-if ls $csv_path 1> /dev/null 2>&1; then
-	echo "$(timestamp): get_indiv_viral_prop: final contigs file already created"
-	return 0
-fi
+csv_path_all="$data_dir_all/${origin}_${sample}_viral_prop_all.csv"
+csv_path_no_hypo="$data_dir_no_hypo/${origin}_${sample}_viral_prop_no_hypo.csv"
 
 # check if download was already complete for this sample
 if ls $fa_file 1> /dev/null 2>&1; then
@@ -52,16 +48,24 @@ fi
 echo "===================================================================================================="
 echo "$(timestamp): get_indiv_viral_prop: generating viral prop. counts"
 echo "===================================================================================================="
-mkdir -p $data_dir
+mkdir -p $data_dir_all $data_dir_no_hypo
 python3 data_wrangling/get_indiv_viral_prop.py \
 	$fa_file \
 	$gff_file \
-	$csv_path
+	$csv_path_all \
+	$csv_path_no_hypo
 
-# check if raw counts was created
-if ls $csv_path 1> /dev/null 2>&1; then
-	echo "$(timestamp): get_indiv_viral_prop: viral prop csv created"
+# check if viral prop csv's created
+if ls $csv_path_all 1> /dev/null 2>&1; then
+	echo "$(timestamp): get_indiv_viral_prop: viral prop all csv created"
 else
-	echo "$(timestamp): get_indiv_viral_prop: ERROR! viral prop csv not found"
+	echo "$(timestamp): get_indiv_viral_prop: ERROR! viral prop all csv not found"
+	exit 1
+fi
+
+if ls $csv_path_no_hypo 1> /dev/null 2>&1; then
+	echo "$(timestamp): get_indiv_viral_prop: viral prop no hypo csv created"
+else
+	echo "$(timestamp): get_indiv_viral_prop: ERROR! viral prop no hypo csv not found"
 	exit 1
 fi
