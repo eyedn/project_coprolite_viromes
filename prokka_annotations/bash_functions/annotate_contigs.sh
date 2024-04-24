@@ -17,8 +17,8 @@ annotate_contigs() {
 	local num_cores=$7
 
 	# if annotation already happend, skip return early
-	if ls $annot_dir 1> /dev/null 2>&1; then
-		echo "$(timestamp): annotate_contigs: annotation directory found. annotation already completed"
+	if ls ${annot_dir}/*gff.gz 1> /dev/null 2>&1; then
+		echo "$(timestamp): annotate_contigs: annotations found. annotation already completed"
 		return 0
 	fi
 

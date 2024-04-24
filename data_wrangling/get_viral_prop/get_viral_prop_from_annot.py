@@ -22,7 +22,8 @@ def get_viral_prop_from_annot(fa_file: typing.Union[str, typing.BinaryIO],
     contigs = read_fa.read_contigs(fa_file)
     annotations = read_gff.read_annotations(gff_file)
     for annot in annotations:
-        contigs[annot.contig].add_covered_bases(annot)
+        if annot.product != "hypothetical protein":
+            contigs[annot.contig].add_covered_bases(annot)
     for contig in contigs.keys():
         contig_data = {'cat': cat, 'ori': ori, 'sample': sample,
                         'contig': contigs[contig].label,
