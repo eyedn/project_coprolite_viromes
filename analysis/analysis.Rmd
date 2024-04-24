@@ -6,7 +6,8 @@ output: html_document
 
 ## set up functions and working directory
 ```{r setup, include=FALSE}
-base_dir <- "~/Documents/Research/project_coprolite_viromes/analysis/"
+base_dir <- "~/Documents/research/project_coprolite_viromes/analysis/"
+setwd(base_dir)
 knitr::opts_chunk$set(root.dir = base_dir)
 
 # source functions from different directories
@@ -25,8 +26,8 @@ source_files_from_dir("misc")
 
 # define global variables
 set.seed(seed = 123)
-data_dir <- "~/Documents/Research/project_coprolite_viromes_NOT_CODE/data"
-figs_dir <- "~/Documents/Research/project_coprolite_viromes_NOT_CODE/figures"
+data_dir <- "~/Documents/research/project_coprolite_viromes_NOT_CODE/data"
+figs_dir <- "~/Documents/research/project_coprolite_viromes_NOT_CODE/figures"
 k <- 4
 max_iter <- 1000
 subset_top <- 100
@@ -92,7 +93,7 @@ vir_ec_clus_violin
 Produce heatmap of most differential represented metabolic genes
 ```{r vir ec heat}
 # get differential represented genes
-vir_ec_diff_repres <- get_diff_repres_ec(data = vir_ec_t_mat)
+vir_ec_diff_repres <- get_diff_repres_cols(data = vir_ec_t_mat)
 vir_ec_diff_repres <- vir_ec_diff_repres[
   order(vir_ec_diff_repres[, "kruskal_p"]), 
   ]
@@ -114,21 +115,15 @@ create_row_legend(
 Produce jitter plot of enzyme categories
 ```{r vir ec jitter}
 # show ec proportions
-vir_ec_median <- get_cat_medians(
-  data = vir_ec_t_mat[, rownames(
-    vir_ec_diff_repres[vir_ec_diff_repres[, 1] <= 0.05, ]
-    )]
-  )
+vir_ec_median <- get_cat_medians(data = vir_ec_t_mat)
 
 # print stats testing of ec classes
-get_diff_repres_class(data = vir_ec_median)
+get_diff_repres_ec(data = vir_ec_median)
 
 # plot jitter plot
-vir_ec_jitter <- create_jitter(
+vir_ec_jitter <- create_metabolic_jitter(
   data = vir_ec_median,
-  classes = c("Oxidoreductases", "Transferases", "Hydrolases", "Lyases",
-                  "Isomerases", "Ligases", "Translocases"),
-  file_name = paste0("vir_classes_", subset_top),
+  file_name = "vir_ec_classes",
   plot_dir = paste0(figs_dir, "/jitter")
   )
 ```
@@ -183,7 +178,7 @@ cazy_t_mat <- scale(t(cazy_norm))
 Produce heatmap
 ```{r cazy heat}
 # test for differentially represented cazy cat
-cazy_diff_repres <- get_diff_repres_ec(data = cazy_t_mat)
+cazy_diff_repres <- get_diff_repres_cols(data = cazy_t_mat)
 cazy_diff_repres <- cazy_diff_repres[order(cazy_diff_repres[, "kruskal_p"]), ]
 
 # generate heatmap of most differential represented genes
@@ -202,21 +197,13 @@ create_row_legend(
 ```
 Produce jitter
 ```{r cazy jitter}
-# show ec proportions
-cazy_median <- get_cat_medians(
-  data = cazy_t_mat[, rownames(cazy_diff_repres)[1:subset_top]]
-  )
-
-# print stats testing of ec classes
-get_diff_repres_class(data = cazy_median)
+cazy_median <- get_cat_medians(data = cazy_t_mat)
 
 # plot jitter plot
-cazy_jitter <- create_jitter(
+# TODO: fix
+cazy_jitter <- create_cazy_jitter(
   data = cazy_median,
-  classes = c("Glycoside Hydrolase", "Glycosyltransferase",
-              "Polysaccharise Lyase", "Carbohydrate Esterase",
-              "Auxiliary Activies", "Carbohydrate-binding Module", "Other"),
-  file_name = paste0("cazy_classes_", subset_top),
+  file_name = "cazy_classes",
   plot_dir = jitter_dir <- paste0(figs_dir, "/jitter")
   )
 ```
@@ -259,7 +246,7 @@ vf_meta_data <- read.csv(
   header = TRUE)
 vf_reference <- vf_meta_data
 colnames(vf_reference) <- vf_reference[1, ]
-vf_reference <- vf_reference[-1, c("VFID", "VFCID")]
+vf_reference <- vf_reference[-1, c("VFID", "VFCID", "VF_Name", "VFcategory")]
 
 # read in vf counts data
 vf_counts <- read.csv(
@@ -275,7 +262,7 @@ vf_t_mat <- scale(t(vf_norm))
 Perform diff representation analysis of VF and determine most prominent VFC
 ```{r vf diff repres}
 # get differential represented genes and combine with vf categories
-vf_diff_repres <- get_diff_repres_ec(data = vf_t_mat)
+vf_diff_repres <- get_diff_repres_cols(data = vf_t_mat)
 vf_diff_repres <- cbind(rownames(vf_diff_repres), vf_diff_repres)
 colnames(vf_diff_repres) <- c("VFID", colnames(vf_diff_repres)[-1])
 vf_diff_repres <- merge(x = vf_diff_repres, y = vf_reference, by = "VFID")
@@ -286,6 +273,12 @@ vf_diff_repres$`pre vs. pal` <- as.numeric(vf_diff_repres$`pre vs. pal`)
 vf_diff_repres <- vf_diff_repres[order(vf_diff_repres[, "kruskal_p"]), ]
 
 # find most represented vfc
+vfc_freq <- table(vf_diff_repres[, "VFCID"])
+vfc_freq <- vfc_freq[order(unlist(vfc_freq),
+                                         decreasing = TRUE)]
+vfc_freq <- as.data.frame(vfc_freq)
+vfc_freq
+
 vfc_sig_freq <- table(vf_diff_repres[vf_diff_repres$kruskal_p <= 0.05, "VFCID"])
 vfc_sig_freq <- vfc_sig_freq[order(unlist(vfc_sig_freq),
                                          decreasing = TRUE)]
@@ -298,6 +291,7 @@ vfc_subset_freq <- vfc_subset_freq[order(unlist(vfc_subset_freq),
 vfc_subset_freq <- as.data.frame(vfc_subset_freq)
 vfc_subset_freq
 
+merge(vfc_freq, unique(vf_meta_data[-1, c(5,6)]), by.x = "Var1", by.y = "X.3")
 merge(vfc_subset_freq, unique(vf_meta_data[-1, c(5,6)]), by.x = "Var1", by.y = "X.3")
 merge(vfc_sig_freq, unique(vf_meta_data[-1, c(5,6)]), by.x = "Var1", by.y = "X.3")
 ```
@@ -319,6 +313,24 @@ create_row_legend(
    color_set = brewer.pal(vfc_colors, "PuRd"), 
    filename = paste0(figs_dir, "/heat/legend_vf_", vfc_colors, ".svg")
  )
+```
+```{r vf jitter}
+# show ec proportions
+vf_median <- get_cat_medians(data = vf_t_mat)
+
+# print stats testing of ec classes
+get_diff_repres_vf(
+  data = vf_median,
+  vf_reference = vf_reference
+  )
+
+# plot jitter plot
+vf_jitter <- create_vf_jitter(
+  data = vf_median,
+  vf_reference = vf_reference,
+  file_name = "vf_categories",
+  plot_dir = paste0(figs_dir, "/jitter")
+  )
 ```
 ### VFDB Contig Hits
 First, bootstrap median coverage of db proteins

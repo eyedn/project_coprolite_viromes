@@ -36,7 +36,7 @@ create_vf_heatmap <- function(data, signif_res, subset, vfc_subset,
   dend_width <- 15
   hc <- hclust(dist(sig_data_concat))
   dend_raw <- as.dendrogram(hc)
-  dend <- set(dend_raw, "branches_lwd", dend_width)
+  dend <- dendextend::set(dend_raw, "branches_lwd", dend_width)
   weights <- c()
   groups <- rownames(sig_data_concat)
   for (i in seq_len(length(groups))) {
@@ -54,7 +54,7 @@ create_vf_heatmap <- function(data, signif_res, subset, vfc_subset,
   
   hc_2 <- hclust(dist(t(sig_data_concat)))
   dend_raw_2 <- as.dendrogram(hc_2)
-  dend_2 <- set(dend_raw_2, "branches_lwd", dend_width)
+  dend_2 <- dendextend::set(dend_raw_2, "branches_lwd", dend_width)
   
   # define column colors and labels
   group_col_set <- rev(brewer.pal(9, "Greys")[c(3,5,8)])

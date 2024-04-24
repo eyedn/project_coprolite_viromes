@@ -14,7 +14,7 @@ get_pathway_diff <- function(data, pathways, num_iter) {
   pathways_in_data <- data[, intersect(colnames(data), pathways[[1]])]
   
   # get differential represented genes
-  diff_repress <- get_diff_repres_ec(data = pathways_in_data)
+  diff_repress <- get_diff_repres_cols(data = pathways_in_data)
   diff_repress[, 2:4] <- ifelse(diff_repress[, 2:4] > 0.05, NA,
                                              diff_repress[, 2:4])
   
