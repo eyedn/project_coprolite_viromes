@@ -20,8 +20,10 @@ num_cores=$3
 prokka_annotations="${project_dir}/genome_annotation"
 data_dir="$project_dir/data"
 search_dir="$prokka_annotations/*bac_on_virus_and_phage"
+viral_vs_phage_prop_dir="$data_dir/indiv_viral_vs_phage_prop"
 gff_list="$data_dir/vir_phage_ec_counts_tmp.txt"
-csv_path="$data_dir/vir_phage_ec_counts.csv"
+ec_csv_path="$data_dir/vir_phage_ec_counts.csv"
+viral_vs_phage_csv_path="$data_dir/viral_vs_phage_prop_all.csv"
 
 # generate counts with python script
 echo "===================================================================================================="
@@ -34,13 +36,19 @@ echo "$(timestamp): 4a_get_counts_viral_phage_ec: generated file of all file pat
 echo "$(timestamp): 4a_get_counts_viral_phage_ec: using the following files:"
 cat $gff_list
 
+# generate csv file of all hits to genes with known ec for all samples
 python3 data_wrangling/collect_ec_counts.py \
 	$gff_list \
-	$csv_path
+	$ec_csv_path
 rm $gff_list
 
+# generate csv file that combines viral contig vs phage contig counts for all samples
+python3 data_wrangling/combine_viral_vs_phage_prop.py \
+	$viral_vs_phage_prop_dir \
+	$viral_vs_phage_csv_path
+
 # check if raw counts was created
-if ls $csv_path 1> /dev/null 2>&1; then
+if ls $ec_csv_path 1> /dev/null 2>&1; then
 	echo "$(timestamp): 4a_get_counts_viral_phage_ec: bacterial gene counts csv created"
 else
 	echo "$(timestamp): 4a_get_counts_viral_phage_ec: ERROR! bacterial gene counts csv not found"
