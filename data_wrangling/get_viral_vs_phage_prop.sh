@@ -26,7 +26,7 @@ viral_prop_all_dir="$project_dir/data/indiv_viral_prop_all"
 data_dir="$project_dir/data/indiv_viral_vs_phage_prop"
 phage_predict="$phage_predict_dir/${origin}_${sample}_prediction/out/phamer_prediction.csv"
 viral_prop_all="$viral_prop_all_dir/${origin}_${sample}_viral_prop_all.csv"
-csv_path="$data_dir_all/${origin}_${sample}_viral_prop_all.csv"
+csv_path="$data_dir/${origin}_${sample}_viral_prop_all.csv"
 
 # check if download was already complete for this sample
 if ls $phage_predict 1> /dev/null 2>&1; then
