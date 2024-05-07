@@ -20,9 +20,10 @@ create_cat_voilins <- function(data, ci_offset, file_name, plot_dir) {
   # calculate 95% CI for each category
   ci_data <- melted_data %>%
     group_by(cat) %>%
-    summarise(mean_value = mean(value),
+    summarise(median_value = median(value),
               ymin = quantile(value, 0.025),
               ymax = quantile(value, 0.975))
+  print(ci_data)
   
   violin <- ggplot(data = melted_data, aes(x = cat)) +
     geom_violin(aes(x = cat, fill = factor(cat), y = value), 

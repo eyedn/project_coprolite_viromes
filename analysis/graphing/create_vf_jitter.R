@@ -60,7 +60,7 @@ create_vf_jitter <- function(data, vf_reference, file_name, plot_dir) {
   # create plot
   star_height = max(melted_data$value)
   jitter <- ggplot(melted_data, aes(x = id, y = value)) +
-    geom_point(aes(fill = cat, x = ), color = "black", pch = 21, size = 4,
+    geom_point(aes(fill = cat), color = "black", pch = 21, size = 4,
                position = position_jitterdodge(jitter.width = 0.55,
                                                dodge.width = 0.85)) +
     geom_violin(aes(color = cat), fill = "white") +

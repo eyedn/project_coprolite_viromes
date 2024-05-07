@@ -17,19 +17,7 @@ get_diff_repres_cols <- function(data) {
   rownames(kruskal_res) <- colnames(data)
   
   # Create vector of groups for Kruskal-Wallis test
-  groups <- vector(length = nrow(data))
-  samples <- rownames(data)
-  for (i in seq_len(length(samples))) {
-    if (grepl("ind", samples[i], fixed = TRUE)) {
-      groups[i] = 1
-    } else if (grepl("pre", samples[i], fixed = TRUE)) {
-      groups[i] = 2
-    } else if (grepl("pal", samples[i], fixed = TRUE)) {
-      groups[i] = 3
-    } else {
-      stop(paste0("invalid group at sample ", i))
-    }
-  } 
+  groups <- substr(rownames(data), 1, 3)
   
   # initialize progress bar
   pb_1 <- progress_bar$new(format = "Time: :elapsedfull [:bar] Iteration :current/:total (:percent)", total = ncol(data))

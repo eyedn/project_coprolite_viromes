@@ -7,7 +7,6 @@ output: html_document
 ## set up functions and working directory
 ```{r setup, include=FALSE}
 base_dir <- "~/Documents/research/project_coprolite_viromes/analysis/"
-setwd(base_dir)
 knitr::opts_chunk$set(root.dir = base_dir)
 
 # source functions from different directories
@@ -28,15 +27,95 @@ source_files_from_dir("misc")
 set.seed(seed = 123)
 data_dir <- "~/Documents/research/project_coprolite_viromes_NOT_CODE/data"
 figs_dir <- "~/Documents/research/project_coprolite_viromes_NOT_CODE/figures"
-k <- 4
 max_iter <- 1000
 subset_top <- 100
 star_bounds <- list(list(0.1, 0.9), list(0.025, 0.975), list(0.01, 0.99),
                     list(0.001, 0.999))
 ```
-## Analysis of viral metabolic ec counts
-First examine what the optimal k for k-means should be 
-```{r vir ec prep}
+## viral contigs vs phage contigs
+Generate an image showing the proportion of a sample's virome that is
+considered "viral" through a PROKKA-based filter vs. the proportion of a 
+sample's virome is phage-like by PhaBOX
+```{r get viral contig prop vs phage congtig prop}
+vir_vs_phage_counts <- read.csv(
+  file = paste0(data_dir, "/viral_vs_phage_prop_all.csv"),
+  header = TRUE
+)
+vir_vs_phage_counts$prokka_perc <-
+  vir_vs_phage_counts$prokka_res / vir_vs_phage_counts$total_contigs
+vir_vs_phage_counts$phabox_perc <-
+  vir_vs_phage_counts$phabox_res / vir_vs_phage_counts$total_contigs
+
+lm(phabox_perc ~ prokka_perc, data = vir_vs_phage_counts)
+ggplot(vir_vs_phage_counts, aes(x = prokka_perc, y = phabox_perc)) +
+  geom_point() +
+  geom_smooth(method = "lm", col = "blue") + 
+  labs(x = "viral contig percentage", y = "phage contig percentage") +
+  theme_minimal()
+```
+
+## Lifestyle prediction 
+read in lifestyle prediction counts and bootstrap for central tendency
+```{r lifestyle boot}
+# read in lifestyle counts
+lifestyle_counts <- read.csv(
+  file = paste0(data_dir, "/lifestyle_counts.csv"),
+  header = TRUE,
+  row.names = 1
+  )
+lifestyle_counts["total", ] <- colSums(lifestyle_counts)
+lifestyle_counts["temp_to_lyt", ] <- 
+  lifestyle_counts["temperate", ] / lifestyle_counts["virulent", ]
+lifestyle_counts["temp_to_lyt_+1", ] <- 
+  (lifestyle_counts["temperate", ] + 0.01) / (lifestyle_counts["virulent", ] + 0.01)
+lifestyle_counts["temp_perc", ] <-
+  lifestyle_counts["temperate", ] / lifestyle_counts["total", ]
+
+# bootstrap median ratio of temperate-to-lytic viruses
+lifestyle_boot_res <- get_row_median(
+  data = lifestyle_counts,
+  num_iter = max_iter, 
+  row_num = 6
+  )
+
+# plot violin plot of lifestyles by category
+lifestyle_voilin <- create_cat_voilins(
+  data = lifestyle_boot_res, 
+  ci_offset = c(0.15, 0.55, 0.55),
+  file_name = "lifestyle",
+  plot_dir = paste0(figs_dir, "/lifestyle")
+  )
+lifestyle_voilin
+
+# print stats testing of lifestyles preferences between categories
+lifestyle <- melt(lifestyle_boot_res)
+kruskal.test(lifestyle$value, lifestyle$Var2)
+```
+
+## viral host analysis
+determine which predicted hosts are diff. repress
+```{r viral host analysis}
+# read in raw counts data
+host_counts <- read.csv(
+  file = paste0(data_dir, "/samples_v_genus.csv"),
+  header = TRUE,
+  row.names = 1
+)
+
+# normalize observation to scaled log( CPM + 1 )
+host_norm <- normalize_data(df = host_counts)
+host_norm <- (10^(host_norm) - 1) / (10^6)
+host_t_mat <- t(host_norm)
+
+# get differentially represented hosts
+host_diff_repress <- get_diff_repres_cols(data = host_t_mat)
+```
+
+## metabolic profile analysis
+### diversity
+First, using the raw counts data, perform a functional diversity assessment of
+the 3 sample categories.
+```{r metabolic gene analysis: diversity}
 # read in raw counts data
 vir_ec_counts <- read.csv(
   file = paste0(data_dir, "/vir_phage_ec_counts.csv"),
@@ -44,35 +123,85 @@ vir_ec_counts <- read.csv(
   row.names = 1
   )
 
-# normalize observations within a sample and transform to log( CPM + 1 )
+# perform diversity assessment of counts
+diversity_data <- get_diversity_indeces(
+  data = t(vir_ec_counts),
+  div_index = "shannon",
+  num_iter = max_iter
+)
+
+# general plot of raw diversity numbers
+diversity_plot <- create_diversity_plots(
+  data = diversity_data[[1]],
+  div_index = "Shannon", 
+  file_name = "shannon_raw",
+  plot_dir = paste0(figs_dir, "/diversity")
+  )
+diversity_plot
+
+# plot of boostrapped medians
+diversity_violin <- create_cat_voilins(
+  data = diversity_data[[2]], 
+  ci_offset = c(0.2, 0.55, 0.55),
+  file_name = "shannon_medians",
+  plot_dir = paste0(figs_dir, "/diversity"))
+diversity_violin
+```
+
+### clustering
+Use bootstrap resampling and permutation testing to gauge kmeans clustering
+behaviour of metabolic genes
+```{r metabolic gene analysis: clustering}
+# normalize raw observation
 vir_ec_norm <- normalize_data(df = vir_ec_counts)
 vir_ec_t_mat <- scale(t(vir_ec_norm))
 
-# find optimal number of clusters with a wss plot
-vir_ec_optimal_wss <- get_optimal_clusters(
+# vir_ec_norm <- rle_normalize(data = vir_ec_counts)
+# vir_ec_t_mat <- t(vir_ec_norm)
+
+# find optimal number of clusters
+vir_ec_optimal <- get_optimal_clusters(
   data = vir_ec_t_mat,
   method = "wss"
   )
-vir_ec_optimal_wss
-```
-Next, perform the bootstrap and permutation k-means
-```{r vir ec boot/perm}
-# perform kmeans with bootstrap resampling
+vir_ec_optimal
+
+# generate representative mds of clutering
+library(ade4)
+k <- 4
+
+kmeans_result <- kmeans(t(vir_ec_norm), centers = k)
+cluster_assignments <- kmeans_result$cluster
+mds <- cmdscale(dist(t(vir_ec_norm)))
+mds_df <- as.data.frame(mds)
+mds_df$clusters <- as.factor(cluster_assignments)
+mds_df$groups <- as.factor(substr(rownames(mds_df), 1, 3))
+mds_order <- data.frame(
+  cat = c("pal", "ind", "pre"),
+  order = c(3, 2, 1)
+  )
+mds_df <- merge(mds_df,  mds_order, by.x = "groups", by.y = "cat")
+mds_df <- mds_df[order(mds_df$order), ]
+
+{plot(mds_df$V1, mds_df$V2, pch = 19, col = mds_df$groups,
+     xlim = c(-30, 30), ylim = c(-80, 10))
+s.class(mds_df[, c("V1", "V2")], fac = mds_df$clusters, cell = 2, axesell = FALSE,
+        csta = 0,
+        col = c("black", "red", "green", "blue"), clabel = FALSE, pch = NA,
+        add.plot = TRUE)}
+
+# perform kmeans with bootstrap resampling and permutation testing
 vir_ec_boot_res <- kmeans_bootstrap(
   data = vir_ec_t_mat,
   k = k,
   num_iter = max_iter
   )
-
-# perform kmeans with permutations
 vir_ec_perm_res <- kmeans_permute(
   data = vir_ec_t_mat,
   k = k,
   num_iter = max_iter
   )
-```
-Produce a violin plot
-```{r vir ec violin}
+
 # combining bootstrap and permutation results
 vir_ec_clus_res <- get_clustering_res(
   boot_data = vir_ec_boot_res,
@@ -86,12 +215,14 @@ vir_ec_clus_violin <- create_clus_violin(
   boot_data = vir_ec_boot_res,
   clus_res = vir_ec_clus_res,
   file_name = paste0("clustering_vir_ec_", k),
-  plot_dir = paste0(figs_dir, "/violin")
+  plot_dir = paste0(figs_dir, "/metabolism")
   )
-vir_ec_clus_violin
 ```
-Produce heatmap of most differential represented metabolic genes
-```{r vir ec heat}
+
+### differential representation
+determine which genes are most differential represented and visualize with
+heatmaps and jitter plots
+```{r metabolic gene analysis: differential representation}
 # get differential represented genes
 vir_ec_diff_repres <- get_diff_repres_cols(data = vir_ec_t_mat)
 vir_ec_diff_repres <- vir_ec_diff_repres[
@@ -104,16 +235,13 @@ create_metabolic_heatmap(
   signif_res = vir_ec_diff_repres,
   subset = subset_top,
   file_name = paste0("diff_repres_vir_ec_", subset_top),
-  plot_dir = paste0(figs_dir, "/heat")
+  plot_dir = paste0(figs_dir, "/metabolism")
   )
-
 create_row_legend(
    color_set =  brewer.pal(7, "PuRd"), 
-   filename = paste0(figs_dir, "/heat/legend_metabolic.svg")
+   filename = paste0(figs_dir, "/metabolism/legend_metabolic.svg")
  )
-```
-Produce jitter plot of enzyme categories
-```{r vir ec jitter}
+
 # show ec proportions
 vir_ec_median <- get_cat_medians(data = vir_ec_t_mat)
 
@@ -124,122 +252,14 @@ get_diff_repres_ec(data = vir_ec_median)
 vir_ec_jitter <- create_metabolic_jitter(
   data = vir_ec_median,
   file_name = "vir_ec_classes",
-  plot_dir = paste0(figs_dir, "/jitter")
+  plot_dir = paste0(figs_dir, "/metabolism")
   )
 ```
-## Lifestyle prediction 
-First, bootstrap lifestyle stats
-```{r lifestyle boot}
-# read in lifestyle counts
-lifestyle_counts <- read.csv(
-  file = paste0(data_dir, "/lifestyle_counts.csv"),
-  header = TRUE,
-  row.names = 1
-  )
 
-# bootstrap median ratio of temperate-to-lytic viruses
-lifestyle_boot_res <- get_median_ratios(
-  data = lifestyle_counts,
-  num_iter = max_iter,
-  numer = 1,
-  denom = 2
-  )
-```
-Produce a violin plot
-```{r lifestyle violin}
-# plot violin plot of lifestyles by category
-lifestyle_voilin <- create_cat_voilins(
-  data = lifestyle_boot_res, 
-  ci_offset = c(0.15, 0.55, 0.55),
-  file_name = "lifestyle",
-  plot_dir = paste0(figs_dir, "/violin")
-  )
-lifestyle_voilin
-
-# print stats testing of lifestyles preferences between categories
-lifestyle <- melt(lifestyle_boot_res)
-kruskal.test(lifestyle$value, lifestyle$Var2)
-```
-## Alignment Results
-### CAZY Alignment Counts
-Read in raw counts and format the counts by protein profile.
-```{r cazy alignment}
-# read in cazy counts data
-cazy_counts <- read.csv(
-  file = paste0(data_dir, "/cazy_alignment_counts.csv"),
-  header = TRUE,
-  row.names = 1
-  )
-
-# normalize
-cazy_norm <- normalize_data(cazy_counts)
-cazy_t_mat <- scale(t(cazy_norm))
-```
-Produce heatmap
-```{r cazy heat}
-# test for differentially represented cazy cat
-cazy_diff_repres <- get_diff_repres_cols(data = cazy_t_mat)
-cazy_diff_repres <- cazy_diff_repres[order(cazy_diff_repres[, "kruskal_p"]), ]
-
-# generate heatmap of most differential represented genes
-create_cazy_heatmap(
-  data = cazy_t_mat,
-  signif_res = cazy_diff_repres,
-  subset = subset_top,
-  file_name = "diff_repress_cazy_profiles",
-  plot_dir = paste0(figs_dir, "/heat")
-  )
-
-create_row_legend(
-   color_set =  brewer.pal(7, "PuRd"), 
-   filename = paste0(figs_dir, "/heat/legend_cazy.svg")
- )
-```
-Produce jitter
-```{r cazy jitter}
-cazy_median <- get_cat_medians(data = cazy_t_mat)
-
-# plot jitter plot
-# TODO: fix
-cazy_jitter <- create_cazy_jitter(
-  data = cazy_median,
-  file_name = "cazy_classes",
-  plot_dir = jitter_dir <- paste0(figs_dir, "/jitter")
-  )
-```
-### CAZY Contig Hits
-First, bootstrap median coverage of db proteins
-```{r cazy contig hits boot}
-# read in cazy counts data
-cazy_contig_hits <- read.csv(
-  file = paste0(data_dir, "/cazy_alignment_contig_hits.csv"), 
-  header = TRUE,
-  row.names = 1)
-
-# bootstrap median ratio of cazy coverage-to-total contig lengths
-cazy_aln_boot_res <- get_median_ratios(
-  data = cazy_contig_hits,
-  num_iter = max_iter,
-  numer = 2,
-  denom = 1)
-```
-Produce violin plot.
-```{r cazy contig hits violin}
-# plot violin plot of coverage by category
-cazy_aln_voilin <- create_cat_voilins(
-  data = cazy_aln_boot_res, 
-  ci_offset = c(0.2, 0.55, 0.55),
-  file_name = "cazy_aln",
-  plot_dir = paste0(figs_dir, "/violin"))
-cazy_aln_voilin
-
-# print stats testing of coverage between categories
-cazy_aln <- melt(cazy_aln_boot_res)
-kruskal.test(cazy_aln$value, cazy_aln$Var2)
-```
-### VFDB Alignment
-Read in vfdb reference df and raw counts.
-```{r vfdb alignment}
+## virulence factors analysis
+### format vfdb
+adjust meta data and reference data to vfdb for the rest of analysis
+```{r vfdb alignment: format reference}
 # read vf reference
 vf_meta_data <- read.csv(
   file = paste0(data_dir, "/VFs.csv"),
@@ -254,13 +274,47 @@ vf_counts <- read.csv(
   header = TRUE,
   row.names = 1
   )
+```
 
+### prevalence
+determine how dense the presence of vfs are on phage contigs
+```{r vfdb alignment: prevalence}
+# read in vf counts data
+vf_contig_hits <- read.csv(
+  file = paste0(data_dir, "/vf_alignment_contig_hits.csv"),
+  header = TRUE,
+  row.names = 1)
+vf_contig_hits["perc", ] <-
+  vf_contig_hits["unique_cover", ] / vf_contig_hits["total_length", ]
+
+# bootstrap median ratio of vf coverage to total contig lengths
+vf_aln_boot_res <- get_row_median(
+  data = vf_contig_hits,
+  num_iter = max_iter,
+  row_num = 3
+  )
+
+# plot violin plot of coverage by category
+vf_aln_voilin <- create_cat_voilins(
+  data = vf_aln_boot_res,
+  ci_offset = c(0.15, 0.55, 0.55),
+  file_name = "vf_aln",
+  plot_dir = paste0(figs_dir, "/vf"))
+vf_aln_voilin
+
+# print stats testing of coverage between categories
+vf_aln <- melt(vf_aln_boot_res)
+kruskal.test(vf_aln$value, vf_aln$Var2)
+```
+
+### differential representation
+determine which genes are most differential represented and visualize with
+heatmaps and jitter plots
+```{r vfdb alignment: differential representation}
 # normalize
 vf_norm <- normalize_data(vf_counts)
 vf_t_mat <- scale(t(vf_norm))
-```
-Perform diff representation analysis of VF and determine most prominent VFC
-```{r vf diff repres}
+
 # get differential represented genes and combine with vf categories
 vf_diff_repres <- get_diff_repres_cols(data = vf_t_mat)
 vf_diff_repres <- cbind(rownames(vf_diff_repres), vf_diff_repres)
@@ -294,9 +348,7 @@ vfc_subset_freq
 merge(vfc_freq, unique(vf_meta_data[-1, c(5,6)]), by.x = "Var1", by.y = "X.3")
 merge(vfc_subset_freq, unique(vf_meta_data[-1, c(5,6)]), by.x = "Var1", by.y = "X.3")
 merge(vfc_sig_freq, unique(vf_meta_data[-1, c(5,6)]), by.x = "Var1", by.y = "X.3")
-```
-Produce heatmap of the protein profiles
-```{r vf heat}
+
 # generate heatmap of most differential represented genes
 vfc_colors <- 4
 create_vf_heatmap(
@@ -306,15 +358,14 @@ create_vf_heatmap(
   vfc_subset = vfc_subset_freq,
   vfc_max_colors = vfc_colors,
   file_name = paste0("diff_repress_vf_profiles_", vfc_colors),
-  plot_dir = heat_dir <- paste0(figs_dir, "/heat")
+  plot_dir = heat_dir <- paste0(figs_dir, "/vf")
   )
 
 create_row_legend(
    color_set = brewer.pal(vfc_colors, "PuRd"), 
-   filename = paste0(figs_dir, "/heat/legend_vf_", vfc_colors, ".svg")
+   filename = paste0(figs_dir, "/vf/legend_vf_", vfc_colors, ".svg")
  )
-```
-```{r vf jitter}
+
 # show ec proportions
 vf_median <- get_cat_medians(data = vf_t_mat)
 
@@ -329,41 +380,88 @@ vf_jitter <- create_vf_jitter(
   data = vf_median,
   vf_reference = vf_reference,
   file_name = "vf_categories",
-  plot_dir = paste0(figs_dir, "/jitter")
+  plot_dir = paste0(figs_dir, "/vf")
   )
 ```
-### VFDB Contig Hits
-First, bootstrap median coverage of db proteins
-```{r vf contig htis}
-# read in vf counts data
-vf_contig_hits <- read.csv(
-  file = paste0(data_dir, "/vf_alignment_contig_hits.csv"),
+
+## carbohydrate-active enzymes analysis
+### prevalence
+determine how dense the presence of cazy are on phage contigs
+```{r cazy alignment prevalence}
+# read in cazy counts data
+cazy_contig_hits <- read.csv(
+  file = paste0(data_dir, "/cazy_alignment_contig_hits.csv"), 
   header = TRUE,
   row.names = 1)
+cazy_contig_hits["perc", ] <-
+  cazy_contig_hits["unique_cover", ] / cazy_contig_hits["total_length", ]
 
-# bootstrap median ratio of vf coverage to total contig lengths
-vf_aln_boot_res <- get_median_ratios(
-  data = vf_contig_hits,
-  num_iter = max_iter,
-  numer = 2,
-  denom = 1
+# bootstrap median ratio of cazy coverage-to-total contig lengths
+cazy_aln_boot_res <- get_row_median(
+  data = cazy_contig_hits,
+  num_iter = max_iter, 
+  row_num = 3
   )
-```
-Produce violin plots
-```{r vf contig hits violin}
+
 # plot violin plot of coverage by category
-vf_aln_voilin <- create_cat_voilins(
-  data = vf_aln_boot_res,
-  ci_offset = c(0.15, 0.55, 0.55),
-  file_name = "vf_aln",
-  plot_dir = paste0(figs_dir, "/violin"))
-vf_aln_voilin
+cazy_aln_voilin <- create_cat_voilins(
+  data = cazy_aln_boot_res, 
+  ci_offset = c(0.2, 0.55, 0.55),
+  file_name = "cazy_aln",
+  plot_dir = paste0(figs_dir, "/cazy"))
+cazy_aln_voilin
 
 # print stats testing of coverage between categories
-vf_aln <- melt(vf_aln_boot_res)
-kruskal.test(vf_aln$value, vf_aln$Var2)
+cazy_aln <- melt(cazy_aln_boot_res)
+kruskal.test(cazy_aln$value, cazy_aln$Var2)
 ```
-### Metabolic Pathway Analysis
+
+### differential representation
+determine which genes are most differential represented and visualize with
+heatmaps and jitter plots
+```{r cazy alignment: differential representation}
+# read in cazy counts data
+cazy_counts <- read.csv(
+  file = paste0(data_dir, "/cazy_alignment_counts.csv"),
+  header = TRUE,
+  row.names = 1
+  )
+
+# normalize
+cazy_norm <- normalize_data(cazy_counts)
+cazy_t_mat <- scale(t(cazy_norm))
+
+# test for differentially represented cazy cat
+cazy_diff_repres <- get_diff_repres_cols(data = cazy_t_mat)
+cazy_diff_repres <- cazy_diff_repres[order(cazy_diff_repres[, "kruskal_p"]), ]
+
+# generate heatmap of most differential represented genes
+create_cazy_heatmap(
+  data = cazy_t_mat,
+  signif_res = cazy_diff_repres,
+  subset = subset_top,
+  file_name = "diff_repress_cazy_profiles",
+  plot_dir = paste0(figs_dir, "/cazy")
+  )
+create_row_legend(
+   color_set =  brewer.pal(7, "PuRd"), 
+   filename = paste0(figs_dir, "/cazy/legend_cazy.svg")
+ )
+
+# show cazy cateogry proportions
+cazy_median <- get_cat_medians(data = cazy_t_mat)
+
+# plot jitter plot
+# TODO: fix
+cazy_jitter <- create_cazy_jitter(
+  data = cazy_median,
+  file_name = "cazy_classes",
+  plot_dir = jitter_dir <- paste0(figs_dir, "/cazy")
+  )
+```
+
+## metabolic pathway analysis
+determine which central carbon metabolism pathways are diff. repres.
 ```{r parse phage pathways}
 # read in raw counts data
 bac_on_phage_counts <- read.csv(
@@ -393,5 +491,3 @@ brewer.pal(11, "RdBu")[c(2, 9)]
 setdiff(rho_pathways[[1]],
         intersect(colnames(bac_on_phage_t_mat), rho_pathways[[1]]))
 ```
-
-
