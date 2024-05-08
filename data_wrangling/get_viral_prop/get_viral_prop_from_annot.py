@@ -19,7 +19,7 @@ def get_viral_prop_from_annot(fa_file: typing.Union[str, typing.BinaryIO],
     data_list: typing.List[typing.Dict[str, any]] = []
     cat = fa_file.split("/")[-1][0:3]
     ori = fa_file.split("/")[-1][4:7]
-    sample = gff_file.split("/")[-1].split(".")[0]
+    sample = '.'.join(gff_file.split("/")[-1].split(".")[:-2])
     contigs = read_fa.read_contigs(fa_file)
     annotations = read_gff.read_annotations(gff_file)
     if include_hypothetical_prot:
