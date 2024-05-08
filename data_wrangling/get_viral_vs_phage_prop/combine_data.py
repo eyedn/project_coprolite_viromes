@@ -12,6 +12,8 @@ import glob
 def combine_data(path: str) -> pd.DataFrame:
 
     all_files = glob.glob(path + "/*.csv")
+    print("files to process:")
+    print(all_files)
 
     # combine all files in the list into one DataFrame
     df = pd.concat((pd.read_csv(f) for f in all_files), ignore_index=True)
