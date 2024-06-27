@@ -49,7 +49,7 @@ create_clus_violin <- function(boot_data, clus_res, file_name, plot_dir) {
     annotate("segment", x = 3.2, xend = 3.2,
              y = ci[[3, "lower"]], yend = ci[[3, "upper"]], 
              size = 2, color = brewer.pal(11, "RdBu")[2]) +
-    annotate("text", label = "***", x = 1, 
+    annotate("text", label = "****", x = 1, 
              y = max(c(ci[4:6, "upper"], boot_data[, 1])) + 0.025,
              size = 12, color = brewer.pal(9, "Greys")[8]) +
     stat_summary(aes(x = pair, y = prob), fun = median, geom = "point", 

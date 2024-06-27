@@ -33,8 +33,8 @@ get_diff_repres_cols <- function(data) {
   }
   
   # apply bh correction to kruskal p-values
-  kruskal_res[, "kruskal_p"] <- p.adjust(kruskal_res[, 1], method = "BH", 
-                                         n = length(kruskal_res[, 1]))
+  # kruskal_res[, "kruskal_p"] <- p.adjust(kruskal_res[, 1], method = "BH", 
+  #                                        n = length(kruskal_res[, 1]))
   
   # if significant, perform Dunn's test
   for (i in seq_len(ncol(data))) {

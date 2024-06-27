@@ -1,7 +1,7 @@
 ###############################################################################
 #   Aydin Karatas
 #   Project Coprolite Viromes
-#   create_row_legend.R
+#   create_legend.R
 ###############################################################################
 library(grid)
 library(gridSVG)
@@ -9,7 +9,7 @@ library(RColorBrewer)
 
 
 # Function to draw the legend
-create_row_legend <- function(color_set, filename) {
+create_legend <- function(color_set, filename) {
   num_colors <- length(color_set)
   
   # Start the svg device

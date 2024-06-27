@@ -32,6 +32,7 @@ subset_top <- 100
 star_bounds <- list(list(0.1, 0.9), list(0.025, 0.975), list(0.01, 0.99),
                     list(0.001, 0.999))
 ```
+
 ## viral contigs vs phage contigs
 Generate an image showing the proportion of a sample's virome that is
 considered "viral" through a PROKKA-based filter vs. the proportion of a 
@@ -46,15 +47,23 @@ vir_vs_phage_counts$prokka_perc <-
 vir_vs_phage_counts$phabox_perc <-
   vir_vs_phage_counts$phabox_res / vir_vs_phage_counts$total_contigs
 
-lm(phabox_perc ~ prokka_perc, data = vir_vs_phage_counts)
-ggplot(vir_vs_phage_counts, aes(x = prokka_perc, y = phabox_perc)) +
-  geom_point() +
+lm = lm(phabox_perc ~ prokka_perc, data = vir_vs_phage_counts)
+lm
+str(summary(lm))
+vir_vs_phage_plot <- 
+  ggplot(vir_vs_phage_counts, aes(x = prokka_perc, y = phabox_perc)) +
+  geom_point(aes(col = cat)) +
   geom_smooth(method = "lm", col = "blue") + 
   labs(x = "viral contig percentage", y = "phage contig percentage") +
   theme_minimal()
+vir_vs_phage_plot
+ggsave(filename = paste0(figs_dir, "/vir_vs_phage_plot.svg"),
+       plot = vir_vs_phage_plot,
+       height = 7,
+       width = 14)
 ```
 
-## Lifestyle prediction 
+## lifestyle prediction 
 read in lifestyle prediction counts and bootstrap for central tendency
 ```{r lifestyle boot}
 # read in lifestyle counts
@@ -104,15 +113,235 @@ host_counts <- read.csv(
 
 # normalize observation to scaled log( CPM + 1 )
 host_norm <- normalize_data(df = host_counts)
-host_norm <- (10^(host_norm) - 1) / (10^6)
-host_t_mat <- t(host_norm)
+host_t_norm <- t(host_norm)
 
 # get differentially represented hosts
-host_diff_repress <- get_diff_repres_cols(data = host_t_mat)
+host_diff_repress <- get_diff_repres_cols(data = host_t_norm)
 ```
+phyla level analysis
+```{r host phyla}
+phyla_counts <- read.csv(
+  file = paste0(data_dir, "/phyla_counts.csv"),
+  header = TRUE,
+  row.names = 1)
 
+phyla_norm <- normalize_data(phyla_counts)
+phyla_t_norm <- t(phyla_norm)
+
+# get differentially represented hosts
+phyla_diff_repress <- get_diff_repres_cols(data = phyla_t_norm)
+
+# generate heatmap of phyla
+phyla_t_scale <- scale(phyla_t_norm)
+create_phyla_heatmap(
+  data = phyla_t_scale,
+  signif_res = phyla_diff_repress,
+  subset = ncol(phyla_t_scale),
+  file_name = "diff_repres_phyla",
+  plot_dir = paste0(figs_dir, "/hosts")
+  )
+```
+furmicutes-to-bacterioda analysis
+```{r vFB versus time}
+time_vFB <- read.csv(
+  file = paste0(data_dir, "/time_vs_vFB.csv"),
+  header = TRUE,
+  row.names = 1)
+time_vFB_t_mat <- t(time_vFB)
+
+time_vFB_boot_res <- get_row_median(
+  data = time_vFB_t_mat,
+  num_iter = 1000,
+  row_num = 1)
+
+time_vFB_violin <- create_cat_scatter(
+  data = time_vFB,
+  file_name = "vFB_scatter",
+  plot_dir = paste0(figs_dir, "/hosts")
+  )
+time_vFB_violin
+```
+```{r vFB versus time with lifestyle}
+templyt_ratio <- read.csv(
+  file = paste0(data_dir, "/templyt_ratio_wide_csv.csv"),
+  header = TRUE,
+  row.names = 1)
+templyt_ratio_t_mat <- t(templyt_ratio)
+
+firmicute_templyt <- get_row_median(
+  data = templyt_ratio_t_mat,
+  num_iter = 1000,
+  row_num = 2)
+
+bacteroidota_templyt <- get_row_median(
+  data = templyt_ratio_t_mat,
+  num_iter = 1000,
+  row_num = 1)
+
+firmicute_templyt_violin <- create_cat_voilins(
+  data = firmicute_templyt,
+  ci_offset = c(0.2, 0.55, 0.55),
+  file_name = "firmicute_templyt",
+  plot_dir = paste0(figs_dir, "/hosts")
+  )
+firmicute_templyt_violin
+
+bacteroidota_templyt_violin <- create_cat_voilins(
+  data = bacteroidota_templyt,
+  ci_offset = c(0.2, 0.55, 0.55),
+  file_name = "bacteroidota_templyt",
+  plot_dir = paste0(figs_dir, "/hosts")
+  )
+bacteroidota_templyt_violin
+```
+presence-absence heatmaps of clusters
+```{r presence absense of hosts}
+phage_cluster_heart <- read.csv(
+  file = paste0(data_dir, "/heatmap_dataframe_heart.csv"),
+  header = TRUE,
+  row.names = 1
+  )
+create_pres_abs_heatmap(data = phage_cluster_heart,
+                        lifestyle = FALSE,
+                        file_name = "phage_cluster_heart",
+                        plot_dir = paste0(figs_dir, "/hosts")
+                        )
+create_pres_abs_heatmap(data = phage_cluster_heart,
+                        lifestyle = TRUE,
+                        file_name = "phage_cluster_heart",
+                        plot_dir = paste0(figs_dir, "/hosts")
+                        )
+
+phage_cluster_john <- read.csv(
+  file = paste0(data_dir, "/heatmap_dataframe_john.csv"),
+  header = TRUE,
+  row.names = 1
+  )
+create_pres_abs_heatmap(data = phage_cluster_john,
+                        lifestyle = FALSE,
+                        file_name = "phage_cluster_john",
+                        plot_dir = paste0(figs_dir, "/hosts")
+                        )
+create_pres_abs_heatmap(data = phage_cluster_john,
+                        lifestyle = TRUE,
+                        file_name = "phage_cluster_john",
+                        plot_dir = paste0(figs_dir, "/hosts")
+                        )
+
+
+phage_cluster_mike <- read.csv(
+  file = paste0(data_dir, "/heatmap_dataframe_mike.csv"),
+  header = TRUE,
+  row.names = 1
+  )
+create_pres_abs_heatmap(data = phage_cluster_mike,
+                        lifestyle = FALSE,
+                        file_name = "phage_cluster_mike",
+                        plot_dir = paste0(figs_dir, "/hosts")
+                        )
+create_pres_abs_heatmap(data = phage_cluster_mike,
+                        lifestyle = TRUE,
+                        file_name = "phage_cluster_mike",
+                        plot_dir = paste0(figs_dir, "/hosts")
+                        )
+
+phage_cluster_milo <- read.csv(
+  file = paste0(data_dir, "/heatmap_dataframe_milo.csv"),
+  header = TRUE,
+  row.names = 1
+  )
+create_pres_abs_heatmap(data = phage_cluster_milo,
+                        lifestyle = FALSE,
+                        file_name = "phage_cluster_milo",
+                        plot_dir = paste0(figs_dir, "/hosts")
+                        )
+create_pres_abs_heatmap(data = phage_cluster_milo,
+                        lifestyle = TRUE,
+                        file_name = "phage_cluster_milo",
+                        plot_dir = paste0(figs_dir, "/hosts")
+                        )
+
+phage_cluster_nub <- read.csv(
+  file = paste0(data_dir, "/heatmap_dataframe_nub.csv"),
+  header = TRUE,
+  row.names = 1
+  )
+create_pres_abs_heatmap(data = phage_cluster_nub,
+                        lifestyle = FALSE,
+                        file_name = "phage_cluster_nub",
+                        plot_dir = paste0(figs_dir, "/hosts")
+                        )
+create_pres_abs_heatmap(data = phage_cluster_nub,
+                        lifestyle = TRUE,
+                        file_name = "phage_cluster_nub",
+                        plot_dir = paste0(figs_dir, "/hosts")
+                        )
+
+phage_cluster_rob <- read.csv(
+  file = paste0(data_dir, "/heatmap_dataframe_rob.csv"),
+  header = TRUE,
+  row.names = 1
+  )
+create_pres_abs_heatmap(data = phage_cluster_rob,
+                        lifestyle = FALSE,
+                        file_name = "phage_cluster_rob",
+                        plot_dir = paste0(figs_dir, "/hosts")
+                        )
+create_pres_abs_heatmap(data = phage_cluster_rob,
+                        lifestyle = TRUE,
+                        file_name = "phage_cluster_rob",
+                        plot_dir = paste0(figs_dir, "/hosts")
+                        )
+
+phage_cluster_roger <- read.csv(
+  file = paste0(data_dir, "/heatmap_dataframe_roger.csv"),
+  header = TRUE,
+  row.names = 1
+  )
+create_pres_abs_heatmap(data = phage_cluster_roger,
+                        lifestyle = FALSE,
+                        file_name = "phage_cluster_roger",
+                        plot_dir = paste0(figs_dir, "/hosts")
+                        )
+create_pres_abs_heatmap(data = phage_cluster_roger,
+                        lifestyle = TRUE,
+                        file_name = "phage_cluster_roger",
+                        plot_dir = paste0(figs_dir, "/hosts")
+                        )
+
+phage_cluster_smoothie <- read.csv(
+  file = paste0(data_dir, "/heatmap_dataframe_smoothie.csv"),
+  header = TRUE,
+  row.names = 1
+  )
+create_pres_abs_heatmap(data = phage_cluster_smoothie,
+                        lifestyle = FALSE,
+                        file_name = "phage_cluster_smoothie",
+                        plot_dir = paste0(figs_dir, "/hosts")
+                        )
+create_pres_abs_heatmap(data = phage_cluster_smoothie,
+                        lifestyle = TRUE,
+                        file_name = "phage_cluster_smoothie",
+                        plot_dir = paste0(figs_dir, "/hosts")
+                        )
+
+phage_cluster_tether <- read.csv(
+  file = paste0(data_dir, "/heatmap_dataframe_tether.csv"),
+  header = TRUE,
+  row.names = 1
+  )
+create_pres_abs_heatmap(data = phage_cluster_tether,
+                        lifestyle = FALSE,
+                        file_name = "phage_cluster_tether",
+                        plot_dir = paste0(figs_dir, "/hosts")
+                        )
+create_pres_abs_heatmap(data = phage_cluster_tether,
+                        lifestyle = TRUE,
+                        file_name = "phage_cluster_tether",
+                        plot_dir = paste0(figs_dir, "/hosts")
+                        )
+```
 ## metabolic profile analysis
-### diversity
 First, using the raw counts data, perform a functional diversity assessment of
 the 3 sample categories.
 ```{r metabolic gene analysis: diversity}
@@ -148,34 +377,30 @@ diversity_violin <- create_cat_voilins(
 diversity_violin
 ```
 
-### clustering
-Use bootstrap resampling and permutation testing to gauge kmeans clustering
-behaviour of metabolic genes
+perform an initial kmeans clustering of ec counts onto an mds
 ```{r metabolic gene analysis: clustering}
 # normalize raw observation
 vir_ec_norm <- normalize_data(df = vir_ec_counts)
-vir_ec_t_mat <- scale(t(vir_ec_norm))
-
-# vir_ec_norm <- rle_normalize(data = vir_ec_counts)
-# vir_ec_t_mat <- t(vir_ec_norm)
+vir_ec_t_norm <- t(vir_ec_norm)
 
 # find optimal number of clusters
 vir_ec_optimal <- get_optimal_clusters(
-  data = vir_ec_t_mat,
-  method = "wss"
+  data = vir_ec_t_norm,
+  method = "silhouette"
   )
 vir_ec_optimal
 
 # generate representative mds of clutering
 library(ade4)
-k <- 4
+k <- 3
 
-kmeans_result <- kmeans(t(vir_ec_norm), centers = k)
+kmeans_result <- kmeans(vir_ec_t_norm, centers = k)
 cluster_assignments <- kmeans_result$cluster
-mds <- cmdscale(dist(t(vir_ec_norm)))
+mds <- cmdscale(dist(vir_ec_t_norm))
 mds_df <- as.data.frame(mds)
 mds_df$clusters <- as.factor(cluster_assignments)
 mds_df$groups <- as.factor(substr(rownames(mds_df), 1, 3))
+mds_df$ori <- as.factor(substr(rownames(mds_df), 5, 7))
 mds_order <- data.frame(
   cat = c("pal", "ind", "pre"),
   order = c(3, 2, 1)
@@ -183,21 +408,29 @@ mds_order <- data.frame(
 mds_df <- merge(mds_df,  mds_order, by.x = "groups", by.y = "cat")
 mds_df <- mds_df[order(mds_df$order), ]
 
-{plot(mds_df$V1, mds_df$V2, pch = 19, col = mds_df$groups,
-     xlim = c(-30, 30), ylim = c(-80, 10))
+{svglite(filename = paste0(figs_dir, "/metabolism/mds.svg"),
+          width = 7,
+          height = 7)
+plot(mds_df$V1, mds_df$V2, pch = 19, cex = 1, col = mds_df$groups)
 s.class(mds_df[, c("V1", "V2")], fac = mds_df$clusters, cell = 2, axesell = FALSE,
         csta = 0,
-        col = c("black", "red", "green", "blue"), clabel = FALSE, pch = NA,
+        col = c("red", "green", "blue"), clabel = FALSE, pch = NA,
         add.plot = TRUE)}
 
+# plot(mds_df$V1, mds_df$V2, pch = 19, cex = 1, col = mds_df$groups,
+#      xlim = c(-30, 30), ylim = c(-65, 15))
+```
+
+use bootstrap and permutation testing to determine clustering behaviour
+```{r metabolic gene analysis: bootstrap and permutation}
 # perform kmeans with bootstrap resampling and permutation testing
 vir_ec_boot_res <- kmeans_bootstrap(
-  data = vir_ec_t_mat,
+  data = vir_ec_t_norm,
   k = k,
   num_iter = max_iter
   )
 vir_ec_perm_res <- kmeans_permute(
-  data = vir_ec_t_mat,
+  data = vir_ec_t_norm,
   k = k,
   num_iter = max_iter
   )
@@ -217,47 +450,47 @@ vir_ec_clus_violin <- create_clus_violin(
   file_name = paste0("clustering_vir_ec_", k),
   plot_dir = paste0(figs_dir, "/metabolism")
   )
+vir_ec_clus_violin
 ```
 
-### differential representation
 determine which genes are most differential represented and visualize with
 heatmaps and jitter plots
 ```{r metabolic gene analysis: differential representation}
 # get differential represented genes
-vir_ec_diff_repres <- get_diff_repres_cols(data = vir_ec_t_mat)
+vir_ec_diff_repres <- get_diff_repres_cols(data = vir_ec_t_norm)
 vir_ec_diff_repres <- vir_ec_diff_repres[
   order(vir_ec_diff_repres[, "kruskal_p"]), 
   ]
 
 # generate heatmap of most differentially represented genes
+vir_ec_t_scale <- scale(vir_ec_t_norm)
 create_metabolic_heatmap(
-  data = vir_ec_t_mat,
+  data = vir_ec_t_norm,
   signif_res = vir_ec_diff_repres,
   subset = subset_top,
   file_name = paste0("diff_repres_vir_ec_", subset_top),
   plot_dir = paste0(figs_dir, "/metabolism")
   )
-create_row_legend(
+create_metabolic_heatmap(
+  data = vir_ec_t_scale,
+  signif_res = vir_ec_diff_repres,
+  subset = subset_top,
+  file_name = paste0("diff_repres_vir_ec_scaled", subset_top),
+  plot_dir = paste0(figs_dir, "/metabolism")
+  )
+create_legend(
    color_set =  brewer.pal(7, "PuRd"), 
    filename = paste0(figs_dir, "/metabolism/legend_metabolic.svg")
  )
 
 # show ec proportions
-vir_ec_median <- get_cat_medians(data = vir_ec_t_mat)
+vir_ec_median <- get_cat_medians(data = vir_ec_t_norm)
 
 # print stats testing of ec classes
 get_diff_repres_ec(data = vir_ec_median)
-
-# plot jitter plot
-vir_ec_jitter <- create_metabolic_jitter(
-  data = vir_ec_median,
-  file_name = "vir_ec_classes",
-  plot_dir = paste0(figs_dir, "/metabolism")
-  )
 ```
 
 ## virulence factors analysis
-### format vfdb
 adjust meta data and reference data to vfdb for the rest of analysis
 ```{r vfdb alignment: format reference}
 # read vf reference
@@ -276,7 +509,6 @@ vf_counts <- read.csv(
   )
 ```
 
-### prevalence
 determine how dense the presence of vfs are on phage contigs
 ```{r vfdb alignment: prevalence}
 # read in vf counts data
@@ -307,16 +539,16 @@ vf_aln <- melt(vf_aln_boot_res)
 kruskal.test(vf_aln$value, vf_aln$Var2)
 ```
 
-### differential representation
-determine which genes are most differential represented and visualize with
-heatmaps and jitter plots
+determine which genes are most differential represented and determine how many
+to show on the hitmap
 ```{r vfdb alignment: differential representation}
 # normalize
 vf_norm <- normalize_data(vf_counts)
-vf_t_mat <- scale(t(vf_norm))
+vf_t_norm <- t(vf_norm)
+vf_t_scale <- scale(vf_t_norm)
 
 # get differential represented genes and combine with vf categories
-vf_diff_repres <- get_diff_repres_cols(data = vf_t_mat)
+vf_diff_repres <- get_diff_repres_cols(data = vf_t_norm)
 vf_diff_repres <- cbind(rownames(vf_diff_repres), vf_diff_repres)
 colnames(vf_diff_repres) <- c("VFID", colnames(vf_diff_repres)[-1])
 vf_diff_repres <- merge(x = vf_diff_repres, y = vf_reference, by = "VFID")
@@ -328,31 +560,38 @@ vf_diff_repres <- vf_diff_repres[order(vf_diff_repres[, "kruskal_p"]), ]
 
 # find most represented vfc
 vfc_freq <- table(vf_diff_repres[, "VFCID"])
-vfc_freq <- vfc_freq[order(unlist(vfc_freq),
-                                         decreasing = TRUE)]
 vfc_freq <- as.data.frame(vfc_freq)
+vfc_freq <- merge(vfc_freq, unique(vf_meta_data[-1, c(5,6)]),
+                  by.x = "Var1", by.y = "X.3")
+vfc_freq <- vfc_freq[rev(order(vfc_freq$Freq)), ]
 vfc_freq
 
 vfc_sig_freq <- table(vf_diff_repres[vf_diff_repres$kruskal_p <= 0.05, "VFCID"])
-vfc_sig_freq <- vfc_sig_freq[order(unlist(vfc_sig_freq),
-                                         decreasing = TRUE)]
 vfc_sig_freq <- as.data.frame(vfc_sig_freq)
+vfc_sig_freq <- merge(vfc_sig_freq, unique(vf_meta_data[-1, c(5,6)]),
+                      by.x = "Var1", by.y = "X.3")
+vfc_sig_freq <- vfc_sig_freq[rev(order(vfc_sig_freq$Freq)), ]
 vfc_sig_freq
 
 vfc_subset_freq <- table(vf_diff_repres[1:subset_top, "VFCID"])
-vfc_subset_freq <- vfc_subset_freq[order(unlist(vfc_subset_freq),
-                                         decreasing = TRUE)]
 vfc_subset_freq <- as.data.frame(vfc_subset_freq)
+vfc_subset_freq <- merge(vfc_subset_freq, unique(vf_meta_data[-1, c(5,6)]), 
+                         by.x = "Var1", by.y = "X.3")
+vfc_subset_freq <- vfc_subset_freq[rev(order(vfc_subset_freq$Freq)), ]
 vfc_subset_freq
 
-merge(vfc_freq, unique(vf_meta_data[-1, c(5,6)]), by.x = "Var1", by.y = "X.3")
-merge(vfc_subset_freq, unique(vf_meta_data[-1, c(5,6)]), by.x = "Var1", by.y = "X.3")
-merge(vfc_sig_freq, unique(vf_meta_data[-1, c(5,6)]), by.x = "Var1", by.y = "X.3")
 
+# determine the number of vfc to use in heatmap with jenk's breaks
+library(BAMMtools)
+vfc_break <- getJenksBreaks(var = vfc_subset_freq$Freq, k = 3)[[2]]
+vfc_colors <- which(vfc_subset_freq$Freq == vfc_break)
+```
+
+generate heatmap consistent with jenks breaks for k = 3
+```{r vfdb alignment: heatmap of differential represenentation}
 # generate heatmap of most differential represented genes
-vfc_colors <- 4
 create_vf_heatmap(
-  data = vf_t_mat,
+  data = vf_t_scale,
   signif_res = vf_diff_repres, 
   subset = subset_top,
   vfc_subset = vfc_subset_freq,
@@ -361,133 +600,17 @@ create_vf_heatmap(
   plot_dir = heat_dir <- paste0(figs_dir, "/vf")
   )
 
-create_row_legend(
+create_legend(
    color_set = brewer.pal(vfc_colors, "PuRd"), 
    filename = paste0(figs_dir, "/vf/legend_vf_", vfc_colors, ".svg")
  )
 
 # show ec proportions
-vf_median <- get_cat_medians(data = vf_t_mat)
+vf_median <- get_cat_medians(data = vf_t_norm)
 
 # print stats testing of ec classes
 get_diff_repres_vf(
   data = vf_median,
   vf_reference = vf_reference
   )
-
-# plot jitter plot
-vf_jitter <- create_vf_jitter(
-  data = vf_median,
-  vf_reference = vf_reference,
-  file_name = "vf_categories",
-  plot_dir = paste0(figs_dir, "/vf")
-  )
-```
-
-## carbohydrate-active enzymes analysis
-### prevalence
-determine how dense the presence of cazy are on phage contigs
-```{r cazy alignment prevalence}
-# read in cazy counts data
-cazy_contig_hits <- read.csv(
-  file = paste0(data_dir, "/cazy_alignment_contig_hits.csv"), 
-  header = TRUE,
-  row.names = 1)
-cazy_contig_hits["perc", ] <-
-  cazy_contig_hits["unique_cover", ] / cazy_contig_hits["total_length", ]
-
-# bootstrap median ratio of cazy coverage-to-total contig lengths
-cazy_aln_boot_res <- get_row_median(
-  data = cazy_contig_hits,
-  num_iter = max_iter, 
-  row_num = 3
-  )
-
-# plot violin plot of coverage by category
-cazy_aln_voilin <- create_cat_voilins(
-  data = cazy_aln_boot_res, 
-  ci_offset = c(0.2, 0.55, 0.55),
-  file_name = "cazy_aln",
-  plot_dir = paste0(figs_dir, "/cazy"))
-cazy_aln_voilin
-
-# print stats testing of coverage between categories
-cazy_aln <- melt(cazy_aln_boot_res)
-kruskal.test(cazy_aln$value, cazy_aln$Var2)
-```
-
-### differential representation
-determine which genes are most differential represented and visualize with
-heatmaps and jitter plots
-```{r cazy alignment: differential representation}
-# read in cazy counts data
-cazy_counts <- read.csv(
-  file = paste0(data_dir, "/cazy_alignment_counts.csv"),
-  header = TRUE,
-  row.names = 1
-  )
-
-# normalize
-cazy_norm <- normalize_data(cazy_counts)
-cazy_t_mat <- scale(t(cazy_norm))
-
-# test for differentially represented cazy cat
-cazy_diff_repres <- get_diff_repres_cols(data = cazy_t_mat)
-cazy_diff_repres <- cazy_diff_repres[order(cazy_diff_repres[, "kruskal_p"]), ]
-
-# generate heatmap of most differential represented genes
-create_cazy_heatmap(
-  data = cazy_t_mat,
-  signif_res = cazy_diff_repres,
-  subset = subset_top,
-  file_name = "diff_repress_cazy_profiles",
-  plot_dir = paste0(figs_dir, "/cazy")
-  )
-create_row_legend(
-   color_set =  brewer.pal(7, "PuRd"), 
-   filename = paste0(figs_dir, "/cazy/legend_cazy.svg")
- )
-
-# show cazy cateogry proportions
-cazy_median <- get_cat_medians(data = cazy_t_mat)
-
-# plot jitter plot
-# TODO: fix
-cazy_jitter <- create_cazy_jitter(
-  data = cazy_median,
-  file_name = "cazy_classes",
-  plot_dir = jitter_dir <- paste0(figs_dir, "/cazy")
-  )
-```
-
-## metabolic pathway analysis
-determine which central carbon metabolism pathways are diff. repres.
-```{r parse phage pathways}
-# read in raw counts data
-bac_on_phage_counts <- read.csv(
-  file = paste0(data_dir, "/bac_on_phage_ec_counts.csv"),
-  header = TRUE,
-  row.names = 1
-)
-bac_on_phage_norm <- normalize_data(df = bac_on_phage_counts)
-bac_on_phage_t_mat <- scale(t(bac_on_phage_norm))
-
-# read in rho pathways
-rho_pathways <- read.csv(
-  file = "../../project_coprolite_viromes_NOT_CODE/references/rho_pathways.csv",
-  header = FALSE
-)
-
-# get information on which rho pathways were differential represented
-phage_pathways <- get_pathway_diff(
-  data = bac_on_phage_t_mat,
-  pathways = rho_pathways,
-  num_iter = max_iter
-)
-
-brewer.pal(9, "Greys")[c(3, 9)]
-brewer.pal(11, "RdBu")[c(2, 9)]
-
-setdiff(rho_pathways[[1]],
-        intersect(colnames(bac_on_phage_t_mat), rho_pathways[[1]]))
 ```

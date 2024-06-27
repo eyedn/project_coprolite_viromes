@@ -1,7 +1,7 @@
 ###############################################################################
 #   Aydin Karatas
 #   Project Coprolite Viromes
-#   create_heatmap.R
+#   create_phyla_heatmap.R
 ###############################################################################
 library(gplots)
 library(svglite)
@@ -10,7 +10,7 @@ library(dendextend)
 
 
 # generate a heatmap based on differential expression
-create_metabolic_heatmap <- function(data, signif_res, subset,
+create_phyla_heatmap <- function(data, signif_res, subset,
                                      file_name, plot_dir) {
   
   sig_data <- data[, rownames(signif_res)[1:subset]]
@@ -62,28 +62,10 @@ create_metabolic_heatmap <- function(data, signif_res, subset,
   group_col <- loc_cols$col
   group_labels <- loc_cols$loc
   
-  # Define dfs for ec colors and class
-  ec_class <- data.frame(
-    ec = colnames(sig_data_concat),
-    class = substr(colnames(sig_data_concat), 1, 2)
-  )
-  class_col <- data.frame(
-    class = c("1.", "2.", "3.", "4.", "5.", "6.", "7."),
-    col = brewer.pal(7, "PuRd")
-  )
-  class_weight <- data.frame(
-    class = c("1.", "2.", "3.", "4.", "5.", "6.", "7."),
-    weight = c(0, 1, 2, 3, 4, 5, 6)
-  )
-  ec_weights <- merge_and_retain_order(ec_class, class_weight, "class", "class")
-  ec_class_col <- merge_and_retain_order(ec_class, class_col, "class", "class")
-  
-  # Define ec dendogram and colors
+  # Define phyla dendrogram
   hc_2 <- hclust(dist(t(sig_data_concat)))
   dend_raw_2 <- as.dendrogram(hc_2)
-  dend_2 <- dendextend::set(dend_raw_2, "branches_lwd", dend_width)
-  ec_dend <- reorder(dend_2, wts = ec_weights$weight, agglo.FUN = mean)
-  ec_col <- ec_class_col$col
+  phyla_dend <- dendextend::set(dend_raw_2, "branches_lwd", dend_width)
   
   # Save plot to svg file
   file_name <- append_time_to_filename(file_name)
@@ -93,12 +75,11 @@ create_metabolic_heatmap <- function(data, signif_res, subset,
   
   heatmap.2(sig_data_concat,
             trace = "none",
-            Colv = ec_dend, 
+            Colv = phyla_dend,
             Rowv = group_dend,
             col = rev(brewer.pal(11, "RdBu")),
             srtCol = 270,
             adjCol = c(0, 1),
-            ColSideColors = ec_col,
             labRow = group_labels,
             RowSideColors = group_col,
             margins = c(25, 20),

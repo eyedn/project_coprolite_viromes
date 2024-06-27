@@ -29,7 +29,6 @@ normalize_data <- function(df) {
   # normalize by log(CPM + 1)
   for (i in seq_len(ncol(df))) {
     df[, i] <- log10(10^6 * df[, i] / sum(df[, i], na.rm = TRUE) + 1)
-    # df[, i] <- 10^6 * df[, i] / sum(df[, i], na.rm = TRUE)
   }
   
   return(df)

@@ -15,9 +15,11 @@ get_row_median <- function(data, num_iter, row_num) {
   colnames(boot_stats) <- c("ind", "pre", "pal")
 
   # Removing columns where the "ratio" is infinite
-  data <- data[, !is.infinite(colSums(data[row_num, , drop = FALSE]))]
+  data <- data[, !is.infinite(data[row_num, , drop = FALSE])]
+  data <- data[, !is.na(data[row_num, , drop = FALSE])]
+  data <- as.data.frame(data)
   data["cat", ] <- substr(colnames(data), 1, 3)
-  data <- as.data.frame(t(data))
+  data <- t(data)
   col_num <- row_num
   data[, col_num] <- as.numeric(data[, col_num])
   
@@ -36,9 +38,9 @@ get_row_median <- function(data, num_iter, row_num) {
     pre_resample <- pre_subset[sample(nrow(pre_subset), nrow(pre_subset),
                                       replace = TRUE), ]
     
-    boot_stats[i, "ind"] <- median(ind_resample[, col_num])
-    boot_stats[i, "pre"] <- median(pre_resample[, col_num])
-    boot_stats[i, "pal"] <- median(pal_resample[, col_num])
+    boot_stats[i, "ind"] <- median(ind_resample[, col_num], na.rm = TRUE)
+    boot_stats[i, "pre"] <- median(pre_resample[, col_num], na.rm = TRUE)
+    boot_stats[i, "pal"] <- median(pal_resample[, col_num], na.rm = TRUE)
     
     # update progress bar
     pb$tick()

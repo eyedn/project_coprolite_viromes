@@ -15,6 +15,7 @@ create_cat_voilins <- function(data, ci_offset, file_name, plot_dir) {
   
   melted_data <- melt(data)
   colnames(melted_data) <- c("point", "cat", "value")
+  melted_data$value <- as.numeric(melted_data$value)
   melted_data$cat <- factor(melted_data$cat, levels = c("pal", "pre", "ind"))
   
   # calculate 95% CI for each category

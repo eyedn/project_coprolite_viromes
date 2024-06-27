@@ -32,47 +32,37 @@ create_vf_heatmap <- function(data, signif_res, subset, vfc_subset,
     sig_data_concat[cat_labels[i], ] <- cat_stats
   }
   
-  # define dendrogram order
+  # Define dfs for samples location, category, dend. weight, and side bar color
+  sample_loc <- data.frame(
+    loc = rownames(sig_data_concat),
+    cat = substr(rownames(sig_data_concat), 1, 3)
+  )
+  cat_weights <- data.frame(
+    cat = c("pal", "pre", "ind"),
+    weight = c(0, 1, 2)
+  )
+  cat_cols <- data.frame(
+    cat = c("pal", "pre", "ind"),
+    col = rev(brewer.pal(9, "Greys")[c(3,5,8)])
+  )
+  sample_weights <- merge_and_retain_order(sample_loc, cat_weights, "cat", "cat")
+  loc_cols <- merge_and_retain_order(sample_loc, cat_cols, "cat", "cat")
+  
+  # Define groups dendrogram order, colors, and labels
   dend_width <- 15
   hc <- hclust(dist(sig_data_concat))
   dend_raw <- as.dendrogram(hc)
   dend <- dendextend::set(dend_raw, "branches_lwd", dend_width)
-  weights <- c()
-  groups <- rownames(sig_data_concat)
-  for (i in seq_len(length(groups))) {
-    if (grepl("pal", groups[i])) {
-      weights <- c(weights, 0)
-    } else if (grepl("pre", groups[i])) {
-      weights <- c(weights, 1)
-    } else if (grepl("ind", groups[i])) {
-      weights <- c(weights, 2)
-    } else {
-      weights <- c(weights, 3)
-    }
-  }
-  reordered_dend <- reorder(dend, wts = weights, agglo.FUN = mean)
+  group_dend <- reorder(dend, wts = sample_weights$weight, agglo.FUN = mean)
+  group_col <- loc_cols$col
+  group_labels <- loc_cols$loc
   
+  # define vfc dendrogram, colors, and labels
   hc_2 <- hclust(dist(t(sig_data_concat)))
   dend_raw_2 <- as.dendrogram(hc_2)
-  dend_2 <- dendextend::set(dend_raw_2, "branches_lwd", dend_width)
-  
-  # define column colors and labels
-  group_col_set <- rev(brewer.pal(9, "Greys")[c(3,5,8)])
-  group_col <- c()
-  col_labels <- c()
-  for (i in seq_len(length(groups))) {
-    if (grepl("pal", groups[i])) {
-      group_col <- c(group_col, group_col_set[1])
-    } else if (grepl("pre", groups[i])) {
-      group_col <- c(group_col, group_col_set[2])
-    } else {
-      group_col <- c(group_col, group_col_set[3])
-    }
-    col_labels <- c(col_labels, origin_labels[[groups[i]]])
-  }
-  
-  # define row colors and labels
-  row_col_range <- brewer.pal(vfc_max_colors, "PuRd")
+  vfc_dend <- dendextend::set(dend_raw_2, "branches_lwd", dend_width)
+
+  vfc_col_range <- brewer.pal(vfc_max_colors, "PuRd")
   vfc_subset$color <- 1
   for (i in seq_len(nrow(vfc_subset))) {
     if (i < vfc_max_colors) {
@@ -83,10 +73,10 @@ create_vf_heatmap <- function(data, signif_res, subset, vfc_subset,
   }
   rownames(vfc_subset) <- vfc_subset[, "Var1"]
   
-  row_col <- c()
+  vfc_col <- c()
   for (i in seq_len(subset)) {
-    row_col <- c(row_col,
-                 row_col_range[vfc_subset[signif_res[i, "VFCID"], "color"]]
+    vfc_col <- c(vfc_col,
+                 vfc_col_range[vfc_subset[signif_res[i, "VFCID"], "color"]]
                  )
   }
   
@@ -98,14 +88,14 @@ create_vf_heatmap <- function(data, signif_res, subset, vfc_subset,
   
   heatmap.2(t(sig_data_concat),
             trace = "none",
-            Colv = reordered_dend, 
-            Rowv = dend_2,
+            Colv = group_dend, 
+            Rowv = vfc_dend,
             col = rev(brewer.pal(11, "RdBu")),
             srtCol = 325,
             adjCol = c(0, 1),
             ColSideColors = group_col,
-            RowSideColors = row_col,
-            labCol = col_labels,
+            RowSideColors = vfc_col,
+            labCol = group_labels,
             margins = c(25, 20),
             cexRow = 3,
             cexCol = 3.5,
@@ -116,6 +106,7 @@ create_vf_heatmap <- function(data, signif_res, subset, vfc_subset,
             key.title = "Median Representation",
             keysize = 2,
             key.par = list(cex = 3),
-            density.info = "none"
+            density.info = "none",
+            add.expr = abline(v=c(6.5, 11.5), h = 36.5)
   )
 }
