@@ -4,7 +4,11 @@ collect and analyze publicly available human gut metagenomic sequence data.
 Samples in this project were from modern-industrial, modern-non-industrial, and 
 paleofecal samples, known as coprolites. The pipeline can be run in a Linux 
 environment. Statistical analysis and visualization were performed in an .Rmd 
-file.
+file. NOTE: Associated paper lables historical periods as pre-historic,
+non-industrial modern, and industrial modern. Prefixes for variables and files
+in this pipeline use "pal" for pre-historic, "pre" for non-industrial modern,
+and "ind" for industial modern. The written paper does not use these
+conventions.
 
 ## Overview of Pipeline
 The pipeline follows 6 major steps:
