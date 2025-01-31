@@ -10,7 +10,7 @@ library(factoextra)
 get_optimal_clusters <- function(data, method) {
   # find optimal number of clusters with fviz_nbclust function
   clusters <- fviz_nbclust(data, kmeans, nboot = 1000, method = method) +
-    labs(subtitle = "Elbow method") +
+    labs(subtitle = method) +
     theme_bw() +
     theme(
       plot.margin = margin(20, 20, 20, 20, "points"),

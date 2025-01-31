@@ -15,8 +15,8 @@ get_row_median <- function(data, num_iter, row_num) {
   colnames(boot_stats) <- c("ind", "pre", "pal")
 
   # Removing columns where the "ratio" is infinite
-  data <- data[, !is.infinite(data[row_num, , drop = FALSE])]
-  data <- data[, !is.na(data[row_num, , drop = FALSE])]
+  data <- data[, !is.infinite(as.numeric(data[row_num, , drop = FALSE]))]
+  data <- data[, !is.na(as.numeric(data[row_num, , drop = FALSE]))]
   data <- as.data.frame(data)
   data["cat", ] <- substr(colnames(data), 1, 3)
   data <- t(data)

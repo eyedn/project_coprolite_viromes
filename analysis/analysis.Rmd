@@ -6,7 +6,7 @@ output: html_document
 
 ## set up functions and working directory
 ```{r setup, include=FALSE}
-base_dir <- "~/Documents/research/project_coprolite_viromes/analysis/"
+base_dir <- "~/Documents/ucla/research/project_coprolite_viromes/analysis/"
 knitr::opts_chunk$set(root.dir = base_dir)
 
 # source functions from different directories
@@ -25,8 +25,8 @@ source_files_from_dir("misc")
 
 # define global variables
 set.seed(seed = 123)
-data_dir <- "~/Documents/research/project_coprolite_viromes_NOT_CODE/data"
-figs_dir <- "~/Documents/research/project_coprolite_viromes_NOT_CODE/figures"
+data_dir <- "~/Documents/ucla/research/project_coprolite_viromes_NOT_CODE/data"
+figs_dir <- "~/Documents/ucla/research/project_coprolite_viromes_NOT_CODE/figures"
 max_iter <- 1000
 subset_top <- 100
 star_bounds <- list(list(0.1, 0.9), list(0.025, 0.975), list(0.01, 0.99),
@@ -76,15 +76,15 @@ lifestyle_counts["total", ] <- colSums(lifestyle_counts)
 lifestyle_counts["temp_to_lyt", ] <- 
   lifestyle_counts["temperate", ] / lifestyle_counts["virulent", ]
 lifestyle_counts["temp_to_lyt_+1", ] <- 
-  (lifestyle_counts["temperate", ] + 0.01) / (lifestyle_counts["virulent", ] + 0.01)
+  (lifestyle_counts["temperate", ] + 1) / (lifestyle_counts["virulent", ] + 1)
 lifestyle_counts["temp_perc", ] <-
   lifestyle_counts["temperate", ] / lifestyle_counts["total", ]
-
+  
 # bootstrap median ratio of temperate-to-lytic viruses
 lifestyle_boot_res <- get_row_median(
   data = lifestyle_counts,
   num_iter = max_iter, 
-  row_num = 6
+  row_num = 5
   )
 
 # plot violin plot of lifestyles by category
@@ -389,6 +389,10 @@ vir_ec_optimal <- get_optimal_clusters(
   method = "silhouette"
   )
 vir_ec_optimal
+ggsave(filename = paste0(figs_dir, "/metabolism/silhouette.svg"),
+         plot = vir_ec_optimal,
+         height = 7,
+         width = 7)
 
 # generate representative mds of clutering
 library(ade4)
@@ -416,9 +420,6 @@ s.class(mds_df[, c("V1", "V2")], fac = mds_df$clusters, cell = 2, axesell = FALS
         csta = 0,
         col = c("red", "green", "blue"), clabel = FALSE, pch = NA,
         add.plot = TRUE)}
-
-# plot(mds_df$V1, mds_df$V2, pch = 19, cex = 1, col = mds_df$groups,
-#      xlim = c(-30, 30), ylim = c(-65, 15))
 ```
 
 use bootstrap and permutation testing to determine clustering behaviour
@@ -488,6 +489,47 @@ vir_ec_median <- get_cat_medians(data = vir_ec_t_norm)
 
 # print stats testing of ec classes
 get_diff_repres_ec(data = vir_ec_median)
+```
+
+determine CI of p-vals of heatmap genes
+```{r metabolic gene analysis: p-val CIs}
+library(boot)
+
+# all metabolic genes in heatmap
+all_met_pvals <- as.numeric(read.csv(
+  file = paste0(data_dir, "/all_met_pvals.txt"),
+  header = FALSE)[1, ])
+set.seed(1234)
+all_met_boot <- boot(
+  all_met_pvals, 
+  statistic = function(x, i) median(x[i]), 
+  R = max_iter
+  )
+all_met_ci <- boot.ci(
+  all_met_boot,
+  conf = 0.95,
+  type = "perc")
+cat("---------- ALL METABOLIC GENES ----------\n")
+cat(paste0("median: ", all_met_ci[2], "\n"))
+cat(paste0("95% CI (last 2 values): ", all_met_ci[4], "\n"))
+
+# red cluster metabolic genes in heatmap
+red_met_pvals <- as.numeric(read.csv(
+  file = paste0(data_dir, "/red_cluster_met_pvals.txt"),
+  header = FALSE)[1, ])
+set.seed(1234)
+red_met_boot <- boot(
+  red_met_pvals, 
+  statistic = function(x, i) median(x[i]), 
+  R = max_iter
+  )
+red_met_ci <- boot.ci(
+  red_met_boot,
+  conf = 0.95,
+  type = "perc")
+cat("\n---------- RED METABOLIC GENES ----------\n")
+cat(paste0("median: ", red_met_ci[2], "\n"))
+cat(paste0("95% CI (last 2 values): ", red_met_ci[4], "\n"))
 ```
 
 ## virulence factors analysis
@@ -614,3 +656,45 @@ get_diff_repres_vf(
   vf_reference = vf_reference
   )
 ```
+
+determine CI of p-vals of heatmap genes
+```{r r vfdb alignment: p-val CIs}
+library(boot)
+
+# all vf genes in heatmap
+all_vf_pvals <- as.numeric(read.csv(
+  file = paste0(data_dir, "/all_vf_pvals.txt"),
+  header = FALSE)[1, ])
+set.seed(1234)
+all_vf_boot <- boot(
+  all_vf_pvals, 
+  statistic = function(x, i) median(x[i]), 
+  R = max_iter
+  )
+all_vf_ci <- boot.ci(
+  all_vf_boot,
+  conf = 0.95,
+  type = "perc")
+cat("---------- ALL VF GENES ----------\n")
+cat(paste0("median: ", all_vf_ci[2], "\n"))
+cat(paste0("95% CI (last 2 values): ", all_vf_ci[4], "\n"))
+
+# blue cluster vf genes in heatmap
+blue_met_pvals <- as.numeric(read.csv(
+  file = paste0(data_dir, "/blue_cluster_vf_pvals.txt"),
+  header = FALSE)[1, ])
+set.seed(1234)
+blue_vf_boot <- boot(
+  blue_met_pvals, 
+  statistic = function(x, i) median(x[i]), 
+  R = max_iter
+  )
+blue_vf_ci <- boot.ci(
+  blue_vf_boot,
+  conf = 0.95,
+  type = "perc")
+cat("\n---------- BLUE VF GENES ----------\n")
+cat(paste0("median: ", blue_vf_ci[2], "\n"))
+cat(paste0("95% CI (last 2 values): ", blue_vf_ci[4], "\n"))
+```
+
