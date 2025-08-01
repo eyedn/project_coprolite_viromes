@@ -47,7 +47,6 @@ fi
 
 job_name=$(echo $script_name | cut -d '/' -f 2-)
 joblogs_output="$SCRATCH/joblogs/$origin/"
-array_string="1-$total_samples%8"  # limit to 8 concurrent array jobs
 
 # submit job
 if [ -z "${hold_jid:-}" ]; then
@@ -61,7 +60,7 @@ if [ -z "${hold_jid:-}" ]; then
     -M $USER@mail \
     -m ea \
     -terse \
-    -t $array_string \
+    -t 1-${total_samples}%8 \
     $script_name "$origin" "$project_dir" "$cores")
 else
   jobid=$(qsub \
@@ -75,7 +74,7 @@ else
     -m ea \
     -hold_jid $hold_jid \
     -terse \
-    -t $array_string \
+    -t 1-${total_samples}%8 \
     $script_name "$origin" "$project_dir" "$cores")
 fi
 

@@ -20,9 +20,12 @@ if [[ $filename =~ ^[0-9]+_ ]]; then
 
     for ori in "${origins[@]}"; do
         if [[ -z "$last_job_id" ]]; then
+            echo "submitting $ori with no dependency"
             jobid=$(./run_ori.sh -s "$script" -d 8 -c 8 -p "$SCRATCH/project_coprolite_viromes" -o "$ori")
+            echo "submitted $jobid for $ori with no dependency"
         else
             jobid=$(./run_ori.sh -s "$script" -d 8 -c 8 -p "$SCRATCH/project_coprolite_viromes" -o "$ori" -h "$last_job_id")
+            echo "submitted $jobid for $ori with dependency $jobid"
         fi
         last_job_id="$jobid"
     done
