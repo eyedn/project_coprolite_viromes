@@ -63,5 +63,6 @@ qsub \
     -pe shared ${cores} \
     -M $USER@mail \
     -m ea \
-    -t 1-${total_samples}%7 \
+    -t 1-${total_samples} \
+    -tc 7 \
     $script_name "$origin" "$project_dir" "$cores"
