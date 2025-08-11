@@ -18,6 +18,8 @@ seqtk="$software/seqtk/seqtk"
 
 bowtie2="$software/bowtie2-2.5.1-linux-x86_64/bowtie2"
 
+samtools="$software/samtools-1.18/samtools"
+
 hmmsearch="$software/hmmer-3.4/src/hmmsearch"
 
 hmmbuild="$software/hmmer-3.4/src/hmmbuild"
