@@ -14,9 +14,10 @@ megahit_assembler() {
     local paired_end_data_1="$3"    # "no_data" or comma-separated R1 FASTQs
     local paired_end_data_2="$4"    # "no_data" or comma-separated R2 FASTQs
     local num_cores="$5"
-    local sample_id="$(basename "$output_dir")"
+    local sample_id
+    sample_id="$(basename "$output_dir")"
 
-    # PyDamage filtering threshold
+    # PyDamage filtering threshold (default)
     local pydmg_thresh=0.5
 
     echo "$(timestamp): megahit_assembler: SE=$single_end_data"
@@ -55,7 +56,8 @@ megahit_assembler() {
     # 2) Align reads → contigs (Bowtie2) + MD tags
     local mapdir="${output_dir}/align"
     mkdir -p "$mapdir"
-    local bt2_build="$(dirname "$bowtie2")/bowtie2-build"
+    local bt2_build
+    bt2_build="$(dirname "$bowtie2")/bowtie2-build"
     local idx="${mapdir}/contigs"
     local sorted_bam="${mapdir}/${sample_id}.sorted.bam"
     local calmd_bam="${mapdir}/${sample_id}.calmd.bam"
@@ -110,12 +112,28 @@ megahit_assembler() {
     fi
 
     # 4) Create final *_all_contigs.fa filtered by PyDamage (keep unfiltered copy)
+    local final_all="${output_dir}/$(basename "$output_dir")_all_contigs.fa"
+    local final_all_unfiltered="${final_all}.unfiltered.fa"
+    cp -f "$contigs_raw" "$final_all_unfiltered"
+
+    # prefer the official filtered CSV name; fall back to unfiltered CSV
     local pd_filtered_csv="${pd_dir}/pydamage_filtered_results.csv"
     if [ ! -s "$pd_filtered_csv" ]; then
         pd_filtered_csv="${pd_dir}/pydamage_results.csv"
-        echo "$(timestamp): NOTE: using ${pd_filtered_csv}; adjust header names below if needed."
     fi
 
+    # if still nothing, skip filtering and keep all contigs
+    if [ ! -s "$pd_filtered_csv" ]; then
+        echo "$(timestamp): PyDamage CSV not found; exporting UNFILTERED contigs."
+        cp -f "$final_all_unfiltered" "$final_all"
+        local n_total
+        n_total=$(grep -c '^>' "$final_all_unfiltered" || true)
+        echo "$(timestamp): PyDamage filter kept ${n_total}/${n_total} contigs"
+        echo "$(timestamp): megahit_assembler completed with alignment (no PyDamage filter applied)"
+        return 0
+    fi
+
+    # Extract contig IDs to keep from CSV (header-robust: 'reference' or 'contig')
     local keep_ids="${pd_dir}/keep_ids.txt"
     awk -F',' '
         NR==1 {
@@ -126,11 +144,6 @@ megahit_assembler() {
         }
         { gsub(/"/,""); print $refIdx }
     ' "$pd_filtered_csv" > "$keep_ids"
-
-    local final_all="${output_dir}/$(basename "$output_dir")_all_contigs.fa"
-    local final_all_unfiltered="${final_all}.unfiltered.fa"
-
-    cp -f "$contigs_raw" "$final_all_unfiltered"
 
     echo "$(timestamp): writing filtered contigs to $final_all"
     awk -v ids="$keep_ids" '
@@ -154,6 +167,5 @@ megahit_assembler() {
     n_total=$(grep -c '^>' "$final_all_unfiltered" || true)
     n_keep=$(grep -c '^>' "$final_all" || true)
     echo "$(timestamp): PyDamage filter kept ${n_keep}/${n_total} contigs"
-
     echo "$(timestamp): megahit_assembler completed with alignment + PyDamage filtering"
 }
