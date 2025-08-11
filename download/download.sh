@@ -68,7 +68,7 @@ for id in $accession_ids; do
 	echo "===================================================================================================="
 	echo "$(timestamp): download: remove human dna from trimmed reads: $origin; $sample; $id"
 	echo "===================================================================================================="
-	# host removal uses kneaddata 
+	# host removal uses bowtie2 
 	remove_human_reads "$id" "$fastq_trimmed_dir" "$fastq_clean_dir" "$fastq_stats" "$num_cores"
 
 	echo "$(timestamp): download: pre-processing complete for $id"
