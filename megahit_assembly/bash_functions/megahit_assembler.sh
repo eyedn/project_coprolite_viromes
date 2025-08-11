@@ -100,7 +100,7 @@ megahit_assembler() {
     mkdir -p "$pd_dir"
 
     echo "$(timestamp): running PyDamage analyze"
-    pydamage --outdir "$pd_dir" analyze "$bam_in"
+    pydamage --outdir "$pd_dir" analyze --force -p "$num_cores" "$bam_in"
 
     echo "$(timestamp): filtering PyDamage results (threshold=$pydmg_thresh)"
     if [ -s "${pd_dir}/pydamage_results.csv" ]; then
@@ -110,9 +110,8 @@ megahit_assembler() {
     fi
 
     # 4) Create final *_all_contigs.fa filtered by PyDamage (keep unfiltered copy)
-    local pd_filtered_csv
-    pd_filtered_csv="$(ls -1 "${pd_dir}"/*filtered*.csv 2>/dev/null | head -n1)"
-    if [ -z "$pd_filtered_csv" ]; then
+    local pd_filtered_csv="${pd_dir}/pydamage_filtered_results.csv"
+    if [ ! -s "$pd_filtered_csv" ]; then
         pd_filtered_csv="${pd_dir}/pydamage_results.csv"
         echo "$(timestamp): NOTE: using ${pd_filtered_csv}; adjust header names below if needed."
     fi
