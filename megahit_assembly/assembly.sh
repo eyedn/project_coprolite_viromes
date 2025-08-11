@@ -10,7 +10,8 @@ for FILE in general_bash_functions/* ; do source $FILE ; done
 source /u/local/Modules/default/init/modules.sh
 module load python
 source $python_env
-
+module load anaconda3
+conda activate qc 	# for using pydamage
 
 # define inputs variables
 origin=$1
