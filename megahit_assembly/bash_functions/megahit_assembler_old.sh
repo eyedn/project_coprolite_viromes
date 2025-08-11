@@ -7,7 +7,7 @@
 
 
 # contains the megahit command to assembly fastq/fasta files
-megahit_assembler() {
+megahit_assembler_old() {
 	# define argument variables
 	local output_dir=$1
 	local single_end_data=$2
