@@ -17,6 +17,7 @@ for FILE in general_bash_functions/* ; do source $FILE ; done
 valid_ori=( pal-AWC pal-BEL pal-BMS pal-ENG pal-ZAF pal-ZAP \
             ind-DNK ind-ESP ind-USA \
             pre-FJI pre-MDG pre-MEX pre-PER pre-TZA \
+            pre-source_samples ind-source_samples soil_samples \
             test all )
             
 # read in arguments by flag and assign them to variables
@@ -64,5 +65,5 @@ qsub \
     -M $USER@mail \
     -m ea \
     -t 1-${total_samples} \
-    -tc 10 \
+    -tc 7 \
     $script_name "$origin" "$project_dir" "$cores"
