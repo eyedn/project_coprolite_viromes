@@ -2,12 +2,12 @@
 ###############################################################################
 #       Aydin Karatas
 #		Project Coprolite Viromes
-#		assembly_functions.sh 
+#		megahit_assembler_wo_pydamage.sh 
 ###############################################################################
 
 
 # contains the megahit command to assembly fastq/fasta files
-megahit_assembler_old() {
+megahit_assembler_wo_pydamage() {
 	# define argument variables
 	local output_dir=$1
 	local single_end_data=$2
@@ -15,14 +15,14 @@ megahit_assembler_old() {
 	local paired_end_data_2=$4
 	local num_cores=$5
 
-	echo "$(timestamp): megahit_assembler: single-ended files: $single_end_data"
-	echo "$(timestamp): megahit_assembler: paired-ended (1) files: $paired_end_data_1"
-	echo "$(timestamp): megahit_assembler: paired-ended (2) files: $paired_end_data_2"
+	echo "$(timestamp): megahit_assembler_wo_pydamage: single-ended files: $single_end_data"
+	echo "$(timestamp): megahit_assembler_wo_pydamage: paired-ended (1) files: $paired_end_data_1"
+	echo "$(timestamp): megahit_assembler_wo_pydamage: paired-ended (2) files: $paired_end_data_2"
 	# run assembly based on the libraries available
 	if ! [ "$single_end_data" == "no_data" ] && \
 	! [ "$paired_end_data_1" == "no_data" ] && \
 	! [ "$paired_end_data_2" == "no_data" ]; then 
-		echo "$(timestamp): megahit_assembler: assembling with both paired-ended and single-ended data:"
+		echo "$(timestamp): megahit_assembler_wo_pydamage: assembling with both paired-ended and single-ended data:"
 		echo "$single_end_data"
 		echo "$paired_end_data_1"
 		echo "$paired_end_data_2"
@@ -35,7 +35,7 @@ megahit_assembler_old() {
 	elif ! [ "$single_end_data" == "no_data" ] && \
 	[ "$paired_end_data_1" == "no_data" ] && \
 	[ "$paired_end_data_2" == "no_data" ]; then 
-		echo "$(timestamp): megahit_assembler: assembling with single-ended data"
+		echo "$(timestamp): megahit_assembler_wo_pydamage: assembling with single-ended data"
 		echo "$single_end_data"
 		$megahit \
 			-r $single_end_data \
@@ -43,8 +43,8 @@ megahit_assembler_old() {
 			-o $output_dir
 	elif [ "$single_end_data" == "no_data" ] && \
 	! [ "$paired_end_data_1" == "no_data" ] && \
-	! [ "$paired_end_data_1" == "no_data" ]; then 
-		echo "$(timestamp): megahit_assembler: assembling with paired-ended data:"
+	! [ "$paired_end_data_2" == "no_data" ]; then 
+		echo "$(timestamp): megahit_assembler_wo_pydamage: assembling with paired-ended data:"
 		echo "$paired_end_data_1"
 		echo "$paired_end_data_2"
 		$megahit \
@@ -53,7 +53,7 @@ megahit_assembler_old() {
 			-t $num_cores \
 			-o $output_dir
 	else
-		echo "$(timestamp): megahit_assembler: libraries provided are not suitible for multiple-library assembly"
+		echo "$(timestamp): megahit_assembler_wo_pydamage: libraries provided are not suitible for multiple-library assembly"
 		exit 1
 	fi
 }
