@@ -65,5 +65,5 @@ qsub \
     -M $USER@mail \
     -m ea \
     -t 1-${total_samples} \
-    -tc 2 \
+    -tc 3 \
     $script_name "$origin" "$project_dir" "$cores"
