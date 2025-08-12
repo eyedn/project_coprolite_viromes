@@ -2,35 +2,51 @@
 ###############################################################################
 #     Aydin Karatas
 #     Project Coprolite Viromes
-#	  run_step.sh 
+#     run_step.sh 
 ###############################################################################
-cd $HOME/project_coprolite_viromes
-
+cd "$HOME/project_coprolite_viromes" || exit 1
 
 script=$1
 filename=$(basename "$script")
 
 if [[ $filename =~ ^[0-9]+_ ]]; then
-    # run pal samples
-    ./run_ori.sh -s $script -d 8 -c 8 -p $SCRATCH/project_coprolite_viromes -o pal-AWC
-    ./run_ori.sh -s $script -d 8 -c 8 -p $SCRATCH/project_coprolite_viromes -o pal-BEL
-    ./run_ori.sh -s $script -d 8 -c 16 -p $SCRATCH/project_coprolite_viromes -o pal-BMS
-    ./run_ori.sh -s $script -d 8 -c 8 -p $SCRATCH/project_coprolite_viromes -o pal-ENG
-    ./run_ori.sh -s $script -d 8 -c 8 -p $SCRATCH/project_coprolite_viromes -o pal-ZAF
-    ./run_ori.sh -s $script -d 8 -c 8 -p $SCRATCH/project_coprolite_viromes -o pal-ZAP
+    echo "Which sample group(s) do you want to run?"
+    echo "  1) pal"
+    echo "  2) ind"
+    echo "  3) pre"
+    echo "  4) all (pal, ind, pre)"
+    read -rp "Enter choice (1/2/3/4): " choice
 
-    # run ind samples
-    ./run_ori.sh -s $script -d 8 -c 8 -p $SCRATCH/project_coprolite_viromes -o ind-DNK
-    ./run_ori.sh -s $script -d 8 -c 8 -p $SCRATCH/project_coprolite_viromes -o ind-ESP
-    ./run_ori.sh -s $script -d 8 -c 8 -p $SCRATCH/project_coprolite_viromes -o ind-USA
+    run_group() {
+        local group=$1
+        shift
+        for origin in "$@"; do
+            ./run_ori.sh -s "$script" -d 8 -c "${CORES:-8}" -p "$SCRATCH/project_coprolite_viromes" -o "$origin"
+        done
+    }
 
-    # run non-ind samples
-    ./run_ori.sh -s $script -d 8 -c 8 -p $SCRATCH/project_coprolite_viromes -o pre-FJI
-    ./run_ori.sh -s $script -d 8 -c 8 -p $SCRATCH/project_coprolite_viromes -o pre-MDG
-    ./run_ori.sh -s $script -d 8 -c 8 -p $SCRATCH/project_coprolite_viromes -o pre-MEX
-    ./run_ori.sh -s $script -d 8 -c 8 -p $SCRATCH/project_coprolite_viromes -o pre-PER
-    ./run_ori.sh -s $script -d 8 -c 8 -p $SCRATCH/project_coprolite_viromes -o pre-TZA
+    case "$choice" in
+        1)
+            run_group pal pal-AWC pal-BEL pal-BMS pal-ENG pal-ZAF pal-ZAP
+            ;;
+        2)
+            run_group ind ind-DNK ind-ESP ind-USA
+            ;;
+        3)
+            run_group pre pre-FJI pre-MDG pre-MEX pre-PER pre-TZA
+            ;;
+        4)
+            run_group pal pal-AWC pal-BEL pal-BMS pal-ENG pal-ZAF pal-ZAP
+            run_group ind ind-DNK ind-ESP ind-USA
+            run_group pre pre-FJI pre-MDG pre-MEX pre-PER pre-TZA
+            ;;
+        *)
+            echo "Invalid choice."
+            exit 1
+            ;;
+    esac
+
 elif [[ $filename =~ ^[0-9]+a_ ]]; then
-    # run auxilliar script that is not specific to an origin
-    ./run_ori.sh -s $script -d 8 -c 4 -p $SCRATCH/project_coprolite_viromes -o all
+    # run auxiliary script not specific to origin
+    ./run_ori.sh -s "$script" -d 8 -c 4 -p "$SCRATCH/project_coprolite_viromes" -o all
 fi
