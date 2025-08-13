@@ -28,7 +28,7 @@ if [[ $filename =~ ^[0-9]+_ ]]; then
 
     case "$choice" in
         1)
-            run_group pal pal-AWC pal-BEL pal-BMS pal-ENG pal-ZAF pal-ZAP
+            run_group pal pal-AUT pal-AWC pal-BEL pal-BMS pal-ENG pal-ZAF pal-ZAP
             ;;
         2)
             run_group ind ind-DNK ind-ESP ind-USA
