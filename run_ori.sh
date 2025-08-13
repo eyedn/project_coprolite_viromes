@@ -16,7 +16,7 @@ for FILE in general_bash_functions/* ; do source $FILE ; done
 #       pre-FJI pre-MDG pre-MEX pre-PER pre-TZA
 valid_ori=( pal-AUT pal-AWC pal-BEL pal-BMS pal-ENG pal-ZAF pal-ZAP \
             ind-CHN ind-DNK ind-ESP ind-USA \
-            pre-FJI pre-MDG pre-MEX pre-PER pre-TZA \
+            pre-FJI pre-MDG pre-MEX pre-NPL pre-PER pre-TZA \
             pre-source ind-source soil \
             test all )
             
