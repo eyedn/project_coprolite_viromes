@@ -55,7 +55,7 @@ for id in $accession_ids; do
 	echo "$(timestamp): download: converting sra file to fastq files: $origin; $sample; $id"
 	echo "===================================================================================================="
 	# uses fasterq-dump from sra tool kit
-	generate_fastq "$id" "$sra_dir" "$fastq_raw_dir" "$fastq_stats" "$num_cores"
+	generate_fastq "$id" "$sra_dir" "$fastq_raw_dir" "$num_cores"
 
 	# quality control fastq files by removing adapters and low quality reads
 	echo "===================================================================================================="
