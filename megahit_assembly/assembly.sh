@@ -48,15 +48,13 @@ fi
 echo "===================================================================================================="
 echo "$(timestamp): assembly: assemble all libraries associated with this sample: $origin; $sample"
 echo "===================================================================================================="
-assemble_libraries_wo_pydamage "$sample" "$fastq_clean_dir" "$assembly_dir" "$assembly_extra_dir" "$num_cores"
-
-# if [[ "${origin%%-*}" == "pal" ]]; then
-#     echo "$(timestamp): assembly: detected pal-*; running assembly with pydamage"
-#     assemble_libraries "$sample" "$fastq_clean_dir" "$assembly_dir" "$assembly_extra_dir" "$num_cores"
-# else
-#     echo "$(timestamp): assembly: non-pal; running assembly without pydamage"
-#     assemble_libraries_wo_pydamage "$sample" "$fastq_clean_dir" "$assembly_dir" "$assembly_extra_dir" "$num_cores"
-# fi
+if [[ "${origin%%-*}" == "pal" ]]; then
+    echo "$(timestamp): assembly: detected pal-*; running assembly with pydamage"
+    assemble_libraries "$sample" "$fastq_clean_dir" "$assembly_dir" "$assembly_extra_dir" "$num_cores"
+else
+    echo "$(timestamp): assembly: non-pal; running assembly without pydamage"
+    assemble_libraries_wo_pydamage "$sample" "$fastq_clean_dir" "$assembly_dir" "$assembly_extra_dir" "$num_cores"
+fi
 
 
 # cleanup reads workspace; keep only non-gz artifacts (e.g., *_DONE.txt)
