@@ -99,7 +99,8 @@ megahit_assembler() {
     fi
 
     # 3) PyDamage
-    mkdir -p "$pd_dir"
+    # clear out pydamage dir if it already exists
+    rm -rf "$pd_dir"
 
     echo "$(timestamp): running PyDamage analyze"
     pydamage --outdir "$pd_dir" analyze --force -p "$num_cores" "$calmd_bam"
