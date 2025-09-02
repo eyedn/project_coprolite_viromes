@@ -60,7 +60,7 @@ echo "$(timestamp): assembly: running assembly without pydamage"
 assemble_libraries_wo_pydamage "$sample" "$fastq_clean_dir" "$assembly_dir" "$assembly_extra_dir" "$num_cores"
 
 # cleanup reads workspace; keep only non-gz artifacts (e.g., *_DONE.txt)
-find "$fastq_clean_dir" -type f -name '*.gz' -delete
-find "$fastq_clean_dir" -type d -empty -delete
+# find "$fastq_clean_dir" -type f -name '*.gz' -delete
+# find "$fastq_clean_dir" -type d -empty -delete
 
 echo "$(timestamp): assembly: assembly complete for $sample"
