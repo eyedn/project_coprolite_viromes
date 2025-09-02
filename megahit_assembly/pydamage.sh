@@ -8,7 +8,7 @@
 #$ -N pydam
 #$ -o $SCRATCH/joblogs/pydamage_extra/
 #$ -j y
-#$ -pe shared 16
+#$ -pe shared 8
 #$ -l h_rt=25:00:00,h_data=8G
 #$ -M $USER@mail 
 #$ -m ea 
