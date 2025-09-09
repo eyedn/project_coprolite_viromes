@@ -2,14 +2,14 @@
 ###############################################################################
 #       Aydin Karatas
 #       Project Coprolite Viromes
-#       pydamage_on_contigs.qsub.sh  (positional-args version)
+#       pydamage.sh
 ###############################################################################
 #$ -cwd
 #$ -N pydam
 #$ -o /u/scratch/a/ayd1n/joblogs/pydamage_extra/
 #$ -j y
 #$ -pe shared 8
-#$ -l h_rt=25:00:00,h_data=8G
+#$ -l h_rt=10:00:00,h_data=8G
 #$ -M $USER@mail
 #$ -m ea
 
