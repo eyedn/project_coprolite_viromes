@@ -4,19 +4,19 @@
 #       Project Coprolite Viromes
 #       pydamage_on_contigs.qsub.sh  (positional-args version)
 ###############################################################################
-#$ -cwd
+
 #$ -N pydam
-#$ -o $SCRATCH/joblogs/pydamage_extra/
+#$ -o /u/scratch/a/ayd1n/joblogs/pydamage_extra/
 #$ -j y
 #$ -pe shared 8
 #$ -l h_rt=25:00:00,h_data=8G
 #$ -M $USER@mail
 #$ -m ea
-#$ -cwd
+
+for FILE in ~/project_coprolite_viromes/general_bash_functions/* ; do source $FILE ; done
+
 
 set -euo pipefail
-
-timestamp(){ date '+%Y-%m-%d %H:%M:%S'; }
 
 usage() {
     cat <<'EOF'
