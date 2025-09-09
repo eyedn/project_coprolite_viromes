@@ -4,7 +4,7 @@
 #       Project Coprolite Viromes
 #       pydamage_on_contigs.qsub.sh  (positional-args version)
 ###############################################################################
-#$ cwd
+#$ -cwd
 #$ -N pydam
 #$ -o /u/scratch/a/ayd1n/joblogs/pydamage_extra/
 #$ -j y
