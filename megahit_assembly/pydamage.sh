@@ -1,8 +1,8 @@
 #!/bin/bash
 ###############################################################################
 #       Aydin Karatas
-#		Project Coprolite Viromes
-#		pydamage.sh 
+#       Project Coprolite Viromes
+#       pydamage_on_contigs.qsub.sh  (positional-args version)
 ###############################################################################
 #$ -cwd
 #$ -N pydam
@@ -10,8 +10,8 @@
 #$ -j y
 #$ -pe shared 8
 #$ -l h_rt=25:00:00,h_data=8G
-#$ -M $USER@mail 
-#$ -m ea 
+#$ -M $USER@mail
+#$ -m ea
 #$ -cwd
 
 set -euo pipefail
@@ -20,62 +20,82 @@ timestamp(){ date '+%Y-%m-%d %H:%M:%S'; }
 
 usage() {
     cat <<'EOF'
-Usage:
-    qsub pydamage_on_contigs.qsub.sh -- \
-    -c <contigs.fa> \
-    -o <output_dir> \
-    [-1 <R1.fastq[.gz]>] [-2 <R2.fastq[.gz]>] [-U <SE.fastq[.gz]>] \
-    [-t <threads>] [-T <pydmg_thresh>] [-s <sample_id>]
+Usage (fixed order, no flags):
+
+  qsub pydamage_on_contigs.qsub.sh \
+      <contigs.fa> \
+      <output_dir> \
+      <R1.fastq[.gz] or -> \
+      <R2.fastq[.gz] or -> \
+      <SE.fastq[.gz] or -> \
+      <threads or -> \
+      <pydmg_thresh or -> \
+      <sample_id or ->
 
 Notes:
-  * Provide reads as any combo of -1/-2/-U (SE and/or PE). At least one of them is required.
+  * Provide reads as any combo, but at least one of R1/R2/SE must be non-"-".
+    - Paired-end: R1 and R2 set; SE should be "-"
+    - Single-end: SE set; R1 and R2 should be "-"
+  * Use "-" to accept defaults for threads (NSLOTS/16), threshold (0.5), or sample_id (derived from contigs filename).
   * Output files:
-        <output_dir>/<sample_id>_all_contigs.fa.unfiltered
-        <output_dir>/<sample_id>_all_contigs.fa            (PyDamage-filtered; falls back to unfiltered)
+      <output_dir>/<sample_id>_all_contigs.fa.unfiltered
+      <output_dir>/<sample_id>_all_contigs.fa
   * Requires bowtie2, samtools, pydamage on PATH (e.g., your "qc" conda env).
 EOF
 }
 
-# -------------------- (optional) environment setup ----------------------------
-# If you need modules/conda, uncomment/edit these lines for your Hoffman setup.
-# source /u/local/Modules/default/init/modules.sh
-# module load anaconda3
-# conda activate qc
+# ---------------------------- environment setup -------------------------------
+source /u/local/Modules/default/init/modules.sh
+module load anaconda3
+conda activate qc
 
-# ----------------------------- CLI args --------------------------------------
-contigs=""
-outdir=""
-R1="no_data"
-R2="no_data"
-SE="no_data"
-threads="${NSLOTS:-16}"     # use grid slots; default 16
-pydmg_thresh="0.5"
-sample_id=""
+# ----------------------------- Positional args --------------------------------
+if [[ "${1:-}" == "-h" || "${1:-}" == "--help" || "$#" -lt 2 ]]; then
+    usage; exit 0
+fi
 
-# SGE passes args after a literal "--" separator; support both styles.
-while getopts ":c:o:1:2:U:t:T:s:h" opt; do
-    case "$opt" in
-        c) contigs="$OPTARG" ;;
-        o) outdir="$OPTARG" ;;
-        1) R1="$OPTARG" ;;
-        2) R2="$OPTARG" ;;
-        U) SE="$OPTARG" ;;
-        t) threads="$OPTARG" ;;
-        T) pydmg_thresh="$OPTARG" ;;
-        s) sample_id="$OPTARG" ;;
-        h) usage; exit 0 ;;
-        \?) echo "Unknown option: -$OPTARG" >&2; usage; exit 1 ;;
-        :)  echo "Missing argument for -$OPTARG" >&2; usage; exit 1 ;;
-    esac
-done
+contigs="${1:-}"
+outdir="${2:-}"
+R1="${3:-"-"}"
+R2="${4:-"-"}"
+SE="${5:-"-"}"
+threads_in="${6:-"-"}"
+pydmg_thresh_in="${7:-"-"}"
+sample_id_in="${8:-"-"}"
 
-# ----------------------------- Checks ----------------------------------------
-if [[ -z "$contigs" || -z "$outdir" ]]; then
-    echo "ERROR: -c <contigs.fa> and -o <outdir> are required." >&2
+# ----------------------------- Defaults/normalize -----------------------------
+if [[ -z "$contigs" ]]; then
+    echo "ERROR: <contigs.fa> is required." >&2
     usage; exit 1
 fi
+
+# Interpret "-" as "no_data" for read args
+R1="${R1:-"-"}"; [[ "$R1" == "-" ]] && R1="no_data"
+R2="${R2:-"-"}"; [[ "$R2" == "-" ]] && R2="no_data"
+SE="${SE:-"-"}"; [[ "$SE" == "-" ]] && SE="no_data"
+
+# Threads default: prefer NSLOTS if available, else 16
+threads="${threads_in}"
+if [[ -z "${threads}" || "${threads}" == "-" ]]; then
+    threads="${NSLOTS:-16}"
+fi
+
+# Threshold default 0.5
+pydmg_thresh="${pydmg_thresh_in}"
+if [[ -z "${pydmg_thresh}" || "${pydmg_thresh}" == "-" ]]; then
+    pydmg_thresh="0.5"
+fi
+
+# Sample ID default derived from contigs filename (strip common fasta extensions)
+if [[ -z "${sample_id_in}" || "${sample_id_in}" == "-" ]]; then
+    sample_id="$(basename "$contigs" | sed 's/\.[Ff][Aa]\([Ss][Tt]\)\{0,1\}[Aa]*$//')"
+else
+    sample_id="${sample_id_in}"
+fi
+
+# ----------------------------- Checks ----------------------------------------
 if [[ "$R1" == "no_data" && "$R2" == "no_data" && "$SE" == "no_data" ]]; then
-    echo "ERROR: Provide at least one of -1, -2, or -U (reads required)." >&2
+    echo "ERROR: Provide at least one read input among R1, R2, or SE." >&2
     usage; exit 1
 fi
 if [[ ! -s "$contigs" ]]; then
@@ -83,12 +103,11 @@ if [[ ! -s "$contigs" ]]; then
     exit 1
 fi
 
-# Make sure the qsub stdout/stderr directory exists (SGE won't create it)
+# Ensure log dir exists for SGE
 mkdir -p "$SCRATCH/joblogs/pydamage_extra/"
 
 # ---------------------------- Paths & names ----------------------------------
 mkdir -p "$outdir"
-sample_id="${sample_id:-$(basename "$contigs" | sed 's/\.[Ff][Aa]\([Ss][Tt]\)\{0,1\}[Aa]*$//')}"
 mapdir="${outdir}/align"
 pd_dir="${outdir}/pydamage"
 idx="${mapdir}/contigs"
@@ -102,13 +121,17 @@ keep_ids="${pd_dir}/keep_ids.txt"
 mkdir -p "$mapdir" "$pd_dir"
 
 # --------------------------- Tool discovery ----------------------------------
-bt2_build="$(command -v bowtie2-build || true)"
-bowtie2="$(command -v bowtie2 || true)"
-samtools="$(command -v samtools || true)"
-pydamage="$(command -v pydamage || true)"
+bt2_build="$software/bowtie2-2.5.1-linux-x86_64/bowtie2-build"
+bowtie2="$software/bowtie2-2.5.1-linux-x86_64/bowtie2"
+samtools="$software/samtools-1.18/samtools"
+pydamage="$(command -v pydamage || true)" 
 
-if [[ -z "$bt2_build" || -z "$bowtie2" || -z "$samtools" || -z "$pydamage" ]]; then
-    echo "ERROR: bowtie2-build, bowtie2, samtools, and pydamage must be on PATH." >&2
+if [[ ! -x "$bt2_build" || ! -x "$bowtie2" || ! -x "$samtools" || -z "$pydamage" ]]; then
+    echo "ERROR: One or more required tools not found/executable:" >&2
+    echo "  bt2_build: $bt2_build" >&2
+    echo "  bowtie2:   $bowtie2" >&2
+    echo "  samtools:  $samtools" >&2
+    echo "  pydamage:  $pydamage" >&2
     exit 1
 fi
 
