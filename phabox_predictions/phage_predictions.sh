@@ -52,7 +52,10 @@ echo "==========================================================================
 get_phages "$sample" "$contigs_file" "$predict_dir" "$num_cores"
 # identify is phages are virulent or temperate
 get_lifestyles "$sample" "$phage_file" "$predict_dir" "$num_cores"
-
+# identify taxonomic classification of phages
+get_families "$sample" "$phage_file" "$predict_dir" "$num_cores"
+# identify hosts of phages
+get_hosts "$sample" "$phage_file" "$predict_dir" "$num_cores"
 
 # compress files
 echo "$(timestamp): phage_predictions: compressing extra files from phage predictions of $sample"
