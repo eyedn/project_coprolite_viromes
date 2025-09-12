@@ -37,9 +37,9 @@ if [[ $filename =~ ^[0-9]+_ ]]; then
             run_group pre pre-FJI pre-MDG pre-MEX pre-NPL pre-PER pre-TZA
             ;;
         4)
-            run_group pal pal-AWC pal-BEL pal-BMS pal-ENG pal-ZAF pal-ZAP
-            run_group ind ind-DNK ind-ESP ind-USA
-            run_group pre pre-FJI pre-MDG pre-MEX pre-PER pre-TZA
+            run_group pal pal-AUT pal-AWC pal-BEL pal-BMS pal-ENG pal-ZAF pal-ZAP
+            run_group ind ind ind-CHN ind-DNK ind-ESP ind-USA
+            run_group pre pre-FJI pre-MDG pre-MEX pre-NPL pre-PER pre-TZA
             ;;
         *)
             echo "Invalid choice."
