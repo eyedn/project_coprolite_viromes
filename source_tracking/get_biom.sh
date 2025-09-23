@@ -5,15 +5,12 @@
 #		Project Coprolite Viromes
 #		get_biom.sh 
 ###############################################################################
-#$ -S /bin/bash
 #$ -cwd
-#$ -N pydam
+#$ -N mpa
 #$ -o /u/scratch/a/ayd1n/joblogs/sourcetracker/
 #$ -j y
 #$ -l h_data=8G,h_rt=24:00:00
 #$ -pe shared 8
-#$ -M ayd1n@mail
-#$ -m ea
 
 # to run: qsub -t 1-$(ls -d /u/scratch/b/bwknowle/project_coprolite_viromes/reads/*_fastq_clean | wc -l) get_biom.sh
 
@@ -38,6 +35,7 @@ fastqs="$(
 echo "$sample"
 
 metaphlan "$fastqs" \
+    --verbose \
     --nproc 8 \
     --db_dir /u/scratch/b/bwknowle/mpa_db \
     --input_type fastq \
