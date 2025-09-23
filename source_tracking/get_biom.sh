@@ -12,7 +12,7 @@
 #$ -j y
 #$ -l h_data=8G,h_rt=24:00:00
 #$ -pe shared 8
-#$ -M ayd1n@ucla.edu
+#$ -M ayd1n@mail
 #$ -m ea
 
 # to run: qsub -t 1-$(ls -d /u/scratch/b/bwknowle/project_coprolite_viromes/reads/*_fastq_clean | wc -l) get_biom.sh
