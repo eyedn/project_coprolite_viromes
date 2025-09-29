@@ -21,7 +21,7 @@ ml anaconda3 jq/1.7.1
 conda activate st2
 
 cd /u/scratch/b/bwknowle/project_coprolite_viromes/sourcetracker
-mkdir -p sourcetracker sourcetracker_output
+mkdir -p sourcetracker_output
 
 # ensure jq/biom/sourcetracker2 are available
 command -v jq >/dev/null 2>&1 || { echo "ERROR: jq not found in PATH"; exit 1; }
@@ -44,8 +44,7 @@ for f in *_fastq_clean_profile.txt; do
     biom validate-table -i "$jtmp"
 
     # 3) convert JSON -> HDF5 (set table type explicitly)
-    biom convert -i "$jtmp" --input-format JSON --to-hdf5 -o "$hout" \
-        --table-type "OTU table"
+    biom convert -i "$jtmp" -o "$hout" --to-hdf5 --table-type "OTU table"
 done
 
 echo "Merging individual BIOMs -> merged.biom"
