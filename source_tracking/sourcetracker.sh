@@ -38,7 +38,7 @@ for f in *_fastq_clean_profile.txt; do
     hout="${sid}.biom"
 
     # 1) force the BIOM column (sample) id to sid
-    jq --arg sid "$sid" '.columns[0].id = $sid' "$f" > "$jtmp"
+    jq --arg sid "$sid" '.columns[0].id = $sid | .type = "OTU table"' "$f" > "$jtmp"
 
     # 2) validate JSON BIOM
     biom validate-table -i "$jtmp"
