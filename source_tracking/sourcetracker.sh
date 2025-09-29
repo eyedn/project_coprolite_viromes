@@ -3,7 +3,7 @@
 ###############################################################################
 #       Aydin Karatas
 #       Project Coprolite Viromes
-#       source_tracker.sh
+#       sourcetracker.sh
 ###############################################################################
 #$ -cwd
 #$ -N st2
@@ -12,7 +12,7 @@
 #$ -l h_data=8G,h_rt=24:00:00
 #$ -pe shared 8
 
-# to run: qsub source_tracker.sh
+# to run: qsub sourcetracker.sh
 
 set -euo pipefail
 source /u/local/Modules/default/init/modules.sh
