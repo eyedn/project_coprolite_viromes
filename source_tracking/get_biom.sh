@@ -40,5 +40,5 @@ metaphlan "$fastqs" \
     --db_dir /u/scratch/b/bwknowle/mpa_db \
     --input_type fastq \
     --mapout "sourcetracker/${sample}.bowtie2.bz2" \
-    -o "sourcetracker/${sample}_profile.out" \
+    -o "sourcetracker/${sample}_profile.out"
     # --biom_format_output
