@@ -9,7 +9,7 @@
 #$ -N mpa
 #$ -o /u/scratch/a/ayd1n/joblogs/sourcetracker/
 #$ -j y
-#$ -l h_data=8G,h_rt=24:00:00
+#$ -l h_data=4G,h_rt=24:00:00
 #$ -pe shared 8
 
 # to run: qsub -t 1-$(ls -d /u/scratch/b/bwknowle/project_coprolite_viromes/reads/*_fastq_clean | wc -l) get_biom.sh
