@@ -50,5 +50,6 @@ metaphlan "sourcetracker/${sample}.bowtie2.bz2" \
     --nproc 8 \
     --db_dir /u/scratch/b/bwknowle/mpa_db \
     --input_type mapout \
-    -o "sourcetracker/${sample}_profile.out"
+    --sample_id_key "${sample}" \
+    -o "sourcetracker/${sample}_profile.txt"
     # --biom_format_output
