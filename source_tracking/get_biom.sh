@@ -34,11 +34,21 @@ fastqs="$(
 )"
 echo "$sample"
 
-metaphlan "$fastqs" \
+# init run
+# metaphlan "$fastqs" \
+#     --verbose \
+#     --nproc 8 \
+#     --db_dir /u/scratch/b/bwknowle/mpa_db \
+#     --input_type fastq \
+#     --mapout "sourcetracker/${sample}.bowtie2.bz2" \
+#     -o "sourcetracker/${sample}_profile.out"
+#     # --biom_format_output
+
+# rerun
+metaphlan "sourcetracker/${sample}.bowtie2.bz2" \
     --verbose \
     --nproc 8 \
     --db_dir /u/scratch/b/bwknowle/mpa_db \
-    --input_type fastq \
-    --mapout "sourcetracker/${sample}.bowtie2.bz2" \
+    --input_type mapout \
     -o "sourcetracker/${sample}_profile.out"
     # --biom_format_output
