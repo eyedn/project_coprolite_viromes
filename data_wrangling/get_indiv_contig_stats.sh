@@ -27,10 +27,10 @@ stats_file="$contigs_dir/${origin}_${sample}_assembly/${origin}_${sample}_log.tx
 csv_path="$data_dir/${origin}_${sample}_contig_stats.csv"
 
 # check if assembly was already complete for this sample
-if ls $csv_path 1> /dev/null 2>&1; then
-	echo "$(timestamp): get_indiv_contig_stats: final contigs file already created"
-	return 0
-fi
+# if ls $csv_path 1> /dev/null 2>&1; then
+# 	echo "$(timestamp): get_indiv_contig_stats: final contigs file already created"
+# 	return 0
+# fi
 
 # check if download was already complete for this sample
 if ls $stats_file 1> /dev/null 2>&1; then
