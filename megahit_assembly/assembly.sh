@@ -48,19 +48,41 @@ fi
 echo "===================================================================================================="
 echo "$(timestamp): assembly: assemble all libraries associated with this sample: $origin; $sample"
 echo "===================================================================================================="
-if [[ "${origin%%-*}" == "pal" ]]; then
-    echo "$(timestamp): assembly: detected pal-*; running assembly with pydamage"
-    assemble_libraries "$sample" "$fastq_clean_dir" "$assembly_dir" "$assembly_extra_dir" "$num_cores"
-else
-    echo "$(timestamp): assembly: non-pal; running assembly without pydamage"
+case "$origin" in
+    pal-AWC*|pal-BMS*|pal-ZAP*)
+    echo "$(timestamp): assembly: detected $origin; running assembly WITHOUT pydamage"
     assemble_libraries_wo_pydamage "$sample" "$fastq_clean_dir" "$assembly_dir" "$assembly_extra_dir" "$num_cores"
-fi
+    echo "$(timestamp): assembly: skipping cleanup of $fastq_clean_dir for $origin"
+    ;;
+    pal-*)
+    echo "$(timestamp): assembly: detected pal-* (not AWC/BMS/ZAP); running assembly WITH pydamage"
+    assemble_libraries "$sample" "$fastq_clean_dir" "$assembly_dir" "$assembly_extra_dir" "$num_cores"
+    # cleanup reads workspace
+    find "$fastq_clean_dir" -type f -name '*.gz' -delete
+    find "$fastq_clean_dir" -type d -empty -delete
+    ;;
+    *)
+    echo "$(timestamp): assembly: non-pal; running assembly WITHOUT pydamage"
+    assemble_libraries_wo_pydamage "$sample" "$fastq_clean_dir" "$assembly_dir" "$assembly_extra_dir" "$num_cores"
+    # cleanup reads workspace
+    find "$fastq_clean_dir" -type f -name '*.gz' -delete
+    find "$fastq_clean_dir" -type d -empty -delete
+    ;;
+esac
+
+# if [[ "${origin%%-*}" == "pal" ]]; then
+#     echo "$(timestamp): assembly: detected pal-*; running assembly with pydamage"
+#     assemble_libraries "$sample" "$fastq_clean_dir" "$assembly_dir" "$assembly_extra_dir" "$num_cores"
+# else
+#     echo "$(timestamp): assembly: non-pal; running assembly without pydamage"
+#     assemble_libraries_wo_pydamage "$sample" "$fastq_clean_dir" "$assembly_dir" "$assembly_extra_dir" "$num_cores"
+# fi
 
 # echo "$(timestamp): assembly: running assembly without pydamage"
 # assemble_libraries_wo_pydamage "$sample" "$fastq_clean_dir" "$assembly_dir" "$assembly_extra_dir" "$num_cores"
 
 # cleanup reads workspace; keep only non-gz artifacts (e.g., *_DONE.txt)
-find "$fastq_clean_dir" -type f -name '*.gz' -delete
-find "$fastq_clean_dir" -type d -empty -delete
+# find "$fastq_clean_dir" -type f -name '*.gz' -delete
+# find "$fastq_clean_dir" -type d -empty -delete
 
 echo "$(timestamp): assembly: assembly complete for $sample"
