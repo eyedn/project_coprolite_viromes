@@ -65,7 +65,7 @@ qsub \
     -M $USER@mail \
     -m ea \
     -t 1-${total_samples} \
-    -tc 4 \
+    # -tc 4 \
     $script_name "$origin" "$project_dir" "$cores"
 
 # for high memory and i/o tasks, consider -tc 3 
