@@ -136,31 +136,36 @@ if [[ ! -x "$bt2_build" || ! -x "$bowtie2" || ! -x "$samtools" || -z "$pydamage"
 fi
 
 # ------------------------------ Align (Step 2) --------------------------------
-echo "$(timestamp): building Bowtie2 index"
-"$bt2_build" --threads "$threads" "$contigs" "$idx"
-
-echo "$(timestamp): aligning reads to contigs (SE/PE aware)"
-if [[ "$R1" != "no_data" && "$R2" != "no_data" && "$SE" != "no_data" ]]; then
-    "$bowtie2" -x "$idx" -1 "$R1" -2 "$R2" -U "$SE" --very-sensitive -k 1 --no-unal -p "$threads" \
-    | "$samtools" view -@ "$threads" -b - \
-    | "$samtools" sort -@ "$threads" -o "$sorted_bam" -
-elif [[ "$R1" != "no_data" && "$R2" != "no_data" ]]; then
-    "$bowtie2" -x "$idx" -1 "$R1" -2 "$R2" --very-sensitive -k 1 --no-unal -p "$threads" \
-    | "$samtools" view -@ "$threads" -b - \
-    | "$samtools" sort -@ "$threads" -o "$sorted_bam" -
-elif [[ "$SE" != "no_data" ]]; then
-    "$bowtie2" -x "$idx" -U "$SE" --very-sensitive -k 1 --no-unal -p "$threads" \
-    | "$samtools" view -@ "$threads" -b - \
-    | "$samtools" sort -@ "$threads" -o "$sorted_bam" -
+# Skip alignment + MD tagging entirely if final output already exists
+if [[ -f "$calmd_bam" ]]; then
+    echo "$(timestamp): $calmd_bam already exists — skipping alignment and calmd steps."
 else
-    echo "ERROR: invalid read combination." >&2
-    exit 1
-fi
-"$samtools" index "$sorted_bam"
+    echo "$(timestamp): building Bowtie2 index"
+    "$bt2_build" --threads "$threads" "$contigs" "$idx"
 
-echo "$(timestamp): adding MD tags (samtools calmd)"
-"$samtools" calmd -@ "$threads" -b "$sorted_bam" "$contigs" > "$calmd_bam"
-"$samtools" index "$calmd_bam"
+    echo "$(timestamp): aligning reads to contigs (SE/PE aware)"
+    if [[ "$R1" != "no_data" && "$R2" != "no_data" && "$SE" != "no_data" ]]; then
+        "$bowtie2" -x "$idx" -1 "$R1" -2 "$R2" -U "$SE" --very-sensitive -k 1 --no-unal -p "$threads" \
+        | "$samtools" view -@ "$threads" -b - \
+        | "$samtools" sort -@ "$threads" -o "$sorted_bam" -
+    elif [[ "$R1" != "no_data" && "$R2" != "no_data" ]]; then
+        "$bowtie2" -x "$idx" -1 "$R1" -2 "$R2" --very-sensitive -k 1 --no-unal -p "$threads" \
+        | "$samtools" view -@ "$threads" -b - \
+        | "$samtools" sort -@ "$threads" -o "$sorted_bam" -
+    elif [[ "$SE" != "no_data" ]]; then
+        "$bowtie2" -x "$idx" -U "$SE" --very-sensitive -k 1 --no-unal -p "$threads" \
+        | "$samtools" view -@ "$threads" -b - \
+        | "$samtools" sort -@ "$threads" -o "$sorted_bam" -
+    else
+        echo "ERROR: invalid read combination." >&2
+        exit 1
+    fi
+    "$samtools" index "$sorted_bam"
+
+    echo "$(timestamp): adding MD tags (samtools calmd)"
+    "$samtools" calmd -@ "$threads" -b "$sorted_bam" "$contigs" > "$calmd_bam"
+    "$samtools" index "$calmd_bam"
+fi
 
 # ------------------------------ PyDamage (Step 3) -----------------------------
 echo "$(timestamp): running PyDamage analyze (threads=$threads)"
