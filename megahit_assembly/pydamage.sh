@@ -9,7 +9,7 @@
 #$ -o /u/scratch/a/ayd1n/joblogs/pydamage_extra/
 #$ -j y
 #$ -pe shared 8
-#$ -l h_rt=10:00:00,h_data=8G
+#$ -l h_rt=20:00:00,h_data=8G
 #$ -M $USER@mail
 #$ -m ea
 
