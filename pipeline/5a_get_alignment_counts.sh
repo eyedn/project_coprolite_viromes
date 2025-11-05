@@ -37,11 +37,11 @@ python3 data_wrangling/get_alignment_counts.py \
 echo "===================================================================================================="
 echo "$(timestamp): 5a_get_alignment_counts: collecting alignment counts for cazy"
 echo "===================================================================================================="
-python3 data_wrangling/get_alignment_counts.py \
-	$cazy_alignments \
-	$search_dir \
-	$data_dir \
-	"cazy_alignment"
+# python3 data_wrangling/get_alignment_counts.py \
+# 	$cazy_alignments \
+# 	$search_dir \
+# 	$data_dir \
+# 	"cazy_alignment"
 
 # check if raw counts was created 
 if ls $data_dir/*alignment* 1> /dev/null 2>&1; then

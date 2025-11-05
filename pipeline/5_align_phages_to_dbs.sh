@@ -15,4 +15,4 @@ num_cores=$3
 . hmm_alignment/vf_alignment.sh "$origin" "$origin_parent" "$num_cores" 
 
 # align phages to cazy db
-. hmm_alignment/cazy_alignment.sh "$origin" "$origin_parent" "$num_cores" 
+# . hmm_alignment/cazy_alignment.sh "$origin" "$origin_parent" "$num_cores" 

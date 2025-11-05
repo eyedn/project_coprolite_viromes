@@ -174,7 +174,7 @@ rm -rf "$pd_dir"; mkdir -p "$pd_dir"
 
 echo "$(timestamp): filtering PyDamage results (threshold=$pydmg_thresh)"
 if [[ -s "${pd_dir}/pydamage_results.csv" ]]; then
-    "$pydamage" filter "${pd_dir}/pydamage_results.csv" -t "$pydmg_thresh" || true
+    "$pydamage" filter -t "$pydmg_thresh" "${pd_dir}/pydamage_results.csv" || true
 else
     echo "$(timestamp): WARNING: no pydamage_results.csv; continuing without filter step"
 fi
