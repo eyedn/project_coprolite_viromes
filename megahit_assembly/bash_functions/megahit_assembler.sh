@@ -107,7 +107,7 @@ megahit_assembler() {
 
     echo "$(timestamp): filtering PyDamage results (threshold=$pydmg_thresh)"
     if [ -s "${pd_dir}/pydamage_results.csv" ]; then
-        pydamage filter "${pd_dir}/pydamage_results.csv" -t "$pydmg_thresh"
+        pydamage -t "$pydmg_thresh" filter "${pd_dir}/pydamage_results.csv"
     else
         echo "$(timestamp): WARNING: no PyDamage results CSV found"
     fi
