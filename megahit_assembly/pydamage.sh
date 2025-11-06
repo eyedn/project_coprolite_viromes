@@ -173,8 +173,7 @@ rm -rf "$pd_dir"; mkdir -p "$pd_dir"
 "$pydamage" --outdir "$pd_dir" analyze --force -p "$threads" "$calmd_bam"
 
 echo "$(timestamp): filtering PyDamage results (threshold=$pydmg_thresh)"
-awk -F',' 'NR==1 || (($12+0) <= 0.05 && ($2+0) >= 0.5)' pydamage_results.csv > "$pd_filtered_csv"
-# "$pydamage" --outdir "$pd_dir" filter  "${pd_dir}/pydamage_results.csv"
+"$pydamage" --outdir "$pd_dir" -t "$pydmg_thresh" filter "${pd_dir}/pydamage_results.csv"
 
 # ----------------------- Export filtered FASTA (Step 4) -----------------------
 echo "$(timestamp): writing unfiltered copy -> $final_all_unfiltered"
