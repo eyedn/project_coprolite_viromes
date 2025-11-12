@@ -35,24 +35,24 @@ fastqs="$(
 echo "$sample"
 
 # init run
-# metaphlan "$fastqs" \
-#     --verbose \
-#     --nproc 8 \
-#     --db_dir /u/scratch/b/bwknowle/mpa_db \
-#     --input_type fastq \
-#     --mapout "sourcetracker/${sample}.bowtie2.bz2" \
-#     -o "sourcetracker/${sample}_profile.out"
-#     # --biom_format_output
-
-# rerun
-metaphlan "sourcetracker/${sample}.bowtie2.bz2" \
+metaphlan "$fastqs" \
     --verbose \
     --nproc 8 \
     --db_dir /u/scratch/b/bwknowle/mpa_db \
-    --input_type mapout \
-    --sample_id_key "${sample}" \
+    --input_type fastq \
+    --mapout "sourcetracker/${sample}.bowtie2.bz2" \
     -o "sourcetracker/${sample}_profile.out"
     # --biom_format_output
+
+# rerun
+# metaphlan "sourcetracker/${sample}.bowtie2.bz2" \
+#     --verbose \
+#     --nproc 8 \
+#     --db_dir /u/scratch/b/bwknowle/mpa_db \
+#     --input_type mapout \
+#     --sample_id_key "${sample}" \
+#     -o "sourcetracker/${sample}_profile.out"
+#     # --biom_format_output
 
 ## run after above runs
 # conda activate st2-np1.19
