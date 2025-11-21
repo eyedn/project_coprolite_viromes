@@ -12,7 +12,7 @@
 #$ -l h_data=4G,h_rt=24:00:00
 #$ -pe shared 8
 
-# to run: qsub -t 1-$(ls -d /u/scratch/b/bwknowle/project_coprolite_viromes/reads/*_fastq_clean | wc -l) get_biom.sh
+# to run: qsub -t 1-$(ls -d /u/scratch/b/bwknowle/project_coprolite_viromes_sourcetracker/reads/*_fastq_clean | wc -l) get_biom.sh
 
 set -euo pipefail
 source /u/local/Modules/default/init/modules.sh
@@ -21,7 +21,7 @@ ml bowtie2/2.4.2
 ml anaconda3
 conda activate mpa
 
-cd /u/scratch/b/bwknowle/project_coprolite_viromes
+cd /u/scratch/b/bwknowle/project_coprolite_viromes_sourcetracker
 mkdir -p sourcetracker
 
 # pick the nth directory
@@ -74,5 +74,5 @@ metaphlan "$fastqs" \
 ## verify biom table
 # biom summarize-table -i combined_profile_species_only_counts.biom
 #
-## run source tracker with --source_rarefaction_depth 2500   --sink_rarefaction_depth 2500 (consistent for out verify step)
+## run source tracker with --source_rarefaction_depth 2500   --sink_rarefaction_depth 2500 (consistent for our verify step)
 # sourcetracker2 gibbs -i combined_profile_species_only_counts.biom -m mapping.txt -o sourcetracker_output/ --source_rarefaction_depth 2500 --sink_rarefaction_depth 2500 --jobs 4
