@@ -29,10 +29,13 @@ readarray -t dirs < <(ls -d reads/*_fastq_clean)
 i="${dirs[$((SGE_TASK_ID-1))]}"
 
 sample="$(basename "$i")"
+
 fastqs="$(
-    printf '%s\n' "${i}/"*".fastq.gz" | paste -sd, - 
+    printf '%s\n' "${i}"/*/*.fastq.gz | paste -sd, -
 )"
+
 echo "$sample"
+echo "$fastqs"
 
 # init run
 metaphlan "$fastqs" \
