@@ -31,14 +31,16 @@ remove_human_reads() {
 			-1 ${fastq_trimmed_dir}/${id}/${id}_val_1.fq.gz \
 			-2 ${fastq_trimmed_dir}/${id}/${id}_val_2.fq.gz \
 			--un-conc-gz ${fastq_clean_dir}/${id}/${id}_R%.fastq.gz \
-			-S ${fastq_clean_dir}/${id}/${id}_SAMPLE_mapped_and_unmapped.sam
+			-S /dev/null
+			# -S ${fastq_clean_dir}/${id}/${id}_SAMPLE_mapped_and_unmapped.sam
 	elif [ -f "${fastq_trimmed_dir}/${id}/${id}_trimmed.fq.gz" ]; then
 		$bowtie2 \
 			-p $num_cores \
 			-x $hum_genome_ref \
 			-U ${fastq_trimmed_dir}/${id}/${id}_trimmed.fq.gz \
 			--un-gz ${fastq_clean_dir}/${id}/${id}_RU.fastq.gz \
-			-S ${fastq_clean_dir}/${id}/${id}_SAMPLE_mapped_and_unmapped.sam
+			-S /dev/null
+			# -S ${fastq_clean_dir}/${id}/${id}_SAMPLE_mapped_and_unmapped.sam
 	else
 		echo "$(timestamp): remove_human_reads: ERROR! trimmed fastq files not found"
 		exit 1
