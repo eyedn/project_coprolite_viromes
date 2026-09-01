@@ -33,7 +33,9 @@ kmeans_bootstrap <- function(data, k, num_iter) {
     data_resample <- rbind(ind_resample, pal_resample, pre_resample)
 
     # run kmeans
-    kmeans_result <- kmeans(data_resample, centers = k)
+    kmeans_result <- kmeans(
+      data_resample, centers = k
+    )
     cluster_assignments <- kmeans_result$cluster
 
     # calculate category, pair-wise clustering probabilities

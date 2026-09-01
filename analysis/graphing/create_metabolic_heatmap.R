@@ -13,7 +13,7 @@ library(dendextend)
 create_metabolic_heatmap <- function(data, signif_res, subset,
                                      file_name, plot_dir) {
   
-  sig_data <- data[, rownames(signif_res)[1:subset]]
+  sig_data <- data[, rownames(signif_res)[1:min(subset, nrow(signif_res))]]
   
   sig_data_concat <- matrix(ncol = ncol(sig_data), nrow = length(cat_labels))
   colnames(sig_data_concat) <- colnames(sig_data)
@@ -111,7 +111,6 @@ create_metabolic_heatmap <- function(data, signif_res, subset,
             key.title = "Median EC Representation",
             keysize = 2,
             key.par = list(cex = 3),
-            density.info = "none",
-            add.expr = abline(v=41.5, h = c(3.5, 8.5))
+            density.info = "none"
   )
 }

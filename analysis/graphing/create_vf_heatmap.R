@@ -31,6 +31,7 @@ create_vf_heatmap <- function(data, signif_res, subset, vfc_subset,
     
     sig_data_concat[cat_labels[i], ] <- cat_stats
   }
+  sig_data_concat <- na.omit(sig_data_concat)
   
   # Define dfs for samples location, category, dend. weight, and side bar color
   sample_loc <- data.frame(

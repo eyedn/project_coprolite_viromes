@@ -25,8 +25,8 @@ create_clus_violin <- function(boot_data, clus_res, file_name, plot_dir) {
     } else {
       ci[i, 1] <- i - 3 
     }
-    ci[i, 2] <- clus_res[[i]][[2]][1, 3]
-    ci[i, 3] <- clus_res[[i]][[2]][2, 3]
+    ci[i, 2] <- clus_res[[i]][[2]][1]
+    ci[i, 3] <- clus_res[[i]][[2]][2]
   }
   ci <- as.data.frame(ci)
   colnames(ci) <- c("group", "lower", "upper")
@@ -49,9 +49,6 @@ create_clus_violin <- function(boot_data, clus_res, file_name, plot_dir) {
     annotate("segment", x = 3.2, xend = 3.2,
              y = ci[[3, "lower"]], yend = ci[[3, "upper"]], 
              size = 2, color = brewer.pal(11, "RdBu")[2]) +
-    annotate("text", label = "****", x = 1, 
-             y = max(c(ci[4:6, "upper"], boot_data[, 1])) + 0.025,
-             size = 12, color = brewer.pal(9, "Greys")[8]) +
     stat_summary(aes(x = pair, y = prob), fun = median, geom = "point", 
                  fill = brewer.pal(9, "Greys")[8],
                  pch = 23, size = 6, inherit.aes = FALSE) +
@@ -79,7 +76,7 @@ create_clus_violin <- function(boot_data, clus_res, file_name, plot_dir) {
   
   hete_violin <- ggplot(melted_hete, aes(y = prob)) +
     geom_violin(aes(x = pair, fill = pair), color = brewer.pal(9, "Greys")[8],
-                linewidth = 1.5, trim = TRUE) +
+                linewidth = 1, trim = TRUE) +
     scale_fill_manual(values = replicate(3, brewer.pal(9, "Greys")[2]),
                       guide = "none") +
     annotate("segment", x = 1.1, xend = 1.1,
@@ -95,9 +92,6 @@ create_clus_violin <- function(boot_data, clus_res, file_name, plot_dir) {
              y = (ci[[6, "lower"]] + ci[[6, "upper"]]) / 2,
              label = "Null Distribution", angle = '-90',
              size = 6, color = brewer.pal(11, "RdBu")[2]) +
-    annotate("text", label = "****", x = 1, 
-             y = max(c(ci[4:6, "upper"], boot_data[, 4])) + 0.025,
-             size = 12, color = brewer.pal(9, "Greys")[8]) +
     stat_summary(aes(x = pair, y = prob), fun = median, geom = "point", 
                  fill = brewer.pal(9, "Greys")[8],
                  pch = 23, size = 6, inherit.aes = FALSE) +

@@ -7,54 +7,71 @@ library(stats)
 library(progress)
 library(dunn.test)
 
-
-# applies a kruskal-wallis test to find differential expressed column values
+# applies a kruskal-wallis test to find differentially represented columns
 # and follows up with Dunn's test for pairwise comparisons
 get_diff_repres_cols <- function(data) {
+  
+  # results matrix: raw p for KW + raw p for 3 pairwise Dunn contrasts
   kruskal_res <- matrix(nrow = ncol(data), ncol = 4)
-  colnames(kruskal_res) <- c("kruskal_p", "ind vs. pre", "ind vs. pal",
-                             "pre vs. pal")
+  colnames(kruskal_res) <- c(
+    "kruskal_p",
+    "ind_vs_pre_p",
+    "ind_vs_pal_p",
+    "pre_vs_pal_p"
+  )
   rownames(kruskal_res) <- colnames(data)
   
-  # Create vector of groups for Kruskal-Wallis test
+  # groups for Kruskal-Wallis and Dunn tests
   groups <- substr(rownames(data), 1, 3)
   
-  # initialize progress bar
-  pb_1 <- progress_bar$new(format = "Time: :elapsedfull [:bar] Iteration :current/:total (:percent)", total = ncol(data))
-  pb_2 <- progress_bar$new(format = "Time: :elapsedfull [:bar] Iteration :current/:total (:percent)", total = ncol(data))
+  # progress bars
+  pb_1 <- progress_bar$new(
+    format = "Kruskal: Time: :elapsedfull [:bar] :current/:total (:percent)",
+    total  = ncol(data)
+  )
+  pb_2 <- progress_bar$new(
+    format = "Dunn:    Time: :elapsedfull [:bar] :current/:total (:percent)",
+    total  = ncol(data)
+  )
   
-  # perform kruskal-wallis test for all ec
+  ## 1) Kruskal–Wallis for all columns
   for (i in seq_len(ncol(data))) {
     kruskal_test_result <- kruskal.test(data[, i], groups)
     kruskal_res[i, "kruskal_p"] <- kruskal_test_result$p.value
-    
-    # update progress bar
     pb_1$tick()
   }
   
-  # apply bh correction to kruskal p-values
-  # kruskal_res[, "kruskal_p"] <- p.adjust(kruskal_res[, 1], method = "BH", 
-  #                                        n = length(kruskal_res[, 1]))
+  ## 1a) Multiple-testing correction across all Kruskal–Wallis tests
+  kruskal_q <- p.adjust(kruskal_res[, "kruskal_p"], method = "BH")
   
-  # if significant, perform Dunn's test
+  ## 2) Dunn's test for columns with significant Kruskal p-value
   for (i in seq_len(ncol(data))) {
+    # keep original behavior: threshold on raw p; you can change to kruskal_q[i] < 0.05 if desired
     if (kruskal_res[i, "kruskal_p"] < 0.05) {
       capture.output(
-        dunn_test_result <- dunn.test(data[, i], groups, method="bh")
+        dunn_test_result <- dunn.test(data[, i], groups, method = "bh")
       )
       
-      kruskal_res[i, "ind vs. pre"] <- dunn_test_result$P.adjusted[1]
-      kruskal_res[i, "ind vs. pal"] <- dunn_test_result$P.adjusted[2]
-      kruskal_res[i, "pre vs. pal"] <- dunn_test_result$P.adjusted[3]
+      # Dunn's P.adjusted are already BH-corrected within this feature
+      kruskal_res[i, "ind_vs_pre_p"] <- dunn_test_result$P.adjusted[1]
+      kruskal_res[i, "ind_vs_pal_p"] <- dunn_test_result$P.adjusted[2]
+      kruskal_res[i, "pre_vs_pal_p"] <- dunn_test_result$P.adjusted[3]
     } else {
-      kruskal_res[i, "ind vs. pre"] <- NA
-      kruskal_res[i, "ind vs. pal"] <- NA
-      kruskal_res[i, "pre vs. pal"] <- NA
+      kruskal_res[i, "ind_vs_pre_p"] <- NA_real_
+      kruskal_res[i, "ind_vs_pal_p"] <- NA_real_
+      kruskal_res[i, "pre_vs_pal_p"] <- NA_real_
     }
     
-    # update progress bar
     pb_2$tick()
   }
   
-  return(kruskal_res)
+  ## 2a) Multiple-testing correction across all features for each pairwise contrast
+  res_df <- as.data.frame(kruskal_res)
+  
+  res_df$kruskal_q      <- kruskal_q
+  res_df$ind_vs_pre_q   <- p.adjust(res_df$ind_vs_pre_p, method = "BH")
+  res_df$ind_vs_pal_q   <- p.adjust(res_df$ind_vs_pal_p, method = "BH")
+  res_df$pre_vs_pal_q   <- p.adjust(res_df$pre_vs_pal_p, method = "BH")
+  
+  return(res_df)
 }

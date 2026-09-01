@@ -5,7 +5,7 @@
 ###############################################################################
 library(ggplot2)
 library(factoextra)
-
+library(ggpubr)
 
 get_optimal_clusters <- function(data, method) {
   # find optimal number of clusters with fviz_nbclust function

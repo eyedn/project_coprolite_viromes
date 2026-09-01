@@ -24,7 +24,9 @@ kmeans_permute <- function(data, k, num_iter) {
     rownames(data_permute) <- rownames(data)
     
     # run kmeans
-    kmeans_result <- kmeans(data_permute, centers = k)
+    kmeans_result <- kmeans(
+      data_permute, centers = k
+      )
     cluster_assignments <- kmeans_result$cluster
 
     # calculate category, pair-wise clustering probabilities

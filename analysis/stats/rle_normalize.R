@@ -3,7 +3,7 @@
 #   Project Coprolite Viromes
 #   rle_normalize.R
 ###############################################################################
-library(DESeq2)
+# library(DESeq2)
 
 
 rle_normalize <- function(data) {

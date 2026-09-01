@@ -5,46 +5,103 @@
 ###############################################################################
 
 
-# gets median value of temperate-to-virulent ratio
-get_row_median <- function(data, num_iter, row_num) {
-  
-  # initialize progress bar
-  pb <- progress_bar$new(format = "Time: :elapsedfull [:bar] Iteration :current/:total (:percent)", total = num_iter)
-  
-  boot_stats <- matrix(nrow = num_iter, ncol = 3)
-  colnames(boot_stats) <- c("ind", "pre", "pal")
+# gets median value
+# get_row_median <- function(data, num_iter, row_num, cats, max_resample = NULL) {
+#   # progress bar
+#   pb <- progress_bar$new(
+#     format = "Time: :elapsedfull [:bar] Iteration :current/:total (:percent)",
+#     total = num_iter
+#   )
+#   
+#   # pull the target row as numeric; drop NA/Inf columns
+#   y <- suppressWarnings(as.numeric(data[row_num, ]))
+#   names(y) <- colnames(data)
+#   keep <- is.finite(y) & !is.na(y)
+#   y <- y[keep]
+#   
+#   # pre-compute vectors per category (substring match in column names)
+#   vec_list <- setNames(vector("list", length(cats)), cats)
+#   for (cat in cats) {
+#     vec_list[[cat]] <- y[grepl(cat, names(y), fixed = TRUE)]
+#   }
+#   
+#   # container for bootstrap stats
+#   boot_stats <- matrix(NA_real_, nrow = num_iter, ncol = length(cats))
+#   colnames(boot_stats) <- cats
+#   
+#   # bootstrap
+#   for (i in seq_len(num_iter)) {
+#     for (j in seq_along(cats)) {
+#       v <- vec_list[[j]]
+#       if (is.null(max_resample)) {
+#         resample_size <- length(v)
+#       } else {
+#         resample_size <- max_resample
+#       }
+#       boot_stats[i, j] <- if (length(v)) median(sample(v, resample_size, replace = TRUE), na.rm = TRUE) else NA_real_
+#     }
+#     pb$tick()
+#   }
+#   
+#   boot_stats
+# }
 
-  # Removing columns where the "ratio" is infinite
-  data <- data[, !is.infinite(as.numeric(data[row_num, , drop = FALSE]))]
-  data <- data[, !is.na(as.numeric(data[row_num, , drop = FALSE]))]
-  data <- as.data.frame(data)
-  data["cat", ] <- substr(colnames(data), 1, 3)
-  data <- t(data)
-  col_num <- row_num
-  data[, col_num] <- as.numeric(data[, col_num])
+get_row_median <- function(
+    data,
+    num_iter,
+    row_num,
+    cats,
+    max_resample = NULL,
+    bootstrap = TRUE
+) {
   
-  # subset data by category for re-sampling later
-  ind_subset <- data[data[, "cat"] == "ind", ]
-  pal_subset <- data[data[, "cat"] == "pal", ]
-  pre_subset <- data[data[, "cat"] == "pre", ]
+  # pull the target row as numeric; drop NA/Inf columns
+  y <- suppressWarnings(as.numeric(data[row_num, ]))
+  names(y) <- colnames(data)
+  keep <- is.finite(y) & !is.na(y)
+  y <- y[keep]
+  
+  # pre-compute vectors per category (substring match in column names)
+  vec_list <- setNames(vector("list", length(cats)), cats)
+  for (cat in cats) {
+    vec_list[[cat]] <- y[grepl(cat, names(y), fixed = TRUE)]
+  }
+  
+  # no bootstrap: return 1-row data frame (same shape as bootstrap output)
+  # ------------------------------------------------------------
+  if (!bootstrap) {
+    med_vec <- vapply(
+      vec_list,
+      function(v) if (length(v)) median(v, na.rm = TRUE) else NA_real_,
+      numeric(1)
+    )
+    out <- as.data.frame(as.list(med_vec), check.names = FALSE)
+    return(out)
+  }
+  
 
-  # perform kmeans for each bootstrap iteration
+  # bootstrap
+  pb <- progress_bar$new(
+    format = "Time: :elapsedfull [:bar] Iteration :current/:total (:percent)",
+    total = num_iter
+  )
+  
+  boot_stats <- matrix(NA_real_, nrow = num_iter, ncol = length(cats))
+  colnames(boot_stats) <- cats
+  
   for (i in seq_len(num_iter)) {
-    # create re-sampled data
-    ind_resample <- ind_subset[sample(nrow(ind_subset), nrow(ind_subset),
-                                      replace = TRUE), ]
-    pal_resample <- pal_subset[sample(nrow(pal_subset), nrow(pal_subset),
-                                      replace = TRUE), ]
-    pre_resample <- pre_subset[sample(nrow(pre_subset), nrow(pre_subset),
-                                      replace = TRUE), ]
-    
-    boot_stats[i, "ind"] <- median(ind_resample[, col_num], na.rm = TRUE)
-    boot_stats[i, "pre"] <- median(pre_resample[, col_num], na.rm = TRUE)
-    boot_stats[i, "pal"] <- median(pal_resample[, col_num], na.rm = TRUE)
-    
-    # update progress bar
+    for (j in seq_along(cats)) {
+      v <- vec_list[[j]]
+      resample_size <- if (is.null(max_resample)) length(v) else max_resample
+      boot_stats[i, j] <-
+        if (length(v))
+          median(sample(v, resample_size, replace = TRUE), na.rm = TRUE)
+      else
+        NA_real_
+    }
     pb$tick()
   }
-
-  return(boot_stats)
+  
+  boot_stats
 }
+
