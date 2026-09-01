@@ -37,7 +37,6 @@ fastqs="$(
 echo "$sample"
 echo "$fastqs"
 
-# init run
 metaphlan "$fastqs" \
     --verbose \
     --nproc 8 \
@@ -45,37 +44,82 @@ metaphlan "$fastqs" \
     --input_type fastq \
     --mapout "sourcetracker/${sample}.bowtie2.bz2" \
     -o "sourcetracker/${sample}_profile.out"
-    # --biom_format_output
 
-# rerun
-# metaphlan "sourcetracker/${sample}.bowtie2.bz2" \
-#     --verbose \
-#     --nproc 8 \
-#     --db_dir /u/scratch/b/bwknowle/mpa_db \
-#     --input_type mapout \
-#     --sample_id_key "${sample}" \
-#     -o "sourcetracker/${sample}_profile.out"
-#     # --biom_format_output
 
-## run after above runs
-# conda activate st2-np1.19
-# for f in *_fastq_clean_profile.out; do; sample=$(basename "$f" "_fastq_clean_profile.out"); out="${f}.renamed"; awk -v s="$sample" 'BEGIN{OFS="\t"} /^#SampleID/ {$1="#"s} {print}' "$f" > "$out"; done
-# 
-# merge_metaphlan_tables.py *_fastq_clean_profile.out.renamed > combined_profile.out
-#
-## edit to combined_profile.otu by formatting header with text editing
-# 
-## filter to species rows (those containing |s__) for species
-# awk 'NR==1 || $1 ~ /\|s__/ {print}' combined_profile.otu > combined_profile_species_only.otu
-#
-## convert abundances to integer counts
-# awk 'BEGIN{FS=OFS="\t"} NR==1{print; next} {for(i=2;i<=NF;i++) $i=int($i*1000+0.5); print}' combined_profile_species_only.otu > combined_profile_species_only_counts.otu 
-# 
-## build biom table
-# biom convert -i combined_profile_species_only_counts.otu -o combined_profile_species_only_counts.biom --table-type="OTU table" --to-hdf5
-#
-## verify biom table
-# biom summarize-table -i combined_profile_species_only_counts.biom
-#
-## run source tracker with --source_rarefaction_depth 2500   --sink_rarefaction_depth 2500 (consistent for our verify step)
-# sourcetracker2 gibbs -i combined_profile_species_only_counts.biom -m mapping.txt -o sourcetracker_output/ --source_rarefaction_depth 2500 --sink_rarefaction_depth 2500 --jobs 4
+###############################################################################
+# After all MetaPhlAn jobs have completed
+###############################################################################
+
+# conda activate mpa
+
+# # Merge MetaPhlAn profiles
+# merge_metaphlan_tables.py *_fastq_clean_profile.out > combined_profile.out
+
+# # Keep only the header row and species-level taxa
+# awk 'NR==2 || $1 ~ /\|s__/' combined_profile.out > combined_profile_species_only.tsv
+
+# # Convert relative abundances to integer pseudo-counts
+# awk '
+# BEGIN {FS=OFS="\t"}
+# NR==1 {print; next}
+# {
+#     for(i=2;i<=NF;i++)
+#         $i=int($i*1000+0.5)
+#     print
+# }
+# ' combined_profile_species_only.tsv \
+# > combined_profile_species_only_counts.tsv
+
+# # Convert to BIOM
+# biom convert \
+#     -i combined_profile_species_only_counts.tsv \
+#     -o combined_profile_species_only_counts.biom \
+#     --table-type="OTU table" \
+#     --to-hdf5
+
+# # Check BIOM table
+# biom summarize-table \
+#     -i combined_profile_species_only_counts.biom
+
+# # Run SourceTracker2
+
+# Create mapping file for Sourcetracker2
+# (
+# echo -e "SampleID\tSourceSink\tEnv"
+
+# head -2 combined_profile.out \
+# | tail -1 \
+# | tr '\t' '\n' \
+# | tail -n +2 \
+# | awk '
+# /^ind-source_/ {
+#     print $1 "\tsource\tIndustrial"
+#     next
+# }
+
+# /^pre-source_/ {
+#     print $1 "\tsource\tNonIndustrial"
+#     next
+# }
+
+# /^soil_/ {
+#     print $1 "\tsource\tSoil"
+#     next
+# }
+
+# /^pal-/ {
+#     print $1 "\tsink\tCoprolite"
+#     next
+# }
+# '
+# ) > mapping.txt
+
+# conda activate st2_real
+
+# sourcetracker2 gibbs \
+#     -i combined_profile_species_only_counts.biom \
+#     -m mapping.txt \
+#     -o sourcetracker_output \
+#     --source_rarefaction_depth 2500 \
+#     --sink_rarefaction_depth 2500 \
+#     --jobs 4
