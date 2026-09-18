@@ -27,6 +27,13 @@ needed for analysis. These auxiliary files are distinguished by the file name
 template `{number}a_{name}.sh`, and can be run once the major step file has 
 run.
 
+After step 5 has completed for every included origin, run
+`pipeline/5a_get_alignment_counts.sh` once with the `all` origin. This is the
+final all-origins VFDB aggregation stage: it writes the legacy alignment count
+tables, `all_vf_hits.csv`, `phage_vf_stats.csv`, and
+`phage_vf_stats_qc.csv`. Step 3a already performs EC aggregation through
+`pipeline/3a_supplement/3b_5_get_counts_bac_ec.sh`.
+
 The one exception to this rule is step **(3.)**. The auxiliary file calls on 
 "sub-auxiliary" data wrangling steps, distinguished by the file name prefix 
 `3b_{number}...`. Running `3a_...` will complete all necessary sub-auxiliary

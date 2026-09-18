@@ -12,8 +12,8 @@
 
 set -euo pipefail
 
-if [ "$#" -ne 1 ]; then
-    echo "Usage: bash data_wrangling/collect_phage_vf_stats.sh PROJECT_DIR" >&2
+if [ "$#" -ne 1 ] && [ "$#" -ne 4 ]; then
+    echo "Usage: bash data_wrangling/collect_phage_vf_stats.sh PROJECT_DIR [VF_HITS_FILE STATS_OUTPUT QC_OUTPUT]" >&2
     exit 2
 fi
 
@@ -23,6 +23,15 @@ annotation_dir="${project_dir}/genome_annotation"
 data_dir="${project_dir}/data"
 vf_hits_file="${data_dir}/all_vf_hits.csv"
 script_dir=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
+
+if [ "$#" -eq 4 ]; then
+    vf_hits_file="${2}"
+    stats_output="${3}"
+    qc_output="${4}"
+else
+    stats_output="${data_dir}/phage_vf_stats.csv"
+    qc_output="${data_dir}/phage_vf_stats_qc.csv"
+fi
 
 for required_dir in \
     "${prediction_dir}" \
@@ -68,6 +77,10 @@ fi
 
 echo "collect_phage_vf_stats: PhaTYP files: ${#phatyp_files[@]}"
 echo "collect_phage_vf_stats: Prokka GFF files: ${#gff_files[@]}"
-python3 "${script_dir}/collect_phage_vf_stats.py" "${project_dir}"
-echo "collect_phage_vf_stats: wrote ${data_dir}/phage_vf_stats.csv"
-echo "collect_phage_vf_stats: wrote ${data_dir}/phage_vf_stats_qc.csv"
+python3 "${script_dir}/collect_phage_vf_stats.py" \
+    "${project_dir}" \
+    --vf-hits-file "${vf_hits_file}" \
+    --stats-output "${stats_output}" \
+    --qc-output "${qc_output}"
+echo "collect_phage_vf_stats: wrote ${stats_output}"
+echo "collect_phage_vf_stats: wrote ${qc_output}"

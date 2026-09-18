@@ -41,13 +41,18 @@ def main():
         description="Collect phage-level lifestyle and VFDB statistics."
     )
     parser.add_argument("project_dir", type=Path)
+    parser.add_argument("--vf-hits-file", type=Path)
+    parser.add_argument("--stats-output", type=Path)
+    parser.add_argument("--qc-output", type=Path)
     args = parser.parse_args()
 
     project_dir = args.project_dir.resolve()
     prediction_dir = project_dir / "phage_predictions"
     annotation_dir = project_dir / "genome_annotation"
     data_dir = project_dir / "data"
-    vf_hits_path = data_dir / "all_vf_hits.csv"
+    vf_hits_path = args.vf_hits_file or data_dir / "all_vf_hits.csv"
+    stats_output = args.stats_output or data_dir / "phage_vf_stats.csv"
+    qc_output = args.qc_output or data_dir / "phage_vf_stats_qc.csv"
 
     for input_dir in (prediction_dir, annotation_dir, data_dir):
         if not input_dir.is_dir():
@@ -58,6 +63,11 @@ def main():
             "data_wrangling/collect_all_vf_hits.sh first: "
             f"{vf_hits_path}"
         )
+    for output_path in (stats_output, qc_output):
+        if not output_path.parent.is_dir():
+            raise FileNotFoundError(
+                f"missing output directory: {output_path.parent}"
+            )
 
     phatyp_paths = sorted(
         prediction_dir.glob("*_prediction/out/phatyp_prediction.csv")
@@ -128,8 +138,8 @@ def main():
         validation_counts,
     )
 
-    write_csv(data_dir / "phage_vf_stats.csv", summaries, STATS_COLUMNS)
-    write_csv(data_dir / "phage_vf_stats_qc.csv", qc_rows, QC_COLUMNS)
+    write_csv(stats_output, summaries, STATS_COLUMNS)
+    write_csv(qc_output, qc_rows, QC_COLUMNS)
 
 
 if __name__ == "__main__":

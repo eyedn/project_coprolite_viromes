@@ -3,6 +3,8 @@
 #       Project Coporlite Viromes
 #       get_alignment_counts.py
 ###############################################################################
+# pattern: Imperative Shell
+
 import collect_alignments as ca
 from sys import argv
 
@@ -16,5 +18,10 @@ if __name__ == "__main__":
         alignment_path, annotation_path, eval
         )
     
-    counts.to_csv(f"{output_dir}/{output_prefix}_counts.csv")
-    contig_hits.to_csv(f"{output_dir}/{output_prefix}_contig_hits.csv")
+    counts_output = argv[5] if len(argv) > 5 \
+        else f"{output_dir}/{output_prefix}_counts.csv"
+    contig_hits_output = argv[6] if len(argv) > 6 \
+        else f"{output_dir}/{output_prefix}_contig_hits.csv"
+
+    counts.to_csv(counts_output)
+    contig_hits.to_csv(contig_hits_output)

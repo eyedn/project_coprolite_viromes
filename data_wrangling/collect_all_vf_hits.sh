@@ -1,21 +1,47 @@
-#!/bin/bash
+#!/usr/bin/env bash
+
 ###############################################################################
-#       Aydin Karatas
-#       Project Coprolite Viromes
-#       collect_all_vf_hits.sh
+#           Aydin Loid Karatas
+#           ---
+#           University of Southern California
+#           Department of Quantitative and Computational Biology
+#           Mooney Lab
+#           ---
+#           collect_all_vf_hits.sh
 ###############################################################################
 
 set -euo pipefail
 
-alignment_dir="/u/scratch/a/ayd1n/project_coprolite_viromes/alignment"
-output_dir="/u/scratch/a/ayd1n/project_coprolite_viromes/data"
-output_csv="${output_dir}/all_vf_hits.csv"
+if [ "$#" -lt 1 ] || [ "$#" -gt 2 ]; then
+    echo "Usage: bash data_wrangling/collect_all_vf_hits.sh PROJECT_DIR [OUTPUT_CSV]" >&2
+    exit 2
+fi
+
+project_dir="${1%/}"
+alignment_dir="${project_dir}/alignment"
+output_dir="${project_dir}/data"
+output_csv="${2:-${output_dir}/all_vf_hits.csv}"
+output_parent=$(dirname "${output_csv}")
+temporary_csv=""
+
+cleanup() {
+    if [ -n "${temporary_csv}" ] && [ -e "${temporary_csv}" ]; then
+        rm -f "${temporary_csv}"
+    fi
+}
+trap cleanup EXIT
 
 echo "collect_all_vf_hits: searching for VF alignment tables in ${alignment_dir}"
 
-mkdir -p "${output_dir}"
+mkdir -p "${output_dir}" "${output_parent}"
 
-mapfile -t table_files < <(find "${alignment_dir}" -mindepth 2 -maxdepth 2 -type f -path '*_vf/table.txt' 2>/dev/null | sort)
+table_files=()
+while IFS= read -r table_file; do
+    table_files+=("${table_file}")
+done < <(
+    find "${alignment_dir}" -mindepth 2 -maxdepth 2 -type f \
+        -path '*_vf/table.txt' 2>/dev/null | sort
+)
 
 if [ "${#table_files[@]}" -eq 0 ]; then
     echo "collect_all_vf_hits: ERROR! no VF table.txt files found in ${alignment_dir}" >&2
@@ -25,9 +51,11 @@ fi
 echo "collect_all_vf_hits: found ${#table_files[@]} table.txt files"
 echo "collect_all_vf_hits: writing combined CSV to ${output_csv}"
 
+temporary_csv=$(mktemp "${output_parent}/.$(basename "${output_csv}").XXXXXX")
+
 printf '%s\n' \
 "category,origin,sample_id,target_name,accession,query_name,query_accession,full_seq_evalue,full_seq_score,full_seq_bias,best_domain_evalue,best_domain_score,best_domain_bias,exp,reg,clu,ov,env,dom,rep,inc,description" \
-> "${output_csv}"
+> "${temporary_csv}"
 
 for table_file in "${table_files[@]}"; do
     table_dir=$(dirname "${table_file}")
@@ -73,7 +101,9 @@ for table_file in "${table_files[@]}"; do
             }
             printf ",%s\n", csv_escape(description)
         }
-    ' "${table_file}" >> "${output_csv}"
+    ' "${table_file}" >> "${temporary_csv}"
 done
 
+mv -f "${temporary_csv}" "${output_csv}"
+temporary_csv=""
 echo "collect_all_vf_hits: finished"
