@@ -3,6 +3,8 @@
 #   Project Coprolite Viromes
 #   create_lifestyle_violin.R
 ###############################################################################
+# pattern: Mixed (unavoidable)
+# Reason: This established helper calculates plot summaries and saves the plot.
 library(ggplot2)
 library(reshape2)
 library(RColorBrewer)
@@ -11,7 +13,9 @@ library(svglite)
 
 
 # generate violin graph from temperate-to-virulent bootstrapping
-create_cat_voilins <- function(data, ci_offset, file_name, plot_dir, cats_order = NULL) {
+create_cat_voilins <- function(data, ci_offset, file_name, plot_dir,
+                               cats_order = NULL, plot.title = NULL,
+                               x.title = NULL, y.title = NULL) {
   # reshape
   melted_data <- melt(data)
   if (ncol(melted_data) == 3) {
@@ -84,11 +88,10 @@ create_cat_voilins <- function(data, ci_offset, file_name, plot_dir, cats_order 
         )
       } else NULL
     } +
+    labs(title = plot.title, x = x.title, y = y.title) +
     theme_bw() +
     theme(
       plot.margin = margin(20, 5, 20, 20, "points"),
-      axis.title.x = element_blank(),
-      axis.title.y = element_blank(),
       axis.text.y  = element_text(size = 14, color = "black", face = "bold", hjust = -0.5),
       panel.grid.major = element_blank(),
       panel.grid.minor = element_blank(),
