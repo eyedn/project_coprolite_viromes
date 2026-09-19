@@ -15,7 +15,13 @@ fi
 origin="$1"
 project_dir="${2%/}"
 num_cores="$3"
-script_dir=$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)
+script_dir="$HOME/project_coprolite_viromes"
+
+if [ ! -d "${script_dir}" ]; then
+    echo "4a_get_checkv_genome_stats: missing code directory: ${script_dir}" >&2
+    exit 1
+fi
+cd "${script_dir}"
 
 if [ "$origin" != "all" ]; then
     echo "4a_get_checkv_genome_stats: ORIGIN must be all" >&2

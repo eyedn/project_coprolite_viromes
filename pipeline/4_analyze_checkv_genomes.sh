@@ -16,7 +16,13 @@ filter_job="$1"
 project_dir="${2%/}"
 num_cores="$3"
 checkv_filter="${filter_job#checkv-}"
-script_dir=$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)
+script_dir="$HOME/project_coprolite_viromes"
+
+if [ ! -d "${script_dir}" ]; then
+    echo "4_analyze_checkv_genomes: missing code directory: ${script_dir}" >&2
+    exit 1
+fi
+cd "${script_dir}"
 
 if [ "$checkv_filter" != "conservative" ] \
     && [ "$checkv_filter" != "aggressive" ]; then

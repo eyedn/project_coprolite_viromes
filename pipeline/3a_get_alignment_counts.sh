@@ -14,7 +14,13 @@ fi
 origin="$1"
 project_dir="${2%/}"
 num_cores="$3"
-script_dir=$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)
+script_dir="$HOME/project_coprolite_viromes"
+
+if [ ! -d "${script_dir}" ]; then
+    echo "3a_get_alignment_counts: missing code directory: ${script_dir}" >&2
+    exit 1
+fi
+cd "${script_dir}"
 
 # Set up the cluster environment when the Hoffman2 module files are present.
 if [ -d "${script_dir}/general_bash_functions" ]; then
