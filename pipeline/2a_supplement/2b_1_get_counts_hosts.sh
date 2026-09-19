@@ -1,8 +1,8 @@
 #!/bin/bash
-##############################################################################
+###############################################################################
 #       Aydin Karatas
 #		Project Coprolite Viromes
-#		3b_6_get_counts_vir_ec.sh 
+#		2b_1_get_counts_hosts.sh 
 ###############################################################################
 cd $HOME/project_coprolite_viromes
 for FILE in general_bash_functions/* ; do source $FILE ; done
@@ -17,32 +17,34 @@ project_dir=$2
 num_cores=$3
 
 # define directories and file
-prokka_annotations="${project_dir}/genome_annotation"
-data_dir="$project_dir/data"
-search_dir="$prokka_annotations/*vir_on_phage"
-gff_list="$data_dir/vir_on_phage_ec_counts_tmp.txt"
-csv_path="$data_dir/vir_on_phage_ec_counts.csv"
+data_dir="${project_dir}/data"
+predict_dir="${project_dir}/phage_predictions"
+search_dir="$predict_dir/*/out"
+search_file="cherry_prediction.csv"
+
+predict_list="$data_dir/host_counts_tmp.txt"
+csv_path="$data_dir/host_counts.csv"
 
 # generate counts with python script
 echo "===================================================================================================="
-echo "$(timestamp): 3b_6_get_counts_vir_ec: generating viral gene counts"
+echo "$(timestamp): 2b_1_get_counts_hosts: generating host counts"
 echo "===================================================================================================="
 # create a list of all files to generate counts from
 mkdir -p $data_dir
-ls $search_dir/*gff.gz > $gff_list
-echo "$(timestamp): 3b_6_get_counts_vir_ec: generated file of all file paths needed"
-echo "$(timestamp): 3b_6_get_counts_vir_ec: using the following files:"
-cat $gff_list
+ls $search_dir/$search_file > $predict_list
+echo "$(timestamp): 2b_1_get_counts_hosts: generated file of all file paths needed"
+echo "$(timestamp): 2b_1_get_counts_hosts: using the following files:"
+cat $predict_list
 
-python3 data_wrangling/collect_ec_counts.py \
-	$gff_list \
+python3 data_wrangling/collect_phred_counts.py \
+	$predict_list \
 	$csv_path
-rm $gff_list
+rm $predict_list
 
 # check if raw counts was created
 if ls $csv_path 1> /dev/null 2>&1; then
-	echo "$(timestamp): 3b_6_get_counts_vir_ec: viral gene counts csv created"
+	echo "$(timestamp): 2b_1_get_counts_hosts: host counts csv created"
 else
-	echo "$(timestamp): 3b_6_get_counts_vir_ec: ERROR! viral gene counts csv not found"
+	echo "$(timestamp): 2b_1_get_counts_hosts: ERROR! host counts csv not found"
 	exit 1
 fi

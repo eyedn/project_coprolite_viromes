@@ -2,7 +2,7 @@
 ###############################################################################
 #       Aydin Karatas
 #		Project Coprolite Viromes
-#		4_annotate_viruses_for_metabolic.sh 
+#		3_align_phages_to_dbs.sh 
 ###############################################################################
 cd $HOME/project_coprolite_viromes
 

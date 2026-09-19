@@ -364,7 +364,7 @@ annotate subsequent hit-count results.
 ```{r vfdb alignment: format reference}
 # Read VFDB metadata and retain the identifier, name, and category fields.
 vf_meta_data <- read.csv(
-  file = paste0(data_dir, "/../other/VFs.csv"),
+  file = paste0(data_dir, "/VFs.csv"),
   header = TRUE)
 vf_reference <- vf_meta_data
 colnames(vf_reference) <- vf_reference[1, ]
@@ -472,7 +472,7 @@ for samples lacking a hit.
 # Filter to qualifying VFDB alignments and retain the dominant hit per
 # sample--ORF pair before tabulating counts.
 all_vf_hits <- read.csv(
-  file = paste0(data_dir, "/../all_vf_hits.csv"),
+  file = paste0(data_dir, "/all_vf_hits.csv"),
   header = TRUE
   )
 
@@ -920,7 +920,7 @@ qualifying-hit prevalence across sample groups.
 ```{r read in vfdb hits on network genomes}
 # Parse every protein identifier to recover its sample, contig, and ORF.
 all_contigs <- read.table(
-  paste0(data_dir, "/../proteins_all_ids.txt"),
+  paste0(data_dir, "/proteins_all_ids.txt"),
   header = FALSE
   ) 
 all_contigs <- all_contigs %>% 
@@ -932,7 +932,7 @@ all_contigs <- all_contigs %>%
 
 # Read the selected network contigs that define the focused subset.
 best_contigs <- read.table(
-  paste0(data_dir, "/../proteins_best_ids.txt"),
+  paste0(data_dir, "/proteins_best_ids.txt"),
   header = FALSE
   )
 best_contigs <- best_contigs %>%
@@ -952,7 +952,7 @@ all_contig_counts <- usable_proteins %>%
 # Filter formatted HMMER hits, retain selected contigs, and keep the dominant
 # qualifying hit per sample--contig--ORF combination.
 hits <- read.csv(
-  paste0(data_dir, "/../proteins_all_hits_formatted.csv"),
+  paste0(data_dir, "/proteins_all_hits_formatted.csv"),
   header = TRUE
   ) %>%
   mutate(

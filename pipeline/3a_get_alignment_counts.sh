@@ -7,13 +7,13 @@
 #           Department of Quantitative and Computational Biology
 #           Mooney Lab
 #           ---
-#           5a_get_alignment_counts.sh
+#           3a_get_alignment_counts.sh
 ###############################################################################
 
 set -euo pipefail
 
 if [ "$#" -ne 3 ]; then
-    echo "Usage: pipeline/5a_get_alignment_counts.sh ORIGIN PROJECT_DIR NUM_CORES" >&2
+    echo "Usage: pipeline/3a_get_alignment_counts.sh ORIGIN PROJECT_DIR NUM_CORES" >&2
     exit 2
 fi
 
@@ -53,13 +53,13 @@ timestamp_message() {
 
 stage_message() {
     echo "==============================================================================="
-    echo "$(timestamp_message): 5a_get_alignment_counts: $1"
+    echo "$(timestamp_message): 3a_get_alignment_counts: $1"
     echo "==============================================================================="
 }
 
 require_directory() {
     if [ ! -d "$1" ]; then
-        echo "$(timestamp_message): 5a_get_alignment_counts: ERROR! missing $2: $1" >&2
+        echo "$(timestamp_message): 3a_get_alignment_counts: ERROR! missing $2: $1" >&2
         exit 1
     fi
 }
@@ -73,21 +73,21 @@ mkdir -p "${data_dir}"
 vf_table_file=$(find "${alignment_dir}" -mindepth 2 -maxdepth 2 -type f \
     -path '*_vf/table.txt' -print -quit)
 if [ -z "${vf_table_file}" ]; then
-    echo "$(timestamp_message): 5a_get_alignment_counts: ERROR! no VF table.txt files" >&2
+    echo "$(timestamp_message): 3a_get_alignment_counts: ERROR! no VF table.txt files" >&2
     exit 1
 fi
 
 phatyp_file=$(find "${prediction_dir}" -type f \
     -path '*_prediction/out/phatyp_prediction.csv' -print -quit)
 if [ -z "${phatyp_file}" ]; then
-    echo "$(timestamp_message): 5a_get_alignment_counts: ERROR! no PhaTYP prediction files" >&2
+    echo "$(timestamp_message): 3a_get_alignment_counts: ERROR! no PhaTYP prediction files" >&2
     exit 1
 fi
 
 gff_file=$(find "${annotation_dir}" -type f \
     -path '*_annotation_bac_on_phage/*.gff.gz' -print -quit)
 if [ -z "${gff_file}" ]; then
-    echo "$(timestamp_message): 5a_get_alignment_counts: ERROR! no bacterial-on-phage GFF files" >&2
+    echo "$(timestamp_message): 3a_get_alignment_counts: ERROR! no bacterial-on-phage GFF files" >&2
     exit 1
 fi
 
@@ -144,7 +144,7 @@ for output_file in \
     "${temporary_qc}"
 do
     if [ ! -s "${output_file}" ]; then
-        echo "$(timestamp_message): 5a_get_alignment_counts: ERROR! expected VFDB output is empty: ${output_file}" >&2
+        echo "$(timestamp_message): 3a_get_alignment_counts: ERROR! expected VFDB output is empty: ${output_file}" >&2
         exit 1
     fi
 done

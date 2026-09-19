@@ -11,33 +11,41 @@ and "ind" for industial modern. The written paper does not use these
 conventions.
 
 ## Overview of Pipeline
-The pipeline follows 6 major steps:
-1. Download and Assembly
-2. Viral Gene Annotation
-3. Predictions of Viral Characteristics
-4. Bacterial Gene Annotation on Viruses
-5. Align Phage Proteins to Databases
-    + Virulence Factors
-    + Carbohydrate Active Enzymes
-Files that govern these steps can be found in the `pipeline` directory, 
-distinguished by the file name template `{number}_{name}.sh`
 
-Each major step is associated with an auxiliary step to extract additional data 
-needed for analysis. These auxiliary files are distinguished by the file name 
-template `{number}a_{name}.sh`, and can be run once the major step file has 
-run.
+The supported analysis workflow has three required stages:
 
-After step 5 has completed for every included origin, run
-`pipeline/5a_get_alignment_counts.sh` once with the `all` origin. This is the
-final all-origins VFDB aggregation stage: it writes the legacy alignment count
-tables, `all_vf_hits.csv`, `phage_vf_stats.csv`, and
-`phage_vf_stats_qc.csv`. Step 3a already performs EC aggregation through
-`pipeline/3a_supplement/3b_5_get_counts_bac_ec.sh`.
+1. Download and assemble: `pipeline/1_download_and_assembly.sh`
+2. Predict phage characteristics and annotate phage contigs:
+   `pipeline/2_predict_viral_character.sh`
+3. Align phage proteins to VFDB: `pipeline/3_align_phages_to_dbs.sh`
 
-The one exception to this rule is step **(3.)**. The auxiliary file calls on 
-"sub-auxiliary" data wrangling steps, distinguished by the file name prefix 
-`3b_{number}...`. Running `3a_...` will complete all necessary sub-auxiliary
-steps, but they could be directly run in any order if desired.
+Run each major stage for every included origin with `run_step.sh`, completing
+the stages in order. After stage 2 has completed for all origins, run
+`pipeline/2a_get_prediction_counts.sh` with the `all` origin. It produces
+`lifestyle_counts.csv`, `bac_on_phage_ec_counts.csv`, and
+`vir_on_phage_ec_counts.csv`; the latter is retained even though the active
+report does not currently consume it. Its supporting scripts are in
+`pipeline/2a_supplement/` and use the `2b_{number}_...` name pattern.
+
+After stage 3 has completed for all origins, run
+`pipeline/3a_get_alignment_counts.sh` with the `all` origin. It writes
+`data/all_vf_hits.csv`, `phage_vf_stats.csv`, `phage_vf_stats_qc.csv`, and the
+legacy alignment count tables. Regenerate old data with this stage before
+rendering `analysis/analysis.Rmd`.
+
+`pipeline/1a_get_combined_contig_stats.sh` is optional assembly/QC metadata;
+it is not required for the active analysis workflow.
+
+### External and manual analysis prerequisites
+
+The active report reads all inputs from its configured local `data_dir`. Copy
+the following external/manual inputs into that directory before rendering:
+
+* SourceTracker output in `sourcetracker_output/`, including
+  `mixing_proportions.txt` and `mixing_proportions_stds.txt`.
+* VFDB metadata as `VFs.csv`.
+* Selected-network-contig inputs: `proteins_all_ids.txt`,
+  `proteins_best_ids.txt`, and `proteins_all_hits_formatted.csv`.
 
 ## Description of Pipeline Files and Directories in `main`
 The step(s) each directory is associated with are provided in "[]" at the end 
@@ -79,16 +87,17 @@ The `general_bash_functions` directory contains general functions and
 `configure.sh`.
 
 ### `./pipeline/` [General/All]
-The `pipeline` directory contains the 5 main steps in the pipeline that each 
-sample must individually go through. It also contains the auxiliary steps that 
-can be completed once all samples have completed the associated major step. 
-Here are the naming conventions again:
+The `pipeline` directory contains the three supported main steps and their
+auxiliary aggregation steps. Each sample origin completes every major step
+before the corresponding auxiliary step is run with `-o all`.
+
+Naming conventions:
 * Major step: all sample origins run individually
     + `./pipeline/{number}_{name}.sh`
 * Auxiliary step: all sample origins run together with `-o all`
     + `./pipeline/{number}a_{name}.sh`
-* Sub-auxiliar functions for step **(3.)** in `./pipeline/3a_supplement`
-    + `./pipeline/3a_supplement/{number}b_{number}_{name}.sh`
+* Step-2 sub-auxiliary functions in `./pipeline/2a_supplement`
+    + `./pipeline/2a_supplement/2b_{number}_{name}.sh`
 
 ### `./download/` [1]
 The `download` directory contains scripts that use *prefetch* and 
@@ -106,17 +115,17 @@ de novo metagenomic assembly of reads after download and quality control.
 Scripts involved in library preparation are also found here, as many scripts 
 had multiple accession runs that contained both paired and unpaired reads.
 
-### `./prokka_annotations/` [2,3,4]
+### `./prokka_annotations/` [2]
 The `prokka_annotations` directory contains scripts that use *Prokka* for 
 genome annotation. Scripts that identify which assembled contigs contain a 
 viral gene annotation are also found here.
 
-### `./phabox_predictions/` [3]
+### `./phabox_predictions/` [2]
 The `phabox_predictions` directory contains scripts that use the tools under 
 *PhaBox* to perform phage contig identification, viral lifestyle prediction, 
 viral taxonomic family prediction, and host prediction.
 
-### './hmm_alignment/' [5]
+### './hmm_alignment/' [3]
 The `hmm_alignment` directory contains scripts that align predicted phage
 proteins to data bases with `HMMER`. The 2 data bases in question are:
 * Virulence Factor (VF)
@@ -126,7 +135,7 @@ proteins to data bases with `HMMER`. The 2 data bases in question are:
 An HMM profile of clustered CAZY proteins was already provided. Construction 
 of an HMM profile of clusted VF proteins was performed by clustering VF by
 their VFID (designation made by VF Data Base). Predicted phage proteins were 
-generated by annotating phage contigs for bacterial genes in step **(3.)**.
+generated by annotating phage contigs for bacterial genes in step **(2.)**.
 
 ### `./data_wrangling/` [All Auxiliary Steps]
 The `data_wrangling` directory contains scripts that collect raw counts and 
