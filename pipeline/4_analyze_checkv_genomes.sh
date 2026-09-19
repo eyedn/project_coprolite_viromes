@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 ###############################################################################
 #       Aydin Karatas
 #       Project Coprolite Viromes
@@ -68,7 +68,14 @@ cleanup() {
     rm -f "$working_fasta"
 }
 trap cleanup EXIT
-gzip -cd "$input_fasta" > "$working_fasta"
+gzip -cd "$input_fasta" | awk '
+    /^>/ {
+        split(substr($0, 2), fields, /[[:space:]]+/)
+        print ">" fields[1]
+        next
+    }
+    { print }
+' > "$working_fasta"
 
 if [ -f /u/local/Modules/default/init/modules.sh ]; then
     source /u/local/Modules/default/init/modules.sh
@@ -95,7 +102,11 @@ if [ ! -s "${bacterial_dir}/${prefix}.gff" ]; then
     fi
     prokka_annotator \
         "$prefix" "$working_fasta" no_data "$bacterial_dir" \
-        Bacteria bacterial "$num_cores"
+        Bacteria bacterial "$num_cores" checkv_tolerant
+fi
+if ! checkv_prokka_outputs_complete "$bacterial_dir" "$prefix"; then
+    echo "4_analyze_checkv_genomes: incomplete bacterial Prokka output" >&2
+    exit 1
 fi
 if [ ! -s "${viral_dir}/${prefix}.gff" ]; then
     if [ -d "$viral_dir" ]; then
@@ -108,7 +119,11 @@ if [ ! -s "${viral_dir}/${prefix}.gff" ]; then
     fi
     prokka_annotator \
         "$prefix" "$working_fasta" no_data "$viral_dir" \
-        Viruses viral "$num_cores"
+        Viruses viral "$num_cores" checkv_tolerant
+fi
+if ! checkv_prokka_outputs_complete "$viral_dir" "$prefix"; then
+    echo "4_analyze_checkv_genomes: incomplete viral Prokka output" >&2
+    exit 1
 fi
 
 python3 "${script_dir}/data_wrangling/prepare_checkv_prokka.py" \
