@@ -11,6 +11,7 @@ import argparse
 import csv
 import gzip
 import json
+import sys
 from pathlib import Path
 
 from python_utils.collect_checkv_genome_stats_utils import (
@@ -279,9 +280,10 @@ def main():
 
         unmatched_checkv = sorted(set(checkv_by_id) - used_checkv_contigs)
         if unmatched_checkv:
-            raise ValueError(
-                "CheckV records have no FASTA genome match: "
-                + ", ".join(unmatched_checkv)
+            print(
+                "QC-excluded CheckV records with no FASTA genome match: "
+                + ", ".join(unmatched_checkv),
+                file=sys.stderr,
             )
 
         for annotation, rows in features_by_annotation.items():
@@ -333,6 +335,7 @@ def main():
         qc_values = {
             "fasta_genomes": len(genome_ids),
             "checkv_records": len(checkv_rows),
+            "unmatched_checkv_records": len(unmatched_checkv),
             "phatyp_records": len(phatyp),
             "phagcn_records": len(phagcn),
             "eligible_bacterial_features": len(bacterial_by_id),
@@ -344,7 +347,11 @@ def main():
                 "checkv_filter": checkv_filter,
                 "metric": metric,
                 "value": value,
-                "details": "",
+                "details": (
+                    ", ".join(unmatched_checkv)
+                    if metric == "unmatched_checkv_records"
+                    else ""
+                ),
             }
             for metric, value in qc_values.items()
         )
