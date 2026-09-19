@@ -31,11 +31,12 @@ if [ -n "${python_env:-}" ] && [ -f "${python_env}" ]; then
 fi
 
 data_dir="${project_dir}/data"
-vf_alignments="${project_dir}/alignment/!vf"
 alignment_dir="${project_dir}/alignment"
 annotation_dir="${project_dir}/genome_annotation"
-search_dir="${annotation_dir}/!_annotation_bac_on_phage"
 prediction_dir="${project_dir}/phage_predictions"
+# The legacy Python collector expands or substitutes these ! path tokens.
+vf_alignment_pattern="${alignment_dir}/!vf"
+annotation_path_template="${annotation_dir}/!_annotation_bac_on_phage"
 
 timestamp_message() {
     if command -v timestamp >/dev/null 2>&1; then
@@ -59,8 +60,7 @@ require_directory() {
 }
 
 require_directory "${alignment_dir}" "alignment directory"
-require_directory "${vf_alignments}" "VF alignment directory"
-require_directory "${search_dir}" "bacterial-on-phage annotation directory"
+require_directory "${annotation_dir}" "genome annotation directory"
 require_directory "${prediction_dir}" "PhaTYP prediction directory"
 mkdir -p "${data_dir}"
 
@@ -111,8 +111,8 @@ temporary_files=(
 
 stage_message "collecting legacy VFDB alignment counts"
 python3 "${script_dir}/data_wrangling/get_alignment_counts.py" \
-    "${vf_alignments}" \
-    "${search_dir}" \
+    "${vf_alignment_pattern}" \
+    "${annotation_path_template}" \
     "${data_dir}" \
     "vf_alignment" \
     "${temporary_counts}" \
