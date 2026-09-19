@@ -1,9 +1,8 @@
 #!/bin/bash
-
 ###############################################################################
 #       Aydin Karatas
-#		Project Coprolite Viromes
-#		get_biom.sh 
+#       Project Coprolite Viromes
+#       get_biom.sh
 ###############################################################################
 #$ -cwd
 #$ -N mpa

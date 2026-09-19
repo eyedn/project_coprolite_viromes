@@ -1,10 +1,8 @@
 ###############################################################################
 #   Aydin Karatas
 #   Project Coprolite Viromes
-#   create_lifestyle_violin.R
+#   create_cat_voilins.R
 ###############################################################################
-# pattern: Mixed (unavoidable)
-# Reason: This established helper calculates plot summaries and saves the plot.
 library(ggplot2)
 library(reshape2)
 library(RColorBrewer)

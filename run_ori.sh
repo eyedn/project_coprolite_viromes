@@ -1,8 +1,8 @@
 #!/bin/bash
 ###############################################################################
-#     Aydin Karatas
-#		  Project Coprolite Viromes
-#		  run_ori.sh 
+#       Aydin Karatas
+#       Project Coprolite Viromes
+#       run_ori.sh
 ###############################################################################
 cd $HOME/project_coprolite_viromes
 for FILE in general_bash_functions/* ; do source $FILE ; done
@@ -18,6 +18,7 @@ valid_ori=( pal-AUT pal-AWC pal-BEL pal-BMS pal-ENG pal-ZAF pal-ZAP \
             ind-CHN ind-DNK ind-ESP ind-USA \
             pre-FJI pre-MDG pre-MEX pre-NPL pre-PER pre-TZA \
             pre-source ind-source soil \
+            checkv-conservative checkv-aggressive \
             test all )
             
 # read in arguments by flag and assign them to variables
@@ -47,7 +48,7 @@ for arg in "${args[@]}"; do
 done
 
 # run the submission command on hoffman2
-if [ "$origin" == "all" ]; then
+if [ "$origin" == "all" ] || [[ "$origin" == checkv-* ]]; then
   total_samples=1
 else
   declare -i total_samples=$(wc -l < ${project_dir}/samples/${origin}_samples.txt) 

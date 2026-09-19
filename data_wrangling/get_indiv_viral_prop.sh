@@ -1,8 +1,8 @@
 #!/bin/bash
 ###############################################################################
 #       Aydin Karatas
-#		Project Coprolite Viromes
-#		get_indiv_viral_prop.sh 
+#       Project Coprolite Viromes
+#       get_indiv_viral_prop.sh
 ###############################################################################
 cd $HOME/project_coprolite_viromes
 for FILE in general_bash_functions/* ; do source $FILE ; done

@@ -3,8 +3,6 @@
 #   Project Coprolite Viromes
 #   create_all_mds.R
 ###############################################################################
-
-
 # create mds plot that displays all points distinguished by cluster
 create_all_mds <- function(mds_info, plot_dir) {
   for (i in seq_len(length(mds_info))) {

@@ -1,15 +1,8 @@
-# ______________________________________________________________________________
-# Aydin Karatas
-# ___
-# University of Southern California
-# Department of Quantitative and Computational Biology
-# Mooney Lab
-# ___
-# pool_phage_vf_coverage.R
-# ______________________________________________________________________________
-# pattern: Functional Core
-
-
+###############################################################################
+#   Aydin Karatas
+#   Project Coprolite Viromes
+#   pool_phage_vf_coverage.R
+###############################################################################
 # Pool covered and total phage-contig bases within each sample.
 pool.phage.vf.coverage <- function(data, exclusions = character()) {
   required.columns <- c(

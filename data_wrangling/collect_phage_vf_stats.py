@@ -1,14 +1,8 @@
 ###############################################################################
-#           Aydin Loid Karatas
-#           ---
-#           University of Southern California
-#           Department of Quantitative and Computational Biology
-#           Mooney Lab
-#           ---
-#           collect_phage_vf_stats.py
+#       Aydin Karatas
+#       Project Coprolite Viromes
+#       collect_phage_vf_stats.py
 ###############################################################################
-# pattern: Imperative Shell
-
 """Collect threshold-consistent phage-level lifestyle and VFDB statistics.
 
 The entrypoint gathers PhaTYP, Prokka, and combined HMMER inputs, delegates

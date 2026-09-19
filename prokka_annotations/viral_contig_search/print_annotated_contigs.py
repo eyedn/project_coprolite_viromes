@@ -1,6 +1,6 @@
 ###############################################################################
 #       Aydin Karatas
-#       Project Coporlite Viromes
+#       Project Coprolite Viromes
 #       print_annotated_contigs.py
 ###############################################################################
 import typing

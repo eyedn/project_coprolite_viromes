@@ -1,8 +1,8 @@
 #!/bin/bash
 ###############################################################################
 #       Aydin Karatas
-#		Project Coprolite Viromes
-#		1a_get_combined_contig_stats.sh 
+#       Project Coprolite Viromes
+#       1a_get_combined_contig_stats.sh
 ###############################################################################
 cd $HOME/project_coprolite_viromes
 for FILE in general_bash_functions/* ; do source $FILE ; done

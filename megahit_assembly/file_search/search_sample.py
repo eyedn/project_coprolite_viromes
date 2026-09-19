@@ -1,7 +1,7 @@
 ###############################################################################
 #       Aydin Karatas
-#		Project Coprolite Viromes
-#		search_directory.py
+#       Project Coprolite Viromes
+#       search_sample.py
 ###############################################################################
 import os
 import typing

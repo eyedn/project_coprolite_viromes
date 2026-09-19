@@ -1,6 +1,6 @@
 ###############################################################################
 #       Aydin Karatas
-#       Project Coporlite Viromes
+#       Project Coprolite Viromes
 #       read_fa.py
 ###############################################################################
 from . import contig

@@ -1,7 +1,7 @@
 ###############################################################################
 #       Aydin Karatas
-#		Project Coprolite Viromes
-#		collect_lifestyle_counts.py
+#       Project Coprolite Viromes
+#       collect_phred_counts.py
 ###############################################################################
 from sys import argv
 import collect_phred_counts as cpc

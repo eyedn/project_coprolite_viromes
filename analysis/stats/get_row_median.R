@@ -1,10 +1,8 @@
 ###############################################################################
 #   Aydin Karatas
 #   Project Coprolite Viromes
-#   get_median_lifestyles.R
+#   get_row_median.R
 ###############################################################################
-
-
 # gets median value
 # get_row_median <- function(data, num_iter, row_num, cats, max_resample = NULL) {
 #   # progress bar

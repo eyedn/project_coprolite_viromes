@@ -1,3 +1,8 @@
+###############################################################################
+#       Aydin Karatas
+#       Project Coprolite Viromes
+#       __init__.py
+###############################################################################
 from . import contig
 from . import annotation as annot
 from . import read_fa

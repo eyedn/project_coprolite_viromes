@@ -1,7 +1,7 @@
 ###############################################################################
 #       Aydin Karatas
-#       Project Coporlite Viromes
-#       protein.py
+#       Project Coprolite Viromes
+#       get_cluster_dict.py
 ###############################################################################
 import typing
 import os

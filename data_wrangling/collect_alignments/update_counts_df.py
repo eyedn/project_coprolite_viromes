@@ -1,6 +1,6 @@
 ###############################################################################
 #       Aydin Karatas
-#       Project Coporlite Viromes
+#       Project Coprolite Viromes
 #       update_counts_df.py
 ###############################################################################
 import typing

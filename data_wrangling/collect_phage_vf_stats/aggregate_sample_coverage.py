@@ -1,14 +1,8 @@
 ###############################################################################
-#           Aydin Loid Karatas
-#           ---
-#           University of Southern California
-#           Department of Quantitative and Computational Biology
-#           Mooney Lab
-#           ---
-#           aggregate_sample_coverage.py
+#       Aydin Karatas
+#       Project Coprolite Viromes
+#       aggregate_sample_coverage.py
 ###############################################################################
-# pattern: Functional Core
-
 """Pool per-phage covered and total bases into sample-level coverage."""
 
 

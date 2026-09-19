@@ -1,6 +1,6 @@
 ###############################################################################
 #       Aydin Karatas
-#       Project Coporlite Viromes
+#       Project Coprolite Viromes
 #       get_counts.py
 ###############################################################################
 import typing

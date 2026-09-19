@@ -1,14 +1,8 @@
 ###############################################################################
-#           Aydin Loid Karatas
-#           ---
-#           University of Southern California
-#           Department of Quantitative and Computational Biology
-#           Mooney Lab
-#           ---
-#           qualify_vf_hits.py
+#       Aydin Karatas
+#       Project Coprolite Viromes
+#       qualify_vf_hits.py
 ###############################################################################
-# pattern: Functional Core
-
 """Apply VFDB thresholds and retain one deterministic best hit per ORF."""
 
 import math

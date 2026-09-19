@@ -1,7 +1,7 @@
 ###############################################################################
 #       Aydin Karatas
-#		Project Coprolite Viromes
-#		collect_raw_counts.py
+#       Project Coprolite Viromes
+#       collect_ec_counts.py
 ###############################################################################
 from sys import argv
 import collect_ec_counts as crc

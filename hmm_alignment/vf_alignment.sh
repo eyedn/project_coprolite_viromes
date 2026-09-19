@@ -1,8 +1,8 @@
 #!/bin/bash
 ###############################################################################
 #       Aydin Karatas
-#		Project Coprolite Viromes
-#		vf_alignment.sh 
+#       Project Coprolite Viromes
+#       vf_alignment.sh
 ###############################################################################
 cd $HOME/project_coprolite_viromes
 for FILE in hmm_alignment/bash_functions/* ; do source $FILE ; done

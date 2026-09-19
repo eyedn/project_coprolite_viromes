@@ -1,4 +1,9 @@
 #!/bin/bash
+###############################################################################
+#       Aydin Karatas
+#       Project Coprolite Viromes
+#       submit_VFDB_extract_clusters.sh
+###############################################################################
 source /u/local/Modules/default/init/modules.sh
 module load python
 

@@ -1,14 +1,8 @@
 ###############################################################################
-#           Aydin Loid Karatas
-#           ---
-#           University of Southern California
-#           Department of Quantitative and Computational Biology
-#           Mooney Lab
-#           ---
-#           read_vf_hits.py
+#       Aydin Karatas
+#       Project Coprolite Viromes
+#       read_vf_hits.py
 ###############################################################################
-# pattern: Imperative Shell
-
 """Read and validate the combined VFDB HMMER hit CSV."""
 
 import csv

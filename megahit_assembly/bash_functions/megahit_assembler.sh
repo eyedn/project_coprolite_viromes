@@ -1,10 +1,9 @@
 #!/bin/bash
 ###############################################################################
 #       Aydin Karatas
-#		Project Coprolite Viromes
-#		assembly_functions.sh 
+#       Project Coprolite Viromes
+#       megahit_assembler.sh
 ###############################################################################
-
 # contains the megahit command to assemble fastq/fasta files,
 # then maps reads back to contigs and runs PyDamage to filter poor contigs.
 megahit_assembler() {

@@ -1,7 +1,7 @@
 ###############################################################################
 #   Aydin Karatas
 #   Project Coprolite Viromes
-#   permute_kmeans.R
+#   kmeans_permute.R
 ###############################################################################
 library(stats)
 library(progress)

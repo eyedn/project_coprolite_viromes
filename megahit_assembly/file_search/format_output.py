@@ -1,7 +1,7 @@
 ###############################################################################
 #       Aydin Karatas
-#		Project Coprolite Viromes
-#		format_output.py
+#       Project Coprolite Viromes
+#       format_output.py
 ###############################################################################
 import os
 import typing

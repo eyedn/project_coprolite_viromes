@@ -1,14 +1,8 @@
 ###############################################################################
-#           Aydin Loid Karatas
-#           ---
-#           University of Southern California
-#           Department of Quantitative and Computational Biology
-#           Mooney Lab
-#           ---
-#           build_qc_rows.py
+#       Aydin Karatas
+#       Project Coprolite Viromes
+#       build_qc_rows.py
 ###############################################################################
-# pattern: Functional Core
-
 """Build a stable long-form QC report for a successful collection run."""
 
 from collections import Counter

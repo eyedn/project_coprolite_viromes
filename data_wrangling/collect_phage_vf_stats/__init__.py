@@ -1,14 +1,8 @@
 ###############################################################################
-#           Aydin Loid Karatas
-#           ---
-#           University of Southern California
-#           Department of Quantitative and Computational Biology
-#           Mooney Lab
-#           ---
-#           __init__.py
+#       Aydin Karatas
+#       Project Coprolite Viromes
+#       __init__.py
 ###############################################################################
-# pattern: Functional Core
-
 """Helpers for threshold-consistent phage-level VFDB summaries."""
 
 from .aggregate_sample_coverage import aggregate_sample_coverage

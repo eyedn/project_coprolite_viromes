@@ -1,8 +1,8 @@
 #!/bin/bash
 ###############################################################################
 #       Aydin Karatas
-#		Project Coprolite Viromes
-#		create_viral_contigs.sh 
+#       Project Coprolite Viromes
+#       create_viral_contigs.sh
 ###############################################################################
 cd $HOME/project_coprolite_viromes
 for FILE in prokka_annotations/bash_functions/* ; do source $FILE ; done

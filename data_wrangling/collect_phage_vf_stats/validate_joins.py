@@ -1,14 +1,8 @@
 ###############################################################################
-#           Aydin Loid Karatas
-#           ---
-#           University of Southern California
-#           Department of Quantitative and Computational Biology
-#           Mooney Lab
-#           ---
-#           validate_joins.py
+#       Aydin Karatas
+#       Project Coprolite Viromes
+#       validate_joins.py
 ###############################################################################
-# pattern: Functional Core
-
 """Validate collector keys before any phage rows are summarized."""
 
 from collections import Counter

@@ -2,10 +2,8 @@
 ###############################################################################
 #       Aydin Karatas
 #       Project Coprolite Viromes
-#       remove_human_reads.sh 
+#       remove_human_reads.sh
 ###############################################################################
-
-
 # use kneaddata to remove human reads
 remove_human_reads() {
 	local id=$1

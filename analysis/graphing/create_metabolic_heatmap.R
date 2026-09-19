@@ -1,7 +1,7 @@
 ###############################################################################
 #   Aydin Karatas
 #   Project Coprolite Viromes
-#   create_heatmap.R
+#   create_metabolic_heatmap.R
 ###############################################################################
 library(gplots)
 library(svglite)

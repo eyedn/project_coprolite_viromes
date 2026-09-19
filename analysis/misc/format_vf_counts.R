@@ -3,8 +3,6 @@
 #   Project Coprolite Viromes
 #   format_vf_counts.R
 ###############################################################################
-
-
 format_vf_counts <- function(data, vf_ref) {
   data[, "cat"] <- NA
   profiles <- rownames(data)

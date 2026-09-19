@@ -1,10 +1,8 @@
 ###############################################################################
 #   Aydin Karatas
 #   Project Coprolite Viromes
-#   create_all_mds.R
+#   append_time_to_filename.R
 ###############################################################################
-
-
 # append the current time to a given file name
 append_time_to_filename <- function(base_name) {
   

@@ -1,15 +1,8 @@
-# ______________________________________________________________________________
-# Aydin Karatas
-# ___
-# University of Southern California
-# Department of Quantitative and Computational Biology
-# Mooney Lab
-# ___
-# prepare_phage_vf_plot_data.R
-# ______________________________________________________________________________
-# pattern: Functional Core
-
-
+###############################################################################
+#   Aydin Karatas
+#   Project Coprolite Viromes
+#   prepare_phage_vf_plot_data.R
+###############################################################################
 # Validate the collector contract and retain two-level lifestyle plot rows.
 prepare.phage.vf.plot.data <- function(data) {
   required.columns <- c(

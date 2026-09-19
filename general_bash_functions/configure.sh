@@ -2,10 +2,8 @@
 ###############################################################################
 #       Aydin Karatas
 #       Project Coprolite Viromes
-#       configure.sh 
+#       configure.sh
 ###############################################################################
-
-
 software="$HOME/software"
 
 prefetch="$software/sratoolkit.3.0.5-ubuntu64/bin/prefetch-orig.3.0.5"

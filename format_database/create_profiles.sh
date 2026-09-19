@@ -1,4 +1,9 @@
 #!/bin/bash
+###############################################################################
+#       Aydin Karatas
+#       Project Coprolite Viromes
+#       create_profiles.sh
+###############################################################################
 source /u/local/Modules/default/init/modules.sh
 module load anaconda3
 conda activate msa

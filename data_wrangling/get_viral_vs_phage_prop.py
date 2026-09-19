@@ -1,7 +1,7 @@
 ###############################################################################
 #       Aydin Karatas
-#		Project Coprolite Viromes
-#		get_viral_vs_phage_prop.py
+#       Project Coprolite Viromes
+#       get_viral_vs_phage_prop.py
 ###############################################################################
 import get_viral_vs_phage_prop as vvp
 from sys import argv

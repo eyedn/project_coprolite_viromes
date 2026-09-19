@@ -1,11 +1,9 @@
 #!/bin/bash
 ###############################################################################
 #       Aydin Karatas
-#		Project Coprolite Viromes
-#		annotate_contigs.sh 
+#       Project Coprolite Viromes
+#       prokka_annotator.sh
 ###############################################################################
-
-
 # contains the prokka command that annotated the contigs file 
 prokka_annotator() {
 	local sample=$1

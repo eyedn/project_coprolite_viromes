@@ -1,7 +1,7 @@
 ###############################################################################
 #       Aydin Karatas
-#		Project Coprolite Viromes
-#		get_viral_prop_from_annot.py
+#       Project Coprolite Viromes
+#       get_viral_prop_from_annot.py
 ###############################################################################
 from . import annotation as annot
 from . import read_gff

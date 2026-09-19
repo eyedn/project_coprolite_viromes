@@ -3,8 +3,6 @@
 #   Project Coprolite Viromes
 #   aux_heatmap_fxns.R
 ###############################################################################
-
-
 # function to add a row order column
 add_row_order <- function(df) {
   df$order <- seq_len(nrow(df))

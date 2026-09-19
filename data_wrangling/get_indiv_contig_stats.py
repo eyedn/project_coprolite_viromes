@@ -1,7 +1,7 @@
 ###############################################################################
 #       Aydin Karatas
-#		Project Coprolite Viromes
-#		get_indiv_contig_stats.py
+#       Project Coprolite Viromes
+#       get_indiv_contig_stats.py
 ###############################################################################
 from sys import argv
 import get_contig_stats as gcs

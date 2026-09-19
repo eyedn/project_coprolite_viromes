@@ -1,14 +1,8 @@
 ###############################################################################
-#           Aydin Loid Karatas
-#           ---
-#           University of Southern California
-#           Department of Quantitative and Computational Biology
-#           Mooney Lab
-#           ---
-#           parse_phatyp_rows.py
+#       Aydin Karatas
+#       Project Coprolite Viromes
+#       parse_phatyp_rows.py
 ###############################################################################
-# pattern: Functional Core
-
 """Validate and normalize rows from one PhaTYP prediction table."""
 
 

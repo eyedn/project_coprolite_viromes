@@ -1,15 +1,21 @@
 #!/bin/bash
 ###############################################################################
-#     Aydin Karatas
-#     Project Coprolite Viromes
-#     run_step.sh 
+#       Aydin Karatas
+#       Project Coprolite Viromes
+#       run_step.sh
 ###############################################################################
 cd "$HOME/project_coprolite_viromes" || exit 1
 
 script=$1
 filename=$(basename "$script")
 
-if [[ $filename =~ ^[0-9]+_ ]]; then
+if [ "$filename" = "4_analyze_checkv_genomes.sh" ]; then
+    # Complete CheckV genomes are processed once per trimming filter.
+    ./run_ori.sh -s "$script" -d 8 -c "${CORES:-8}" \
+        -p "$SCRATCH/project_coprolite_viromes" -o checkv-conservative
+    ./run_ori.sh -s "$script" -d 8 -c "${CORES:-8}" \
+        -p "$SCRATCH/project_coprolite_viromes" -o checkv-aggressive
+elif [[ $filename =~ ^[0-9]+_ ]]; then
     # run main pipeline step
     echo "Which sample group(s) do you want to run?"
     echo "  1) pal"

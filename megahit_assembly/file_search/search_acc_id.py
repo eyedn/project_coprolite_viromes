@@ -1,7 +1,7 @@
 ###############################################################################
 #       Aydin Karatas
-#		Project Coprolite Viromes
-#		get_file_names.py
+#       Project Coprolite Viromes
+#       search_acc_id.py
 ###############################################################################
 import os
 import typing

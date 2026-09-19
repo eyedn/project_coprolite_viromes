@@ -4,7 +4,6 @@
 #       Project Coprolite Viromes
 #       format_network_genome_vf_hits.sh
 ###############################################################################
-
 set -euo pipefail
 
 input_no_header="/u/scratch/a/ayd1n/proteins_all_tbl.no_header.txt"

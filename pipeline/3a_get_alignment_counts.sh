@@ -1,15 +1,9 @@
-#!/usr/bin/env bash
-
+#!/bin/bash
 ###############################################################################
-#           Aydin Loid Karatas
-#           ---
-#           University of Southern California
-#           Department of Quantitative and Computational Biology
-#           Mooney Lab
-#           ---
-#           3a_get_alignment_counts.sh
+#       Aydin Karatas
+#       Project Coprolite Viromes
+#       3a_get_alignment_counts.sh
 ###############################################################################
-
 set -euo pipefail
 
 if [ "$#" -ne 3 ]; then

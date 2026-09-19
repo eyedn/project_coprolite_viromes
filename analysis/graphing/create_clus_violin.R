@@ -1,7 +1,7 @@
 ###############################################################################
 #   Aydin Karatas
 #   Project Coprolite Viromes
-#   create_violin.R
+#   create_clus_violin.R
 ###############################################################################
 library(ggplot2)
 library(ggsignif)

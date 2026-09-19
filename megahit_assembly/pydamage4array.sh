@@ -4,7 +4,6 @@
 #       Project Coprolite Viromes
 #       pydamage4array.sh
 ###############################################################################
-
 set -euo pipefail
 
 # keep this — you source your helper funcs

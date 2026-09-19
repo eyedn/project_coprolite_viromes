@@ -1,8 +1,8 @@
 #!/bin/bash
 ###############################################################################
 #       Aydin Karatas
-#		Project Coprolite Viromes
-#		phage_predictions.sh 
+#       Project Coprolite Viromes
+#       phage_predictions.sh
 ###############################################################################
 cd $HOME/project_coprolite_viromes
 for FILE in phabox_predictions/bash_functions/* ; do source $FILE ; done

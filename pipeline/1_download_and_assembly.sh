@@ -1,8 +1,8 @@
 #!/bin/bash
 ###############################################################################
 #       Aydin Karatas
-#		Project Coprolite Viromes
-#		1_download_and_assembly.sh 
+#       Project Coprolite Viromes
+#       1_download_and_assembly.sh
 ###############################################################################
 cd $HOME/project_coprolite_viromes
 

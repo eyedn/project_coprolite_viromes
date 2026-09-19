@@ -1,0 +1,28 @@
+#!/bin/bash
+###############################################################################
+#       Aydin Karatas
+#       Project Coprolite Viromes
+#       4a_get_checkv_genome_stats.sh
+###############################################################################
+set -euo pipefail
+
+if [ "$#" -ne 3 ]; then
+    echo "Usage: pipeline/4a_get_checkv_genome_stats.sh " \
+        "ORIGIN PROJECT_DIR NUM_CORES" >&2
+    exit 2
+fi
+
+origin="$1"
+project_dir="${2%/}"
+num_cores="$3"
+script_dir=$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)
+
+if [ "$origin" != "all" ]; then
+    echo "4a_get_checkv_genome_stats: ORIGIN must be all" >&2
+    exit 2
+fi
+
+python3 "${script_dir}/data_wrangling/collect_checkv_genome_stats.py" \
+    "$project_dir"
+
+echo "4a_get_checkv_genome_stats: complete with ${num_cores} requested cores"

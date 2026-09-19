@@ -1,6 +1,6 @@
 ###############################################################################
 #       Aydin Karatas
-#       Project Coporlite Viromes
+#       Project Coprolite Viromes
 #       VFDB_extract_clusters.py
 ###############################################################################
 from extract_clusters import get_cluster_dict, print_files, print_path_list

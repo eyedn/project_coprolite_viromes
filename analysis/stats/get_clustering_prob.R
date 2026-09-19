@@ -3,8 +3,6 @@
 #   Project Coprolite Viromes
 #   get_clustering_prob.R
 ###############################################################################
-
-
 get_clustering_prob <- function(k, cat_1, cat_2) {
   clustered_pairs <- 0
   

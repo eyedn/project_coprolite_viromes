@@ -1,4 +1,9 @@
 #!/bin/bash
+###############################################################################
+#       Aydin Karatas
+#       Project Coprolite Viromes
+#       diversity_extract_clusters.sh
+###############################################################################
 source /u/local/Modules/default/init/modules.sh
 
 orf_files_pat=

@@ -1,14 +1,8 @@
 ###############################################################################
-#           Aydin Loid Karatas
-#           ---
-#           University of Southern California
-#           Department of Quantitative and Computational Biology
-#           Mooney Lab
-#           ---
-#           read_phatyp.py
+#       Aydin Karatas
+#       Project Coprolite Viromes
+#       read_phatyp.py
 ###############################################################################
-# pattern: Imperative Shell
-
 """Read one PhaTYP CSV file and pass its rows to the parser."""
 
 import csv

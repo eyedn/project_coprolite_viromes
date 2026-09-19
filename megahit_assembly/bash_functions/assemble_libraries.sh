@@ -1,10 +1,9 @@
 #!/bin/bash
 ###############################################################################
 #       Aydin Karatas
-#		Project Coprolite Viromes
-#		assemble_libraries.sh 
+#       Project Coprolite Viromes
+#       assemble_libraries.sh
 ###############################################################################
-
 # create final.contigs.fa with megahit assembly from fastq/fasta files
 assemble_libraries() {
     local sample="$1"

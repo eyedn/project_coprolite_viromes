@@ -1,10 +1,8 @@
 ###############################################################################
 #       Aydin Karatas
-#       Project Coporlite Viromes
+#       Project Coprolite Viromes
 #       get_alignment_counts.py
 ###############################################################################
-# pattern: Imperative Shell
-
 import collect_alignments as ca
 from sys import argv
 

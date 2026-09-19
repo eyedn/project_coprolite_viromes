@@ -1,14 +1,8 @@
 ###############################################################################
-#           Aydin Loid Karatas
-#           ---
-#           University of Southern California
-#           Department of Quantitative and Computational Biology
-#           Mooney Lab
-#           ---
-#           read_gff.py
+#       Aydin Karatas
+#       Project Coprolite Viromes
+#       read_gff.py
 ###############################################################################
-# pattern: Imperative Shell
-
 """Read one gzip-compressed Prokka GFF file."""
 
 import gzip

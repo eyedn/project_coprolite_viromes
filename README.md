@@ -12,12 +12,14 @@ conventions.
 
 ## Overview of Pipeline
 
-The supported analysis workflow has three required stages:
+The supported analysis workflow has four major stages:
 
 1. Download and assemble: `pipeline/1_download_and_assembly.sh`
 2. Predict phage characteristics and annotate phage contigs:
    `pipeline/2_predict_viral_character.sh`
 3. Align phage proteins to VFDB: `pipeline/3_align_phages_to_dbs.sh`
+4. Analyze complete CheckV genomes for both trimming filters:
+   `pipeline/4_analyze_checkv_genomes.sh`
 
 Run each major stage for every included origin with `run_step.sh`, completing
 the stages in order. After stage 2 has completed for all origins, run
@@ -31,7 +33,34 @@ After stage 3 has completed for all origins, run
 `pipeline/3a_get_alignment_counts.sh` with the `all` origin. It writes
 `data/all_vf_hits.csv`, `phage_vf_stats.csv`, `phage_vf_stats_qc.csv`, and the
 legacy alignment count tables. Regenerate old data with this stage before
-rendering `analysis/analysis.Rmd`.
+rendering `analysis/analysis_contigs.Rmd`.
+
+Step 4 is filter-specific rather than sample-origin-specific. `run_step.sh`
+submits one single-task job named `checkv-conservative` and one named
+`checkv-aggressive`. Each job reads the following immutable inputs:
+
+* `checkv_input/<filter>/genomes.fa.gz`
+* `checkv_input/<filter>/quality_summary.tsv`
+* `checkv_input/<filter>/complete_contigs.txt`
+
+PhaTYP, PhaGCN, raw bacterial and viral Prokka results, filtered feature
+tables, eligible bacterial proteins, and VFDB alignment results are written
+under `checkv_genomes/<filter>/`. This directory is separate from the
+contig-level prediction, annotation, and alignment directories.
+
+After both filter jobs finish, run
+`pipeline/4a_get_checkv_genome_stats.sh`. It validates and aggregates the two
+filters into five files under `data/`:
+
+* `checkv_genome_metadata.csv`
+* `checkv_genome_features.csv`
+* `checkv_genome_vf_hits.csv`
+* `checkv_genome_vf_stats.csv`
+* `checkv_genome_qc.csv`
+
+The complete-genome VF prevalence is the number of qualifying VFDB-hit
+bacterial ORFs divided by the number of eligible bacterial ORFs. Eligibility
+requires a nonempty EC number and a non-hypothetical Prokka product.
 
 `pipeline/1a_get_combined_contig_stats.sh` is optional assembly/QC metadata;
 it is not required for the active analysis workflow.
@@ -87,7 +116,7 @@ The `general_bash_functions` directory contains general functions and
 `configure.sh`.
 
 ### `./pipeline/` [General/All]
-The `pipeline` directory contains the three supported main steps and their
+The `pipeline` directory contains the four supported main steps and their
 auxiliary aggregation steps. Each sample origin completes every major step
 before the corresponding auxiliary step is run with `-o all`.
 
@@ -143,6 +172,14 @@ meta information after a major step is completed. These are the scripts used by
 the auxiliary steps of the pipeline.
 
 ## Overview of Statistical Analysis
-The `analysis` directory holds all files used to analyze the outputs of the 
-pipeline. The file used to perform statistical tests, learning methods, and 
-create visuals is `analysis/analysis.Rmd`.
+
+The `analysis` directory holds the reports and their statistics, graphing,
+and miscellaneous helpers:
+
+* `analysis/analysis_contigs.Rmd` is the active contig-level report.
+* `analysis/analysis_checkvhits.Rmd` contains the original selected-network
+  analysis and the complete CheckV-genome analysis. Its selected-genome map
+  accepts `selected.genome.id` and `selected.annotation`; the latter must be
+  `viral`, `bacterial`, or `vf`.
+* `analysis/analysis_before_phage_vf_stats.Rmd` is a preserved historical
+  report and is not part of the active workflow.

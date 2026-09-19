@@ -1,7 +1,7 @@
 ###############################################################################
 #       Aydin Karatas
-#		Project Coprolite Viromes
-#		get_stats.py
+#       Project Coprolite Viromes
+#       get_stats.py
 ###############################################################################
 import pandas as pd
 import typing

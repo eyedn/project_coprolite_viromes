@@ -1,3 +1,8 @@
+###############################################################################
+#       Aydin Karatas
+#       Project Coprolite Viromes
+#       __init__.py
+###############################################################################
 from . import annotation as annot
 from . import search_files as search
 from . import read_gff

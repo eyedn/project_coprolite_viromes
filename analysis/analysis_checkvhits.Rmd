@@ -1,0 +1,516 @@
+---
+title: "Analysis of CheckV genomes"
+author: "Aydin Karatas"
+output: html_document
+params:
+  selected.genome.id: "ind-CHN_NLF015_k99_39404_1"
+  selected.annotation: "bacterial"
+---
+
+This report separates the original selected-network-genome analysis from the
+new analysis of complete genomes supplied by CheckV. The complete-genome
+analysis preserves conservative and aggressive trimming results as separate
+observations.
+
+## Analysis setup
+
+```{r setup, include=FALSE}
+base_dir <- "~/Documents/ucla/research/project_coprolite_viromes/analysis/"
+knitr::opts_chunk$set(root.dir = base_dir)
+
+library(tidyverse)
+source.files.from.dir <- function(directory) {
+  full.path <- file.path(base_dir, directory)
+  functions.list <- list.files(
+    path = full.path,
+    pattern = "*.R",
+    full.names = TRUE
+  )
+  sapply(functions.list, source)
+  return(invisible(functions.list))
+}
+source.files.from.dir("stats")
+source.files.from.dir("graphing")
+source.files.from.dir("misc")
+
+set.seed(seed = 123)
+data_dir <-
+  "~/Documents/ucla/research/project_coprolite_viromes_NOT_CODE/data/20251118"
+figs_dir <-
+  "~/Documents/ucla/research/project_coprolite_viromes_NOT_CODE/figures"
+max_iter <- 1000
+```
+
+## Original CheckV analysis
+
+The following selected-network-genome analysis was moved from the contig
+report without changing its calculations.
+
+### Selected-network-genome results
+
+The selected network contigs define a focused genome subset. The analysis
+counts all proteins on those contigs as denominators, applies the same
+stringent VFDB-hit thresholds, keeps one dominant hit per ORF, and compares
+qualifying-hit prevalence across sample groups.
+
+```{r read in vfdb hits on network genomes}
+# Parse every protein identifier to recover its sample, contig, and ORF.
+all_contigs <- read.table(
+  paste0(data_dir, "/proteins_all_ids.txt"),
+  header = FALSE
+  ) 
+all_contigs <- all_contigs %>% 
+  separate(V1, into = c("ori", "id", "contig"), sep = "_", extra = "merge") %>% 
+  unite(sample, ori, id, sep = "_") %>%
+  mutate(sample = str_replace(sample, "-", "."))
+all_contigs <- all_contigs %>%
+  separate(contig, into = c("contig_id", "orf_id"), sep = "_(?=[^_]+$)")
+
+# Read the selected network contigs that define the focused subset.
+best_contigs <- read.table(
+  paste0(data_dir, "/proteins_best_ids.txt"),
+  header = FALSE
+  )
+best_contigs <- best_contigs %>%
+  separate(V1, into = c("ori", "id", "contig"), sep = "_", extra = "merge") %>%
+  unite(sample, ori, id, sep = "_") %>%
+  mutate(sample = str_replace(sample, "-", ".")) %>%
+  rename(contig_id = contig)
+
+# Count proteins on selected contigs to define each sample's denominator.
+usable_proteins <- all_contigs %>%
+  semi_join(best_contigs,
+            by = c("sample" = "sample",
+                   "contig_id" = "contig_id"))
+all_contig_counts <- usable_proteins %>%
+  count(sample, name = "total")
+
+# Filter formatted HMMER hits, retain selected contigs, and keep the dominant
+# qualifying hit per sample--contig--ORF combination.
+hits <- read.csv(
+  paste0(data_dir, "/proteins_all_hits_formatted.csv"),
+  header = TRUE
+  ) %>%
+  mutate(
+    full_seq_evalue = as.numeric(full_seq_evalue),
+    full_seq_score = as.numeric(full_seq_score),
+    full_seq_bias = as.numeric(full_seq_bias)
+  ) %>%
+  filter(
+    full_seq_evalue <= 1e-10,
+    full_seq_score >= 25,
+    full_seq_score >= 10 * full_seq_bias
+  ) %>%
+  semi_join(best_contigs,
+            by = c("sample" = "sample",
+                   "contig_id" = "contig_id")) %>%
+  arrange(sample, contig_id, orf_id, full_seq_evalue, desc(full_seq_score)) %>%
+  group_by(sample, contig_id, orf_id) %>%
+  slice(1) %>%
+  ungroup()
+
+hit_counts <- hits %>%
+  count(query_name, sample) %>%
+  pivot_wider(
+    names_from = sample,
+    values_from = n,
+    values_fill = 0
+  ) %>%
+  rename(VF_hit = query_name) %>%
+  column_to_rownames("VF_hit")
+
+# Convert selected-contig hit counts and protein totals to the shared summary
+# matrix format.
+hit_totals <- hit_counts %>%
+  summarise(across(everything(), sum)) %>%
+  pivot_longer(everything(), names_to = "sample", values_to = "vfdb_count")
+vf_hit_counts <- all_contig_counts %>%
+  left_join(hit_totals, by = "sample") %>%
+  mutate(proportion = vfdb_count / total)
+vf_hit_counts[is.na(vf_hit_counts)] <- 0
+vf_hit_counts <- vf_hit_counts %>%
+  select(sample, vfdb_count, total, proportion) %>%
+  pivot_longer(-sample, names_to = "metric", values_to = "value") %>%
+  pivot_wider(names_from = sample, values_from = value)
+vf_hit_counts_t <- as.data.frame(t(vf_hit_counts))
+vf_hit_counts_t$group <- sub("\\..*$", "", rownames(vf_hit_counts_t))
+vf_hit_counts_t$country <- sub("^[^.]+\\.([A-Za-z]{3}).*$", "\\1", rownames(vf_hit_counts_t))
+```
+
+```{r analyze in vfdb hits on network genomes}
+# Bootstrap medians of qualifying VFDB-hit ORFs per selected-contig protein.
+vf_hit_boot_res <- get_row_median(
+  data = vf_hit_counts,
+  num_iter = max_iter, 
+  row_num = 3,
+  cats = c("ind", "pre", "pal")
+  )
+vf_hit_boot_res_by_country <- get_row_median(
+  data = vf_hit_counts,
+  num_iter = max_iter, 
+  row_num = 3,
+  cats = c("AUT", "AWC", "BMS", "ZAF", "ZAP",
+           "CHN", "DNK", "ESP", "USA",
+           "FJI", "MEX", "MDG", "TZA", "NPL", "PER")
+  )
+pal_size_vf_hit <- nrow(vf_hit_counts_t %>% filter(group == "pal"))
+# Balance resampling to the number of paleofecal samples.
+pal_size_vf_hit_boot_res_downsample <- get_row_median(
+  data = vf_hit_counts,
+  num_iter = max_iter, 
+  row_num = 3,
+  cats = c("ind", "pre", "pal"),
+  max_resample = pal_size_vf_hit
+  )
+
+# Produce group, country, and balanced-group selected-contig violin plots.
+vf_hit_voilin <- create_cat_voilins(
+  data = vf_hit_boot_res, 
+  ci_offset = c(0.15, 0.55, 0.55),
+  file_name = "vf_perc_netGen",
+  plot_dir = paste0(figs_dir, "/vf"),
+  cats_order = c("pal", "pre", "ind"),
+  plot.title = "Qualifying VFDB-hit ORFs per selected protein",
+  x.title = "Sample group",
+  y.title = "Qualifying VFDB-hit ORFs per selected protein"
+  )
+vf_hit_voilin[[1]]
+vf_hit_voilin[[2]]
+vf_hit_voilin_by_country <- create_cat_voilins(
+  data = vf_hit_boot_res_by_country, 
+  ci_offset = 0.3,
+  file_name = "vf_perc_by_pop_netGen",
+  plot_dir = paste0(figs_dir, "/vf"),
+  cats_order = c("AUT", "AWC", "BMS", "ZAF", "ZAP",
+                 "FJI", "MDG", "MEX", "NPL", "PER", "TZA",
+                 "CHN", "DNK", "ESP", "USA"),
+  plot.title = "Qualifying VFDB-hit ORFs per selected protein",
+  x.title = "Sample origin",
+  y.title = "Qualifying VFDB-hit ORFs per selected protein"
+  )
+vf_hit_voilin_by_country[[1]]
+vf_hit_voilin_by_country[[2]]
+vf_hit_voilin_downsampled <- create_cat_voilins(
+  data = pal_size_vf_hit_boot_res_downsample, 
+  ci_offset = c(0.15, 0.55, 0.55),
+  file_name = "vf_perc_downsampled_netGen",
+  plot_dir = paste0(figs_dir, "/vf"),
+  cats_order = c("pal", "pre", "ind"),
+  plot.title = "Qualifying VFDB-hit ORFs per selected protein",
+  x.title = "Sample group",
+  y.title = "Qualifying VFDB-hit ORFs per selected protein"
+  )
+vf_hit_voilin_downsampled[[1]]
+vf_hit_voilin_downsampled[[2]]
+
+# Test selected-contig prevalence differences among bootstrap distributions.
+vf_hit <- melt(vf_hit_boot_res)
+kruskal.test(vf_hit$value, vf_hit$Var2)
+vf_hit_by_country <- melt(vf_hit_boot_res_by_country)
+kruskal.test(vf_hit_by_country$value, vf_hit_by_country$Var2)
+vf_hit_downsampled <- melt(pal_size_vf_hit_boot_res_downsample)
+kruskal.test(vf_hit_downsampled$value, vf_hit_downsampled$Var2)
+```
+
+## Complete CheckV genome analysis
+
+The complete-genome tables use checkv.filter plus genome.id as their key.
+All summaries below therefore retain both trimming filters.
+
+```{r read complete CheckV tables}
+checkv.metadata <- read.csv(
+  file.path(data_dir, "checkv_genome_metadata.csv"),
+  check.names = TRUE
+)
+checkv.features <- read.csv(
+  file.path(data_dir, "checkv_genome_features.csv"),
+  check.names = TRUE
+)
+checkv.vf.hits <- read.csv(
+  file.path(data_dir, "checkv_genome_vf_hits.csv"),
+  check.names = TRUE
+)
+checkv.vf.stats <- read.csv(
+  file.path(data_dir, "checkv_genome_vf_stats.csv"),
+  check.names = TRUE
+)
+checkv.qc <- read.csv(
+  file.path(data_dir, "checkv_genome_qc.csv"),
+  check.names = TRUE
+)
+
+stopifnot(
+  !anyDuplicated(
+    checkv.metadata[c("checkv.filter", "genome.id")]
+  ),
+  !anyDuplicated(
+    checkv.vf.stats[c("checkv.filter", "genome.id")]
+  )
+)
+```
+
+### CheckV and PhaTYP lifestyle agreement
+
+```{r CheckV PhaTYP lifestyle comparison}
+lifestyle.confusion <- checkv.metadata %>%
+  count(
+    checkv.filter,
+    category,
+    origin,
+    checkv.lifestyle,
+    phatyp.lifestyle,
+    name = "genomes"
+  )
+
+lifestyle.agreement <- checkv.metadata %>%
+  mutate(
+    checkv.lifestyle.normalized = normalize.checkv.lifestyle(
+      checkv.lifestyle
+    ),
+    phatyp.lifestyle.normalized = normalize.checkv.lifestyle(
+      phatyp.lifestyle
+    ),
+    agrees = checkv.lifestyle.normalized == phatyp.lifestyle.normalized
+  ) %>%
+  count(checkv.filter, category, origin, agrees, name = "genomes")
+
+lifestyle.confusion
+lifestyle.agreement
+
+lifestyle.agreement.plot <- lifestyle.agreement %>%
+  ggplot(
+    aes(
+      x = checkv.filter,
+      y = genomes,
+      fill = agrees
+    )
+  ) +
+  geom_col(position = "fill", color = "black") +
+  facet_grid(category ~ origin, scales = "free_x", space = "free_x") +
+  scale_y_continuous(labels = scales::percent) +
+  labs(
+    x = "CheckV trimming filter",
+    y = "Fraction of complete genomes",
+    fill = "Lifestyle agrees",
+    title = "Agreement between CheckV-table and PhaTYP lifestyles"
+  ) +
+  theme_bw()
+lifestyle.agreement.plot
+```
+
+### PhaGCN family summaries
+
+```{r PhaGCN family summaries}
+family.summary <- checkv.metadata %>%
+  count(
+    checkv.filter,
+    category,
+    origin,
+    phatyp.lifestyle,
+    phagcn.family,
+    name = "genomes"
+  ) %>%
+  group_by(checkv.filter, category, origin, phatyp.lifestyle) %>%
+  mutate(fraction = genomes / sum(genomes)) %>%
+  ungroup()
+
+family.summary
+
+family.plot <- family.summary %>%
+  ggplot(
+    aes(
+      x = phagcn.family,
+      y = genomes,
+      fill = phatyp.lifestyle
+    )
+  ) +
+  geom_col(position = "dodge", color = "black") +
+  facet_grid(
+    category + origin ~ checkv.filter,
+    scales = "free_y"
+  ) +
+  labs(
+    x = "PhaGCN family",
+    y = "Complete genomes",
+    fill = "PhaTYP lifestyle",
+    title = "PhaGCN family assignments"
+  ) +
+  theme_bw() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+family.plot
+```
+
+### VFDB-hit prevalence by lifestyle
+
+Prevalence is the number of qualifying VFDB-hit bacterial ORFs divided by the
+number of eligible bacterial ORFs. Genomes without eligible bacterial ORFs
+remain missing; genomes with eligible ORFs and no qualifying hit remain zero.
+
+```{r VF prevalence by PhaTYP lifestyle}
+vf.plot.data <- checkv.vf.stats %>%
+  left_join(
+    checkv.metadata %>%
+      select(
+        checkv.filter,
+        genome.id,
+        phatyp.lifestyle,
+        checkv.lifestyle
+      ),
+    by = c("checkv.filter", "genome.id")
+  )
+
+vf.by.phatyp.plot <- vf.plot.data %>%
+  ggplot(
+    aes(
+      x = phatyp.lifestyle,
+      y = vf.orf.prevalence,
+      fill = phatyp.lifestyle
+    )
+  ) +
+  geom_boxplot(outlier.shape = NA) +
+  geom_jitter(width = 0.15, alpha = 0.45) +
+  facet_grid(
+    category + origin ~ checkv.filter,
+    scales = "free_x"
+  ) +
+  labs(
+    x = "PhaTYP lifestyle",
+    y = "Qualifying VFDB-hit bacterial ORFs / eligible bacterial ORFs",
+    fill = "PhaTYP lifestyle",
+    title = "Complete-genome VF prevalence by PhaTYP lifestyle"
+  ) +
+  theme_bw()
+vf.by.phatyp.plot
+```
+
+```{r VF prevalence by CheckV lifestyle}
+vf.by.checkv.plot <- vf.plot.data %>%
+  ggplot(
+    aes(
+      x = checkv.lifestyle,
+      y = vf.orf.prevalence,
+      fill = checkv.lifestyle
+    )
+  ) +
+  geom_boxplot(outlier.shape = NA) +
+  geom_jitter(width = 0.15, alpha = 0.45) +
+  facet_grid(
+    category + origin ~ checkv.filter,
+    scales = "free_x"
+  ) +
+  labs(
+    x = "CheckV-table lifestyle",
+    y = "Qualifying VFDB-hit bacterial ORFs / eligible bacterial ORFs",
+    fill = "CheckV lifestyle",
+    title = "Complete-genome VF prevalence by supplied CheckV lifestyle"
+  ) +
+  theme_bw()
+vf.by.checkv.plot
+```
+
+### Selected complete-genome feature map
+
+The map displays one annotation class at a time. Positive-strand features are
+above the genome backbone and negative-strand features are below it.
+
+```{r selected complete genome feature map}
+selected.genome.id <- params$selected.genome.id
+selected.annotation <- params$selected.annotation
+
+selected.features <- prepare.checkv.feature.map(
+  features = checkv.features,
+  selected.genome.id = selected.genome.id,
+  selected.annotation = selected.annotation
+)
+if (nrow(selected.features) == 0) {
+  stop(
+    "No eligible ",
+    selected.annotation,
+    " features found for ",
+    selected.genome.id
+  )
+}
+
+selected.backbones <- checkv.metadata %>%
+  filter(genome.id == selected.genome.id) %>%
+  transmute(
+    checkv.filter,
+    backbone.start = 1,
+    backbone.end = genome.length
+  )
+selected.features <- selected.features %>%
+  inner_join(selected.backbones, by = "checkv.filter")
+
+checkv.figs.dir <- file.path(figs_dir, "checkv")
+dir.create(checkv.figs.dir, recursive = TRUE, showWarnings = FALSE)
+selected.table.path <- file.path(
+  checkv.figs.dir,
+  paste0(
+    str_replace_all(selected.genome.id, "[^A-Za-z0-9._-]", "_"),
+    "_",
+    selected.annotation,
+    "_features.csv"
+  )
+)
+write.csv(selected.features, selected.table.path, row.names = FALSE)
+selected.features
+
+annotation.colors <- c(
+  viral = "#0072B2",
+  bacterial = "#D55E00",
+  vf = "#009E73"
+)
+selected.map <- ggplot() +
+  geom_segment(
+    data = selected.backbones,
+    aes(
+      x = backbone.start,
+      xend = backbone.end,
+      y = 0,
+      yend = 0
+    ),
+    color = "black",
+    linewidth = 0.8
+  ) +
+  geom_segment(
+    data = selected.features,
+    aes(
+      x = start,
+      xend = end,
+      y = y,
+      yend = y,
+      color = annotation
+    ),
+    linewidth = 3
+  ) +
+  facet_wrap(~ checkv.filter, ncol = 1) +
+  scale_color_manual(values = annotation.colors) +
+  scale_y_continuous(
+    breaks = c(-1, 0, 1),
+    labels = c("Negative", "Genome", "Positive"),
+    limits = c(-1.4, 1.4)
+  ) +
+  labs(
+    x = "Genome coordinate",
+    y = "Feature strand",
+    color = "Annotation",
+    title = paste(selected.annotation, "features on", selected.genome.id)
+  ) +
+  theme_bw()
+selected.map
+
+ggsave(
+  filename = file.path(
+    checkv.figs.dir,
+    paste0(
+      str_replace_all(selected.genome.id, "[^A-Za-z0-9._-]", "_"),
+      "_",
+      selected.annotation,
+      "_map.svg"
+    )
+  ),
+  plot = selected.map,
+  width = 10,
+  height = 5
+)
+```

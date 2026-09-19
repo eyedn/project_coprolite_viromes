@@ -1,8 +1,8 @@
 #!/bin/bash
 ###############################################################################
 #       Aydin Karatas
-#		Project Coprolite Viromes
-#		download.sh 
+#       Project Coprolite Viromes
+#       download.sh
 ###############################################################################
 cd $HOME/project_coprolite_viromes
 for FILE in download/bash_functions/* ; do source $FILE ; done

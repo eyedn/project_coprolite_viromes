@@ -1,14 +1,8 @@
 ###############################################################################
-#           Aydin Loid Karatas
-#           ---
-#           University of Southern California
-#           Department of Quantitative and Computational Biology
-#           Mooney Lab
-#           ---
-#           parse_sample_path.py
+#       Aydin Karatas
+#       Project Coprolite Viromes
+#       parse_sample_path.py
 ###############################################################################
-# pattern: Functional Core
-
 """Parse category, origin, and sample identifiers from input paths."""
 
 import re

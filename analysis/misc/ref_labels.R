@@ -3,8 +3,6 @@
 #   Project Coprolite Viromes
 #   ref_labels.R
 ###############################################################################
-
-
 # label sample categories for facet graph
 sample_labels <- c("ind" = "Modern, Industrial",
                    "pal" = "Paleo-sample",

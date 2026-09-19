@@ -1,11 +1,9 @@
 #!/bin/bash
 ###############################################################################
 #       Aydin Karatas
-#		Project Coprolite Viromes
-#		annotate_contigs.sh 
+#       Project Coprolite Viromes
+#       annotate_contigs.sh
 ###############################################################################
-
-
 # generate informative files by annotating contigs file 
 annotate_contigs() {
 	local sample=$1

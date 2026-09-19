@@ -1,15 +1,8 @@
-# ______________________________________________________________________________
-# Aydin Karatas
-# ___
-# University of Southern California
-# Department of Quantitative and Computational Biology
-# Mooney Lab
-# ___
-# create_phage_vf_plot.R
-# ______________________________________________________________________________
-# pattern: Functional Core
-
-
+###############################################################################
+#   Aydin Karatas
+#   Project Coprolite Viromes
+#   create_phage_vf_plot.R
+###############################################################################
 # Create one descriptive phage-level lifestyle-by-VFDB plot.
 create.phage.vf.plot <- function(data, statistic, facet.variable,
                                  plot.title, y.title) {

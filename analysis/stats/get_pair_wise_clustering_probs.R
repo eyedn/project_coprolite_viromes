@@ -3,8 +3,6 @@
 #   Project Coprolite Viromes
 #   get_pair_wise_clustering_probs.R
 ###############################################################################
-
-
 get_pair_wise_clustering_probs <- function(cluster_assignments, data, k) {
   # get cluster counts for all categories
   ind_clusters <- get_cluster_counts(

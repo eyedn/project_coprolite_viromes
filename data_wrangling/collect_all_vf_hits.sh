@@ -1,15 +1,9 @@
-#!/usr/bin/env bash
-
+#!/bin/bash
 ###############################################################################
-#           Aydin Loid Karatas
-#           ---
-#           University of Southern California
-#           Department of Quantitative and Computational Biology
-#           Mooney Lab
-#           ---
-#           collect_all_vf_hits.sh
+#       Aydin Karatas
+#       Project Coprolite Viromes
+#       collect_all_vf_hits.sh
 ###############################################################################
-
 set -euo pipefail
 
 if [ "$#" -lt 1 ] || [ "$#" -gt 2 ]; then

@@ -1,14 +1,8 @@
 ###############################################################################
-#           Aydin Loid Karatas
-#           ---
-#           University of Southern California
-#           Department of Quantitative and Computational Biology
-#           Mooney Lab
-#           ---
-#           summarize_phages.py
+#       Aydin Karatas
+#       Project Coprolite Viromes
+#       summarize_phages.py
 ###############################################################################
-# pattern: Functional Core
-
 """Calculate per-phage ORF prevalence and interval-union coverage."""
 
 

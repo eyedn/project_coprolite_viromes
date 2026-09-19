@@ -1,11 +1,9 @@
 #!/bin/bash
 ###############################################################################
 #       Aydin Karatas
-#		Project Coprolite Viromes
-#		assemble_libraries_wo_pydamage.sh 
+#       Project Coprolite Viromes
+#       assemble_libraries_wo_pydamage.sh
 ###############################################################################
-
-
 # create final.contigs.fa with megahit assembly from fastq/fasta files
 assemble_libraries_wo_pydamage() {
 	local sample=$1

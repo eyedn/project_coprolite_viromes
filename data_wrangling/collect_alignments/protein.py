@@ -1,7 +1,7 @@
 ###############################################################################
 #       Aydin Karatas
-#       Project Coporlite Viromes
-#       annotation.py
+#       Project Coprolite Viromes
+#       protein.py
 ###############################################################################
 import typing
 from . import contig

@@ -1,14 +1,8 @@
 ###############################################################################
-#           Aydin Loid Karatas
-#           ---
-#           University of Southern California
-#           Department of Quantitative and Computational Biology
-#           Mooney Lab
-#           ---
-#           write_csv.py
+#       Aydin Karatas
+#       Project Coprolite Viromes
+#       write_csv.py
 ###############################################################################
-# pattern: Imperative Shell
-
 """Write collector rows with an explicit stable column order."""
 
 import csv

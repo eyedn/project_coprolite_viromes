@@ -1,14 +1,8 @@
 ###############################################################################
-#           Aydin Loid Karatas
-#           ---
-#           University of Southern California
-#           Department of Quantitative and Computational Biology
-#           Mooney Lab
-#           ---
-#           parse_gff_lines.py
+#       Aydin Karatas
+#       Project Coprolite Viromes
+#       parse_gff_lines.py
 ###############################################################################
-# pattern: Functional Core
-
 """Parse contig lengths and CDS-to-contig mappings from GFF text."""
 
 

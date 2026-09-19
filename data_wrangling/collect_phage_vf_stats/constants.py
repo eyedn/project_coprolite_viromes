@@ -1,14 +1,8 @@
 ###############################################################################
-#           Aydin Loid Karatas
-#           ---
-#           University of Southern California
-#           Department of Quantitative and Computational Biology
-#           Mooney Lab
-#           ---
-#           constants.py
+#       Aydin Karatas
+#       Project Coprolite Viromes
+#       constants.py
 ###############################################################################
-# pattern: Functional Core
-
 """Shared collector schema and VFDB threshold constants."""
 
 MAX_FULL_SEQ_EVALUE = 1e-10

@@ -1,10 +1,9 @@
 #!/bin/bash
 ###############################################################################
 #       Aydin Karatas
-#		Project Coprolite Viromes
-#		assembly.sh 
+#       Project Coprolite Viromes
+#       assembly.sh
 ###############################################################################
-
 cd "$HOME/project_coprolite_viromes"
 for FILE in megahit_assembly/bash_functions/* ; do source "$FILE" ; done
 for FILE in general_bash_functions/* ; do source "$FILE" ; done
