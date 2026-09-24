@@ -18,4 +18,4 @@ qsub \
     -M $USER@mail \
     -m a \
     -t 1-$tot_clusters:1 \
-    /u/home/a/ayd1n/project_coprolite_viromes/format_VFDB/create_profiles.sh $cores $profiles_dir
+    "${HOME}/project_coprolite_viromes/format_database/create_profiles.sh" $cores $profiles_dir

@@ -2,9 +2,6 @@
 title: "Analysis of CheckV genomes"
 author: "Aydin Karatas"
 output: html_document
-params:
-  selected.genome.id: "ind-CHN_NLF015_k99_39404_1"
-  selected.annotation: "bacterial"
 ---
 
 This report separates the original selected-network-genome analysis from the
@@ -35,7 +32,7 @@ source.files.from.dir("misc")
 
 set.seed(seed = 123)
 data_dir <-
-  "~/Documents/ucla/research/project_coprolite_viromes_NOT_CODE/data/20251118"
+  "~/Documents/ucla/research/project_coprolite_viromes_NOT_CODE/data/20260920"
 figs_dir <-
   "~/Documents/ucla/research/project_coprolite_viromes_NOT_CODE/figures"
 max_iter <- 1000
@@ -241,17 +238,51 @@ checkv.qc <- read.csv(
 
 stopifnot(
   !anyDuplicated(
-    checkv.metadata[c("checkv.filter", "genome.id")]
+    checkv.metadata[c("checkv_filter", "genome_id")]
   ),
   !anyDuplicated(
-    checkv.vf.stats[c("checkv.filter", "genome.id")]
+    checkv.vf.stats[c("checkv_filter", "genome_id")]
   )
 )
+
+checkv.features <- checkv.features %>%
+  rename(
+    checkv.filter = checkv_filter,
+    genome.id = genome_id,
+    checkv.contig.id = checkv_contig_id,
+    feature.id = feature_id,
+    ec.number = ec_number,
+    vf.id = vf_id,
+    full.seq.evalue = full_seq_evalue,
+    full.seq.score = full_seq_score,
+    full.seq.bias = full_seq_bias,
+    vf.description = vf_description
+  )
 ```
 
 ### CheckV and PhaTYP lifestyle agreement
 
 ```{r CheckV PhaTYP lifestyle comparison}
+checkv.metadata <- checkv.metadata %>%
+  rename(
+    checkv.filter = checkv_filter, 
+    checkv.lifestyle = checkv_lifestyle, 
+    phatyp.lifestyle = phatyp_lifestyle,
+    phagcn.family = phagcn_family,
+    genome.id = genome_id,
+    checkv.contig.id = checkv_contig_id,
+    genome.length = genome_length,
+    checkv.source = checkv_source,
+    checkv.warnings = checkv_warnings,
+    phatyp.lifestyle.raw = phatyp_lifestyle_raw,
+    phatyp.score = phatyp_score,
+    phagcn.lineage = phagcn_lineage,
+    phagcn.family.score = phagcn_family_score,
+    phagcn.genus = phagcn_genus,
+    phagcn.genus.cluster = phagcn_genus_cluster,
+    checkv.raw.json = checkv_raw_json,
+    phagcn.raw.json = phagcn_raw_json
+    )
 lifestyle.confusion <- checkv.metadata %>%
   count(
     checkv.filter,
@@ -286,7 +317,7 @@ lifestyle.agreement.plot <- lifestyle.agreement %>%
     )
   ) +
   geom_col(position = "fill", color = "black") +
-  facet_grid(category ~ origin, scales = "free_x", space = "free_x") +
+  facet_wrap(~ origin, scales = "free_x", space = "free_x") +
   scale_y_continuous(labels = scales::percent) +
   labs(
     x = "CheckV trimming filter",
@@ -347,6 +378,16 @@ number of eligible bacterial ORFs. Genomes without eligible bacterial ORFs
 remain missing; genomes with eligible ORFs and no qualifying hit remain zero.
 
 ```{r VF prevalence by PhaTYP lifestyle}
+checkv.vf.stats <- checkv.vf.stats %>%
+  rename(
+    checkv.filter = checkv_filter,
+    genome.id = genome_id,
+    checkv.contig.id = checkv_contig_id,
+    eligible.bacterial.orfs = eligible_bacterial_orfs,
+    qualifying.vf.orfs = qualifying_vf_orfs,
+    vf.present = vf_present,
+    vf.orf.prevalence = vf_orf_prevalence
+  )
 vf.plot.data <- checkv.vf.stats %>%
   left_join(
     checkv.metadata %>%
@@ -414,14 +455,15 @@ The map displays one annotation class at a time. Positive-strand features are
 above the genome backbone and negative-strand features are below it.
 
 ```{r selected complete genome feature map}
-selected.genome.id <- params$selected.genome.id
-selected.annotation <- params$selected.annotation
+selected.genome.id <- "pre-TZA_ERS9106184_k141_65577"
+selected.annotation <- "vf"
 
 selected.features <- prepare.checkv.feature.map(
   features = checkv.features,
   selected.genome.id = selected.genome.id,
   selected.annotation = selected.annotation
 )
+
 if (nrow(selected.features) == 0) {
   stop(
     "No eligible ",

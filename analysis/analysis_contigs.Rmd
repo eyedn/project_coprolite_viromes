@@ -34,7 +34,7 @@ source_files_from_dir("misc")
 
 # Define the shared random seed, input/output directories, and bootstrap size.
 set.seed(seed = 123)
-data_dir <- "~/Documents/ucla/research/project_coprolite_viromes_NOT_CODE/data/20251118"
+data_dir <- "~/Documents/ucla/research/project_coprolite_viromes_NOT_CODE/data/20260920"
 figs_dir <- "~/Documents/ucla/research/project_coprolite_viromes_NOT_CODE/figures"
 max_iter <- 1000
 subset_top <- 100

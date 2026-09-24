@@ -135,7 +135,7 @@ python3 "${script_dir}/data_wrangling/prepare_checkv_prokka.py" \
     "${viral_dir}/${prefix}.gff" \
     "${viral_dir}/valid_features.csv"
 
-vf_database="${ref_db}/VFDB_setA_pro_20230917.txt"
+vf_database="${ref_db}/VFDB_setB_pro_20260923.txt"
 if [ ! -s "$vf_database" ]; then
     echo "4_analyze_checkv_genomes: missing VFDB profile: ${vf_database}" >&2
     exit 1

@@ -10,6 +10,6 @@ module load python
 
 # run python script to create separate fasta files for each cluster
 python3 VFDB_extract_clusters.py \
-    $SCRATCH/references/VFDB_setA_pro_20230917.fas \
+    $SCRATCH/references/VFDB_setB_pro_20260923.fas \
     $SCRATCH/VFDB_cluster_profiles \
     $SCRATCH/VFDB_cluster_profiles/clusters.txt
