@@ -70,27 +70,6 @@ require_directory "${annotation_dir}" "genome annotation directory"
 require_directory "${prediction_dir}" "PhaTYP prediction directory"
 mkdir -p "${data_dir}"
 
-vf_table_file=$(find "${alignment_dir}" -mindepth 2 -maxdepth 2 -type f \
-    -path '*_vf/table.txt' -print -quit)
-if [ -z "${vf_table_file}" ]; then
-    echo "$(timestamp_message): 3a_get_alignment_counts: ERROR! no VF table.txt files" >&2
-    exit 1
-fi
-
-phatyp_file=$(find "${prediction_dir}" -type f \
-    -path '*_prediction/out/phatyp_prediction.csv' -print -quit)
-if [ -z "${phatyp_file}" ]; then
-    echo "$(timestamp_message): 3a_get_alignment_counts: ERROR! no PhaTYP prediction files" >&2
-    exit 1
-fi
-
-gff_file=$(find "${annotation_dir}" -type f \
-    -path '*_annotation_bac_on_phage/*.gff.gz' -print -quit)
-if [ -z "${gff_file}" ]; then
-    echo "$(timestamp_message): 3a_get_alignment_counts: ERROR! no bacterial-on-phage GFF files" >&2
-    exit 1
-fi
-
 temporary_files=()
 cleanup() {
     local file_path
@@ -107,13 +86,23 @@ temporary_contig_hits=$(mktemp "${data_dir}/.vf_alignment_contig_hits.csv.XXXXXX
 temporary_all_hits=$(mktemp "${data_dir}/.all_vf_hits.csv.XXXXXX")
 temporary_stats=$(mktemp "${data_dir}/.phage_vf_stats.csv.XXXXXX")
 temporary_qc=$(mktemp "${data_dir}/.phage_vf_stats_qc.csv.XXXXXX")
+temporary_alignment_qc=$(mktemp "${data_dir}/.vf_alignment_qc.csv.XXXXXX")
+temporary_complete_samples=$(mktemp "${data_dir}/.vf_complete_samples.XXXXXX")
 temporary_files=(
     "${temporary_counts}"
     "${temporary_contig_hits}"
     "${temporary_all_hits}"
     "${temporary_stats}"
     "${temporary_qc}"
+    "${temporary_alignment_qc}"
+    "${temporary_complete_samples}"
 )
+
+stage_message "auditing expected VFDB alignments"
+bash "${script_dir}/data_wrangling/audit_vf_alignments.sh" \
+    "${project_dir}" \
+    "${temporary_alignment_qc}" \
+    "${temporary_complete_samples}"
 
 stage_message "collecting legacy VFDB alignment counts"
 python3 "${script_dir}/data_wrangling/get_alignment_counts.py" \
@@ -122,26 +111,30 @@ python3 "${script_dir}/data_wrangling/get_alignment_counts.py" \
     "${data_dir}" \
     "vf_alignment" \
     "${temporary_counts}" \
-    "${temporary_contig_hits}"
+    "${temporary_contig_hits}" \
+    "${temporary_complete_samples}"
 
 stage_message "combining all VFDB hits"
 bash "${script_dir}/data_wrangling/collect_all_vf_hits.sh" \
     "${project_dir}" \
-    "${temporary_all_hits}"
+    "${temporary_all_hits}" \
+    "${temporary_complete_samples}"
 
 stage_message "calculating phage-level VFDB statistics"
 bash "${script_dir}/data_wrangling/collect_phage_vf_stats.sh" \
     "${project_dir}" \
     "${temporary_all_hits}" \
     "${temporary_stats}" \
-    "${temporary_qc}"
+    "${temporary_qc}" \
+    "${temporary_complete_samples}"
 
 for output_file in \
     "${temporary_counts}" \
     "${temporary_contig_hits}" \
     "${temporary_all_hits}" \
     "${temporary_stats}" \
-    "${temporary_qc}"
+    "${temporary_qc}" \
+    "${temporary_alignment_qc}"
 do
     if [ ! -s "${output_file}" ]; then
         echo "$(timestamp_message): 3a_get_alignment_counts: ERROR! expected VFDB output is empty: ${output_file}" >&2
@@ -149,12 +142,14 @@ do
     fi
 done
 
-stage_message "publishing five VFDB output files"
+stage_message "publishing six VFDB output files"
 mv -f "${temporary_counts}" "${data_dir}/vf_alignment_counts.csv"
 mv -f "${temporary_contig_hits}" "${data_dir}/vf_alignment_contig_hits.csv"
 mv -f "${temporary_all_hits}" "${data_dir}/all_vf_hits.csv"
 mv -f "${temporary_stats}" "${data_dir}/phage_vf_stats.csv"
 mv -f "${temporary_qc}" "${data_dir}/phage_vf_stats_qc.csv"
+mv -f "${temporary_alignment_qc}" "${data_dir}/vf_alignment_qc.csv"
+rm -f "${temporary_complete_samples}"
 temporary_files=()
 
 stage_message "VFDB aggregation complete for ${origin} with ${num_cores} cores"

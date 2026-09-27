@@ -10,7 +10,8 @@ from . import read_table, read_gff, read_results
 from . import update_counts_df, update_contig_hits_dict
 
 
-def get_align_info(alignment_path: str, annotations_path: str, eval: float) \
+def get_align_info(alignment_path: str, annotations_path: str, eval: float,
+    complete_samples=None) \
     -> typing.Tuple[pd.DataFrame, pd.DataFrame]:
 
     # contains information about how much on a contig is spanned by db proteins
@@ -22,6 +23,8 @@ def get_align_info(alignment_path: str, annotations_path: str, eval: float) \
     for align_path in glob(alignment_path, recursive = True):
         # define paths for appropriate files
         label = "_".join(align_path.split("/")[-1].split("_")[:-1])
+        if complete_samples is not None and label not in complete_samples:
+            continue
         table_txt = f"{align_path}/table.txt"
         results_txt = f"{align_path}/results.txt"
         sample_annotations_path = annotations_path.replace("!", label)

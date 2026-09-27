@@ -6,8 +6,8 @@
 ###############################################################################
 set -euo pipefail
 
-if [ "$#" -ne 1 ] && [ "$#" -ne 4 ]; then
-    echo "Usage: bash data_wrangling/collect_phage_vf_stats.sh PROJECT_DIR [VF_HITS_FILE STATS_OUTPUT QC_OUTPUT]" >&2
+if [ "$#" -ne 1 ] && [ "$#" -ne 4 ] && [ "$#" -ne 5 ]; then
+    echo "Usage: bash data_wrangling/collect_phage_vf_stats.sh PROJECT_DIR [VF_HITS_FILE STATS_OUTPUT QC_OUTPUT COMPLETE_SAMPLES_FILE]" >&2
     exit 2
 fi
 
@@ -18,10 +18,14 @@ data_dir="${project_dir}/data"
 vf_hits_file="${data_dir}/all_vf_hits.csv"
 script_dir=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
 
-if [ "$#" -eq 4 ]; then
+complete_samples_file=""
+if [ "$#" -ge 4 ]; then
     vf_hits_file="${2}"
     stats_output="${3}"
     qc_output="${4}"
+    if [ "$#" -eq 5 ]; then
+        complete_samples_file="${5}"
+    fi
 else
     stats_output="${data_dir}/phage_vf_stats.csv"
     qc_output="${data_dir}/phage_vf_stats_qc.csv"
@@ -41,6 +45,10 @@ done
 if [ ! -f "${vf_hits_file}" ]; then
     echo "collect_phage_vf_stats: missing upstream file: ${vf_hits_file}" >&2
     echo "Run data_wrangling/collect_all_vf_hits.sh first." >&2
+    exit 1
+fi
+if [ -n "${complete_samples_file}" ] && [ ! -s "${complete_samples_file}" ]; then
+    echo "collect_phage_vf_stats: missing complete-samples file: ${complete_samples_file}" >&2
     exit 1
 fi
 
@@ -71,10 +79,17 @@ fi
 
 echo "collect_phage_vf_stats: PhaTYP files: ${#phatyp_files[@]}"
 echo "collect_phage_vf_stats: Prokka GFF files: ${#gff_files[@]}"
-python3 "${script_dir}/collect_phage_vf_stats.py" \
-    "${project_dir}" \
-    --vf-hits-file "${vf_hits_file}" \
-    --stats-output "${stats_output}" \
+python_command=(
+    python3
+    "${script_dir}/collect_phage_vf_stats.py"
+    "${project_dir}"
+    --vf-hits-file "${vf_hits_file}"
+    --stats-output "${stats_output}"
     --qc-output "${qc_output}"
+)
+if [ -n "${complete_samples_file}" ]; then
+    python_command+=(--complete-samples-file "${complete_samples_file}")
+fi
+"${python_command[@]}"
 echo "collect_phage_vf_stats: wrote ${stats_output}"
 echo "collect_phage_vf_stats: wrote ${qc_output}"

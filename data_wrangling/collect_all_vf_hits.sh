@@ -6,8 +6,8 @@
 ###############################################################################
 set -euo pipefail
 
-if [ "$#" -lt 1 ] || [ "$#" -gt 2 ]; then
-    echo "Usage: bash data_wrangling/collect_all_vf_hits.sh PROJECT_DIR [OUTPUT_CSV]" >&2
+if [ "$#" -lt 1 ] || [ "$#" -gt 3 ]; then
+    echo "Usage: bash data_wrangling/collect_all_vf_hits.sh PROJECT_DIR [OUTPUT_CSV COMPLETE_SAMPLES_FILE]" >&2
     exit 2
 fi
 
@@ -15,6 +15,7 @@ project_dir="${1%/}"
 alignment_dir="${project_dir}/alignment"
 output_dir="${project_dir}/data"
 output_csv="${2:-${output_dir}/all_vf_hits.csv}"
+complete_samples_file="${3:-}"
 output_parent=$(dirname "${output_csv}")
 temporary_csv=""
 
@@ -29,8 +30,20 @@ echo "collect_all_vf_hits: searching for VF alignment tables in ${alignment_dir}
 
 mkdir -p "${output_dir}" "${output_parent}"
 
+if [ -n "${complete_samples_file}" ] && [ ! -s "${complete_samples_file}" ]; then
+    echo "collect_all_vf_hits: ERROR! missing complete-samples file: ${complete_samples_file}" >&2
+    exit 1
+fi
+
 table_files=()
 while IFS= read -r table_file; do
+    table_name=$(basename "$(dirname "${table_file}")")
+    sample_label="${table_name%_vf}"
+    if [ -n "${complete_samples_file}" ] && \
+        ! grep -Fqx "${sample_label}" "${complete_samples_file}"
+    then
+        continue
+    fi
     table_files+=("${table_file}")
 done < <(
     find "${alignment_dir}" -mindepth 2 -maxdepth 2 -type f \
@@ -75,10 +88,14 @@ for table_file in "${table_files[@]}"; do
             return "\"" escaped "\""
         }
 
-        NR <= 3 { next }
         /^[[:space:]]*$/ { next }
         /^#/ { next }
-        NF < 18 { next }
+
+        NF < 18 {
+            print "collect_all_vf_hits: ERROR! malformed HMMER row in " \
+                FILENAME ":" FNR > "/dev/stderr"
+            exit 2
+        }
 
         {
             description = ""

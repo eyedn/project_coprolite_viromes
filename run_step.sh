@@ -44,7 +44,7 @@ elif [[ $filename =~ ^[0-9]+_ ]]; then
             ;;
         4)
             run_group pal pal-AUT pal-AWC pal-BEL pal-BMS pal-ENG pal-ZAF pal-ZAP
-            run_group ind ind ind-CHN ind-DNK ind-ESP ind-USA
+            run_group ind ind-CHN ind-DNK ind-ESP ind-USA
             run_group pre pre-FJI pre-MDG pre-MEX pre-NPL pre-PER pre-TZA
             ;;
         *)

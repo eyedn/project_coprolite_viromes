@@ -38,6 +38,7 @@ def main():
     parser.add_argument("--vf-hits-file", type=Path)
     parser.add_argument("--stats-output", type=Path)
     parser.add_argument("--qc-output", type=Path)
+    parser.add_argument("--complete-samples-file", type=Path)
     args = parser.parse_args()
 
     project_dir = args.project_dir.resolve()
@@ -47,6 +48,17 @@ def main():
     vf_hits_path = args.vf_hits_file or data_dir / "all_vf_hits.csv"
     stats_output = args.stats_output or data_dir / "phage_vf_stats.csv"
     qc_output = args.qc_output or data_dir / "phage_vf_stats_qc.csv"
+
+    complete_samples = None
+    if args.complete_samples_file is not None:
+        with args.complete_samples_file.open() as handle:
+            complete_samples = {
+                line.strip()
+                for line in handle
+                if line.strip()
+            }
+        if not complete_samples:
+            raise ValueError("complete-samples file contains no samples")
 
     for input_dir in (prediction_dir, annotation_dir, data_dir):
         if not input_dir.is_dir():
@@ -82,6 +94,15 @@ def main():
     phatyp_samples = set()
     for path in phatyp_paths:
         metadata = parse_sample_path(path, "prediction")
+        sample_label = (
+            f"{metadata['category']}-{metadata['origin']}_"
+            f"{metadata['sample_id']}"
+        )
+        if (
+            complete_samples is not None
+            and sample_label not in complete_samples
+        ):
+            continue
         if metadata["sample"] in phatyp_samples:
             raise ValueError(
                 f"multiple PhaTYP files for sample: {metadata['sample']}"
@@ -95,6 +116,15 @@ def main():
     gff_samples = set()
     for path in gff_paths:
         metadata = parse_sample_path(path, "gff")
+        sample_label = (
+            f"{metadata['category']}-{metadata['origin']}_"
+            f"{metadata['sample_id']}"
+        )
+        if (
+            complete_samples is not None
+            and sample_label not in complete_samples
+        ):
+            continue
         if metadata["sample"] in gff_samples:
             raise ValueError(
                 f"multiple GFF files for sample: {metadata['sample']}"
@@ -125,8 +155,8 @@ def main():
     )
     summaries = summarize_phages(phages, contigs, orfs, hits)
     qc_rows = build_qc_rows(
-        len(phatyp_paths),
-        len(gff_paths),
+        len(phatyp_samples),
+        len(gff_samples),
         phages,
         summaries,
         validation_counts,
