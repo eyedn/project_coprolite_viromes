@@ -2,11 +2,7 @@
 
 ###############################################################################
 #           Aydin Loid Karatas
-#           ---
-#           University of Southern California
-#           Department of Quantitative and Computational Biology
-#           Mooney Lab
-#           ---
+#           Project Coprolite Viromes
 #           vf_alignment.sh
 ###############################################################################
 
