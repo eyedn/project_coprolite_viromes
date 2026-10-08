@@ -40,7 +40,7 @@ VF_STATS_COLUMNS = [
     "category",
     "origin",
     "sample",
-    "eligible_bacterial_orfs",
+    "total_bacterial_orfs",
     "qualifying_vf_orfs",
     "vf_present",
     "vf_orf_prevalence",

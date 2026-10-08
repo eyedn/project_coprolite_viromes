@@ -18,6 +18,8 @@ def validate_joins(phages, contigs, orfs, hits, invalid_coordinates):
         key for key, count in Counter(phage_keys).items() if count > 1
     )
     unmatched_phatyp_contigs = sorted(set(phage_keys) - set(contigs))
+    if set(contigs) - set(phage_keys):
+        raise ValueError("GFF contigs missing from PhaTYP predictions")
     unmatched_vf_orfs = sorted(set(hits) - set(orfs))
 
     if duplicate_phage_keys:

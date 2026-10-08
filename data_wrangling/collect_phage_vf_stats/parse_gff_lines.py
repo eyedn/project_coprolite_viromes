@@ -6,6 +6,7 @@
 """Parse contig lengths and CDS-to-contig mappings from GFF text."""
 
 
+from urllib.parse import unquote
 def parse_gff_lines(lines, sample):
     """Return contig lengths, CDS coordinates, and invalid coordinates."""
     lines = list(lines)
@@ -66,7 +67,7 @@ def parse_gff_lines(lines, sample):
         for item in fields[8].split(";"):
             if "=" in item:
                 key, value = item.split("=", 1)
-                attributes[key] = value
+                attributes[key] = unquote(value)
         orf_id = attributes.get("ID", "").strip()
         if not orf_id:
             raise ValueError(f"GFF CDS has no ID at line {line_number}")
@@ -78,7 +79,8 @@ def parse_gff_lines(lines, sample):
             raise ValueError(
                 f"GFF CDS has nonnumeric coordinates at line {line_number}"
             ) from error
-        if start < 1 or end < start or end > contigs[contig_key]:
+        if (start < 1 or end < start or end > contigs[contig_key]
+                or fields[6] not in {"+", "-"}):
             invalid_coordinates.append(
                 f"{sample}:{orf_id}:{start}-{end}"
             )
@@ -90,6 +92,15 @@ def parse_gff_lines(lines, sample):
             "contig_id": contig_id,
             "start": start,
             "end": end,
+            "strand": fields[6],
+            "product": attributes.get("product", "").strip(),
+            "ec_number": (attributes.get("eC_number", "")
+                          or attributes.get("EC_number", "")).strip(),
+            "feature_id": orf_id,
+            "is_hypothetical": "hypothetical protein" in
+                attributes.get("product", "").casefold(),
+            "has_ec_number": bool((attributes.get("eC_number", "")
+                                   or attributes.get("EC_number", "")).strip()),
         }
 
     return contigs, orfs, invalid_coordinates

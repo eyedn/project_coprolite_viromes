@@ -42,7 +42,7 @@ output_dir="${project_dir}/checkv_genomes/${checkv_filter}"
 prediction_dir="${output_dir}/predictions"
 bacterial_dir="${output_dir}/annotations/bacterial"
 viral_dir="${output_dir}/annotations/viral"
-vf_dir="${output_dir}/vf_alignment"
+vf_dir="${output_dir}/vf_alignment_all_orfs"
 input_fasta="${input_dir}/genomes.fa.gz"
 working_fasta="${output_dir}/working_genomes.fa"
 prefix="checkv_${checkv_filter}"
@@ -128,31 +128,21 @@ fi
 
 python3 "${script_dir}/data_wrangling/prepare_checkv_prokka.py" \
     "${bacterial_dir}/${prefix}.gff" \
-    "${bacterial_dir}/valid_features.csv" \
-    --faa-path "${bacterial_dir}/${prefix}.faa" \
-    --faa-output "${bacterial_dir}/eligible_proteins.faa"
+    "${bacterial_dir}/valid_features.csv"
 python3 "${script_dir}/data_wrangling/prepare_checkv_prokka.py" \
     "${viral_dir}/${prefix}.gff" \
     "${viral_dir}/valid_features.csv"
 
-vf_database="${ref_db}/VFDB_setB_pro_20260923.txt"
-if [ ! -s "$vf_database" ]; then
-    echo "4_analyze_checkv_genomes: missing VFDB profile: ${vf_database}" >&2
-    exit 1
-fi
-if [ -s "${bacterial_dir}/eligible_proteins.faa" ]; then
-    "$hmmsearch" \
-        -o "${vf_dir}/results.txt" \
-        --tblout "${vf_dir}/table.txt" \
-        --cpu "$num_cores" \
-        --incE 1e-5 \
-        "$vf_database" \
-        "${bacterial_dir}/eligible_proteins.faa"
-else
-    printf '# No eligible bacterial proteins for VFDB alignment.\n' \
-        > "${vf_dir}/table.txt"
-    printf 'No eligible bacterial proteins for VFDB alignment.\n' \
-        > "${vf_dir}/results.txt"
-fi
+# Reuse Prokka calls, searching both full-pool reference versions.
+for version in VFDB_setA VFDB_setB; do
+    case "$version" in
+        VFDB_setA) vf_database="${ref_db}/VFDB_setA_pro_20230917.txt" ;;
+        VFDB_setB) vf_database="${ref_db}/VFDB_setB_pro_20260923.txt" ;;
+    esac
+    python3 "${script_dir}/data_wrangling/search_vfdb.py" \
+        "${bacterial_dir}/${prefix}.faa" \
+        "${bacterial_dir}/${prefix}.gff" "$vf_database" \
+        "${vf_dir}/${version}" "$version" "$num_cores" "$hmmsearch"
+done
 
 echo "$(timestamp): step 4 complete for ${checkv_filter}"

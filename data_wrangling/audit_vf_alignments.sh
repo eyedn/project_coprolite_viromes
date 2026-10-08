@@ -8,16 +8,22 @@
 
 set -euo pipefail
 
-if [ "$#" -ne 3 ]; then
+if [ "$#" -ne 4 ]; then
     echo "Usage: audit_vf_alignments.sh PROJECT_DIR QC_OUTPUT \
-COMPLETE_SAMPLES_OUTPUT" >&2
+COMPLETE_SAMPLES_OUTPUT VFDB_VERSION" >&2
     exit 2
 fi
 
 project_dir="${1%/}"
 qc_output="$2"
 complete_samples_output="$3"
-alignment_dir="${project_dir}/alignment"
+version="$4"
+case "$version" in
+    VFDB_setA|VFDB_setB) ;;
+    *) echo "audit_vf_alignments: invalid VFDB version" >&2; exit 2 ;;
+esac
+script_dir=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
+alignment_dir="${project_dir}/alignment/vfdb_all_orfs/${version}"
 annotation_dir="${project_dir}/genome_annotation"
 prediction_dir="${project_dir}/phage_predictions"
 temporary_files=()
@@ -165,7 +171,8 @@ find "${prediction_dir}" -type f \
     done | sort -u > "${phatyp_samples}"
 
 find "${annotation_dir}" -type f \
-    -path '*_annotation_bac_on_phage/*.gff.gz' \
+    \( -path '*_annotation_bac_on_phage/*.gff.gz' \
+        -o -path '*_annotation_bac_on_phage/*.gff' \) \
     -print | while IFS= read -r file_path; do
         sample_directory=$(basename "$(dirname "${file_path}")")
         printf '%s\n' "${sample_directory%_annotation_bac_on_phage}"
@@ -282,7 +289,7 @@ ${orfs_file}.gz" >&2
     fi
 
     missing_files=()
-    for required_file in table.txt results.txt; do
+    for required_file in table.txt results.txt search_manifest.json; do
         if [ ! -s "${sample_alignment_dir}/${required_file}" ]; then
             missing_files+=("${required_file}")
         fi
@@ -301,6 +308,9 @@ output: ${sample_alignment_dir}/${stale_file}" >&2
         exclusion_reason="incomplete_alignment"
         status="excluded"
     else
+        python3 "${script_dir}/audit_vf_search.py" \
+            "${sample_annotation_dir}/${sample_id}.gff" \
+            "$orfs_file" "$sample_alignment_dir" "$version"
         status="complete"
     fi
 

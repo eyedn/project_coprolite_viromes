@@ -5,6 +5,7 @@
 ###############################################################################
 import typing
 import gzip
+from pathlib import Path
 from . import contig
 from . import protein
 
@@ -17,7 +18,11 @@ def read_gff(gff_file: typing.BinaryIO) \
     contigs: typing.Dict[str, contig.Contig] = {}
     proteins: typing.Dict[str, protein.Protein] = {}
 
-    with gzip.open(gff_file, "rt") as f:
+    path = Path(gff_file)
+    if not path.is_file() and path.suffix == ".gz":
+        path = path.with_suffix("")
+    opener = gzip.open if path.suffix == ".gz" else open
+    with opener(path, "rt") as f:
         for line in f.readlines():
             curr_line = str(line.strip())
 

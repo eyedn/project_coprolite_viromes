@@ -6,13 +6,18 @@
 ###############################################################################
 set -euo pipefail
 
-if [ "$#" -lt 1 ] || [ "$#" -gt 3 ]; then
-    echo "Usage: bash data_wrangling/collect_all_vf_hits.sh PROJECT_DIR [OUTPUT_CSV COMPLETE_SAMPLES_FILE]" >&2
+if [ "$#" -lt 1 ] || [ "$#" -gt 4 ]; then
+    echo "Usage: bash data_wrangling/collect_all_vf_hits.sh PROJECT_DIR [OUTPUT_CSV COMPLETE_SAMPLES_FILE] VFDB_VERSION" >&2
     exit 2
 fi
 
 project_dir="${1%/}"
-alignment_dir="${project_dir}/alignment"
+version="${4:?VFDB_VERSION is required as the fourth argument}"
+case "$version" in
+    VFDB_setA|VFDB_setB) ;;
+    *) echo "collect_all_vf_hits: invalid VFDB version" >&2; exit 2 ;;
+esac
+alignment_dir="${project_dir}/alignment/vfdb_all_orfs/${version}"
 output_dir="${project_dir}/data"
 output_csv="${2:-${output_dir}/all_vf_hits.csv}"
 complete_samples_file="${3:-}"
@@ -61,7 +66,7 @@ echo "collect_all_vf_hits: writing combined CSV to ${output_csv}"
 temporary_csv=$(mktemp "${output_parent}/.$(basename "${output_csv}").XXXXXX")
 
 printf '%s\n' \
-"category,origin,sample_id,target_name,accession,query_name,query_accession,full_seq_evalue,full_seq_score,full_seq_bias,best_domain_evalue,best_domain_score,best_domain_bias,exp,reg,clu,ov,env,dom,rep,inc,description" \
+"vfdb_version,orf_pool,category,origin,sample_id,target_name,accession,query_name,query_accession,full_seq_evalue,full_seq_score,full_seq_bias,best_domain_evalue,best_domain_score,best_domain_bias,exp,reg,clu,ov,env,dom,rep,inc,description" \
 > "${temporary_csv}"
 
 for table_file in "${table_files[@]}"; do
@@ -81,7 +86,7 @@ for table_file in "${table_files[@]}"; do
 
     echo "collect_all_vf_hits: parsing ${table_file}"
 
-    awk -v category="${category}" -v origin="${origin}" -v sample_id="${sample_id}" '
+    awk -v version="${version}" -v category="${category}" -v origin="${origin}" -v sample_id="${sample_id}" '
         function csv_escape(value, escaped) {
             escaped = value
             gsub(/"/, "\"\"", escaped)
@@ -106,7 +111,9 @@ for table_file in "${table_files[@]}"; do
                 }
             }
 
-            printf "%s,%s,%s", csv_escape(category), csv_escape(origin), csv_escape(sample_id)
+            printf "%s,%s,%s,%s,%s", csv_escape(version), \
+                csv_escape("all_bacterial_prokka_cds"), csv_escape(category), \
+                csv_escape(origin), csv_escape(sample_id)
             for (i = 1; i <= 18; i++) {
                 printf ",%s", csv_escape($i)
             }

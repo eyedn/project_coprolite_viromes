@@ -20,7 +20,6 @@ from python_utils.collect_checkv_genome_stats_utils import (
     parse_checkv_lines,
     parse_fasta_lines,
     parse_genome_metadata,
-    parse_hmmer_lines,
     parse_phagcn_rows,
     parse_phatyp_rows,
     select_best_vf_hits,
@@ -36,13 +35,24 @@ from python_utils.collect_checkv_genome_stats_utils.constants import (
 )
 
 
+from python_utils.read_bacterial_orfs import read_bacterial_orfs
+from python_utils.validate_vf_search import validate_vf_search
+from python_utils.summarize_orf_groups import summarize_orf_groups
+from python_utils.make_orf_inventory import make_orf_inventory
+from python_utils.vfdb_constants import (
+    GROUP_COLUMNS, ORF_COLUMNS, ORF_POOL, POOL_COLUMNS, VFDB_DATABASES,
+)
+
 ##### main
 
 def main():
-    """Gather both filter outputs, enforce joins, and publish five CSVs."""
+    """Gather both filter outputs, enforce joins, and publish six version-specific CSVs."""
     parser = argparse.ArgumentParser()
     parser.add_argument("project_dir", type=Path)
+    parser.add_argument("--vfdb-version", choices=VFDB_DATABASES,
+                        required=True)
     args = parser.parse_args()
+    suffix = "_VFDB_setA" if args.vfdb_version == "VFDB_setA" else ""
     project_dir = args.project_dir.resolve()
     data_dir = project_dir / "data"
     if not data_dir.is_dir():
@@ -64,6 +74,7 @@ def main():
         manifest_samples[manifest_name] = samples
     sample_index = build_sample_index(manifest_samples)
 
+    all_orfs = []
     all_metadata = []
     all_features = []
     all_hits = []
@@ -109,7 +120,8 @@ def main():
             "viral features": (
                 output_dir / "annotations/viral/valid_features.csv"
             ),
-            "VFDB alignment": output_dir / "vf_alignment/table.txt",
+            "VFDB alignment": (output_dir / "vf_alignment_all_orfs" /
+                               args.vfdb_version / "table.txt"),
         }
         for label, path in required_paths.items():
             if not path.is_file():
@@ -211,23 +223,35 @@ def main():
                 seen.add(feature_id)
             features_by_annotation[annotation] = rows
 
-        bacterial_by_id = {
-            row["feature_id"]: row
-            for row in features_by_annotation["bacterial"]
-        }
-        with required_paths["VFDB alignment"].open(encoding="utf-8") as handle:
-            raw_hits = parse_hmmer_lines(handle)
-        unexpected_targets = sorted(
-            {
-                row["target_name"] for row in raw_hits
-                if row["target_name"] not in bacterial_by_id
-            }
+        bacterial_dir = output_dir / "annotations/bacterial"
+        prefix = f"checkv_{checkv_filter}"
+        bacterial_contigs, _, bacterial_orfs = read_bacterial_orfs(
+            bacterial_dir / f"{prefix}.gff",
+            bacterial_dir / f"{prefix}.faa", "checkv",
         )
-        if unexpected_targets:
-            raise ValueError(
-                "VFDB alignment contains ineligible bacterial ORFs: "
-                + ", ".join(unexpected_targets)
-            )
+        if {key[1]: length for key, length in bacterial_contigs.items()} != (
+                genome_lengths):
+            raise ValueError("bacterial GFF contigs differ from genome FASTA")
+        bacterial_by_id = {row["feature_id"]: {
+            **row, "genome_id": row["contig_id"]
+        } for row in bacterial_orfs}
+        expected_filtered = {
+            key for key, row in bacterial_by_id.items()
+            if row["has_ec_number"] and not row["is_hypothetical"]
+        }
+        filtered = features_by_annotation["bacterial"]
+        if {row["feature_id"] for row in filtered} != expected_filtered:
+            raise ValueError("filtered bacterial map features differ from GFF")
+        for row in filtered:
+            feature = bacterial_by_id[row["feature_id"]]
+            for field in ("genome_id", "start", "end", "strand",
+                          "product", "ec_number"):
+                if str(row[field]) != str(feature[field]):
+                    raise ValueError("filtered bacterial map feature mismatch")
+        raw_hits = validate_vf_search(
+            required_paths["VFDB alignment"].parent, args.vfdb_version,
+            bacterial_dir / f"{prefix}.faa", set(bacterial_by_id),
+        )
         best_hits = select_best_vf_hits(raw_hits, set(bacterial_by_id))
         hits_by_id = {row["target_name"]: row for row in best_hits}
 
@@ -254,6 +278,8 @@ def main():
             )
             context = {
                 "checkv_filter": checkv_filter,
+                "vfdb_version": args.vfdb_version,
+                "orf_pool": ORF_POOL,
                 "genome_id": genome_id,
                 "checkv_contig_id": checkv_contig_id,
                 **sample_metadata,
@@ -315,21 +341,16 @@ def main():
             all_features.append(vf_row)
 
         bacterial_by_genome = {genome_id: [] for genome_id in genome_ids}
-        for feature in features_by_annotation["bacterial"]:
+        for feature in bacterial_by_id.values():
             bacterial_by_genome[feature["genome_id"]].append(feature)
         for genome_id in genome_lengths:
-            eligible = bacterial_by_genome[genome_id]
-            qualifying = sum(
-                feature["feature_id"] in hits_by_id for feature in eligible
-            )
-            denominator = len(eligible)
-            prevalence = qualifying / denominator if denominator else None
+            rows = bacterial_by_genome[genome_id]
+            all_orfs.extend(make_orf_inventory(
+                rows, hits_by_id, genome_context[genome_id]
+            ))
             all_stats.append({
                 **genome_context[genome_id],
-                "eligible_bacterial_orfs": denominator,
-                "qualifying_vf_orfs": qualifying,
-                "vf_present": int(qualifying > 0),
-                "vf_orf_prevalence": prevalence,
+                **summarize_orf_groups(rows, set(hits_by_id)),
             })
 
         qc_values = {
@@ -338,13 +359,15 @@ def main():
             "unmatched_checkv_records": len(unmatched_checkv),
             "phatyp_records": len(phatyp),
             "phagcn_records": len(phagcn),
-            "eligible_bacterial_features": len(bacterial_by_id),
+            "total_bacterial_orfs": len(bacterial_by_id),
             "eligible_viral_features": len(features_by_annotation["viral"]),
             "qualifying_vf_hits": len(best_hits),
         }
         all_qc.extend(
             {
                 "checkv_filter": checkv_filter,
+                "vfdb_version": args.vfdb_version,
+                "orf_pool": ORF_POOL,
                 "metric": metric,
                 "value": value,
                 "details": (
@@ -357,6 +380,8 @@ def main():
         )
 
     outputs = (
+        ("checkv_genome_orfs.csv", all_orfs,
+         [*METADATA_COLUMNS[:6], "contig_id", *ORF_COLUMNS]),
         ("checkv_genome_metadata.csv", all_metadata, METADATA_COLUMNS),
         ("checkv_genome_features.csv", all_features, FEATURE_COLUMNS),
         ("checkv_genome_vf_hits.csv", all_hits, VF_HIT_COLUMNS),
@@ -364,6 +389,10 @@ def main():
         ("checkv_genome_qc.csv", all_qc, QC_COLUMNS),
     )
     for filename, rows, fieldnames in outputs:
+        filename = filename[:-4] + suffix + ".csv"
+        fieldnames = list(dict.fromkeys([*fieldnames, *POOL_COLUMNS]))
+        if "vf_stats" in filename:
+            fieldnames += GROUP_COLUMNS
         output_path = data_dir / filename
         temporary_path = data_dir / ("." + filename + ".tmp")
         with temporary_path.open("w", newline="", encoding="utf-8") as handle:

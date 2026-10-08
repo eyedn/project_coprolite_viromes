@@ -38,9 +38,6 @@ def qualify_vf_hits(rows):
                 f"VFDB row {row_number} has non-finite threshold fields"
             )
 
-        description = str(row["description"]).strip().casefold()
-        if description == "hypothetical protein":
-            continue
         if evalue > MAX_FULL_SEQ_EVALUE or score < MIN_FULL_SEQ_SCORE:
             continue
         if score < MIN_SCORE_TO_BIAS_RATIO * bias:

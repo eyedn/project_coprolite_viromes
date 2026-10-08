@@ -41,7 +41,6 @@ alignment_dir="${project_dir}/alignment"
 annotation_dir="${project_dir}/genome_annotation"
 prediction_dir="${project_dir}/phage_predictions"
 # The legacy Python collector expands or substitutes these ! path tokens.
-vf_alignment_pattern="${alignment_dir}/!vf"
 annotation_path_template="${annotation_dir}/!_annotation_bac_on_phage"
 
 timestamp_message() {
@@ -81,75 +80,59 @@ cleanup() {
 }
 trap cleanup EXIT
 
-temporary_counts=$(mktemp "${data_dir}/.vf_alignment_counts.csv.XXXXXX")
-temporary_contig_hits=$(mktemp "${data_dir}/.vf_alignment_contig_hits.csv.XXXXXX")
-temporary_all_hits=$(mktemp "${data_dir}/.all_vf_hits.csv.XXXXXX")
-temporary_stats=$(mktemp "${data_dir}/.phage_vf_stats.csv.XXXXXX")
-temporary_qc=$(mktemp "${data_dir}/.phage_vf_stats_qc.csv.XXXXXX")
-temporary_alignment_qc=$(mktemp "${data_dir}/.vf_alignment_qc.csv.XXXXXX")
-temporary_complete_samples=$(mktemp "${data_dir}/.vf_complete_samples.XXXXXX")
-temporary_files=(
-    "${temporary_counts}"
-    "${temporary_contig_hits}"
-    "${temporary_all_hits}"
-    "${temporary_stats}"
-    "${temporary_qc}"
-    "${temporary_alignment_qc}"
-    "${temporary_complete_samples}"
-)
-
-stage_message "auditing expected VFDB alignments"
-bash "${script_dir}/data_wrangling/audit_vf_alignments.sh" \
-    "${project_dir}" \
-    "${temporary_alignment_qc}" \
-    "${temporary_complete_samples}"
-
-stage_message "collecting legacy VFDB alignment counts"
-python3 "${script_dir}/data_wrangling/get_alignment_counts.py" \
-    "${vf_alignment_pattern}" \
-    "${annotation_path_template}" \
-    "${data_dir}" \
-    "vf_alignment" \
-    "${temporary_counts}" \
-    "${temporary_contig_hits}" \
-    "${temporary_complete_samples}"
-
-stage_message "combining all VFDB hits"
-bash "${script_dir}/data_wrangling/collect_all_vf_hits.sh" \
-    "${project_dir}" \
-    "${temporary_all_hits}" \
-    "${temporary_complete_samples}"
-
-stage_message "calculating phage-level VFDB statistics"
-bash "${script_dir}/data_wrangling/collect_phage_vf_stats.sh" \
-    "${project_dir}" \
-    "${temporary_all_hits}" \
-    "${temporary_stats}" \
-    "${temporary_qc}" \
-    "${temporary_complete_samples}"
-
-for output_file in \
-    "${temporary_counts}" \
-    "${temporary_contig_hits}" \
-    "${temporary_all_hits}" \
-    "${temporary_stats}" \
-    "${temporary_qc}" \
-    "${temporary_alignment_qc}"
-do
-    if [ ! -s "${output_file}" ]; then
-        echo "$(timestamp_message): 3a_get_alignment_counts: ERROR! expected VFDB output is empty: ${output_file}" >&2
-        exit 1
+# Publish independently validated full-pool bundles for each reference.
+for version in VFDB_setA VFDB_setB; do
+    suffix=""
+    if [ "$version" = VFDB_setA ]; then
+        suffix="_VFDB_setA"
     fi
+    version_alignment_dir="${alignment_dir}/vfdb_all_orfs/${version}"
+    vf_alignment_pattern="${version_alignment_dir}/!vf"
+    temporary_dir=$(mktemp -d "${data_dir}/.vfdb_bundle.XXXXXX")
+    temporary_files=()
+    for name in vf_alignment_counts vf_alignment_contig_hits all_vf_hits \
+        phage_vf_stats phage_vf_stats_qc vf_alignment_qc phage_vf_orfs \
+        sample_vf_stats complete_samples; do
+        temporary_files+=("${temporary_dir}/${name}.csv")
+    done
+    stage_message "auditing ${version} full-pool alignments"
+    bash "${script_dir}/data_wrangling/audit_vf_alignments.sh" \
+        "$project_dir" "${temporary_dir}/vf_alignment_qc.csv" \
+        "${temporary_dir}/complete_samples.csv" "$version"
+
+    # E-value-only legacy products are diagnostics, never prevalence inputs.
+    python3 "${script_dir}/data_wrangling/get_alignment_counts.py" \
+        "$vf_alignment_pattern" "$annotation_path_template" "$data_dir" \
+        vf_alignment "${temporary_dir}/vf_alignment_counts.csv" \
+        "${temporary_dir}/vf_alignment_contig_hits.csv" \
+        "${temporary_dir}/complete_samples.csv"
+    bash "${script_dir}/data_wrangling/collect_all_vf_hits.sh" \
+        "$project_dir" "${temporary_dir}/all_vf_hits.csv" \
+        "${temporary_dir}/complete_samples.csv" "$version"
+    python3 "${script_dir}/data_wrangling/collect_phage_vf_stats.py" \
+        "$project_dir" --vfdb-version "$version" \
+        --vf-hits-file "${temporary_dir}/all_vf_hits.csv" \
+        --stats-output "${temporary_dir}/phage_vf_stats.csv" \
+        --qc-output "${temporary_dir}/phage_vf_stats_qc.csv" \
+        --orfs-output "${temporary_dir}/phage_vf_orfs.csv" \
+        --sample-stats-output "${temporary_dir}/sample_vf_stats.csv" \
+        --complete-samples-file "${temporary_dir}/complete_samples.csv"
+    for name in vf_alignment_counts vf_alignment_contig_hits all_vf_hits \
+        phage_vf_stats phage_vf_stats_qc vf_alignment_qc phage_vf_orfs \
+        sample_vf_stats; do
+        if [ ! -s "${temporary_dir}/${name}.csv" ]; then
+            echo "3a: empty ${version} output: ${name}" >&2
+            exit 1
+        fi
+    done
+    for name in vf_alignment_counts vf_alignment_contig_hits all_vf_hits \
+        phage_vf_stats phage_vf_stats_qc vf_alignment_qc phage_vf_orfs \
+        sample_vf_stats; do
+        mv "${temporary_dir}/${name}.csv" \
+            "${data_dir}/${name}${suffix}.csv"
+    done
+    rm -f "${temporary_dir}/complete_samples.csv"
+    rmdir "$temporary_dir"
+    temporary_files=()
 done
-
-stage_message "publishing six VFDB output files"
-mv -f "${temporary_counts}" "${data_dir}/vf_alignment_counts.csv"
-mv -f "${temporary_contig_hits}" "${data_dir}/vf_alignment_contig_hits.csv"
-mv -f "${temporary_all_hits}" "${data_dir}/all_vf_hits.csv"
-mv -f "${temporary_stats}" "${data_dir}/phage_vf_stats.csv"
-mv -f "${temporary_qc}" "${data_dir}/phage_vf_stats_qc.csv"
-mv -f "${temporary_alignment_qc}" "${data_dir}/vf_alignment_qc.csv"
-rm -f "${temporary_complete_samples}"
-temporary_files=()
-
 stage_message "VFDB aggregation complete for ${origin} with ${num_cores} cores"

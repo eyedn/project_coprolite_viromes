@@ -32,10 +32,8 @@ annotations_dir="${project_dir}/genome_annotation/\
 ${origin}_${sample}_annotation_${label}"
 prediction_dir="${project_dir}/phage_predictions/\
 ${origin}_${sample}_prediction/out"
-sample_alignment_output="${alignment_dir}/${origin}_${sample}_vf"
 orfs_file="${annotations_dir}/${sample}.faa"
 phamer_file="${prediction_dir}/phamer_prediction.csv"
-db_file="${ref_db}/VFDB_setB_pro_20260923.txt"
 
 
 # Return 0 for a nonempty FASTA, 10 for zero records, and 1 for malformed data.
@@ -179,13 +177,16 @@ if [ "${faa_status}" -ne 0 ]; then
 fi
 
 
-# Align nonempty VFDB inputs through the existing generic alignment path.
-echo "========================================================================"
-echo "$(timestamp): vf_alignment: format files ${origin}; ${sample}"
-echo "========================================================================"
-align_w_db \
-    "$sample" \
-    "$orfs_file" \
-    "$db_file" \
-    "$sample_alignment_output" \
-    "$num_cores"
+# Search each reference independently against the complete bacterial FAA.
+for version in VFDB_setA VFDB_setB; do
+    case "$version" in
+        VFDB_setA) db_file="${ref_db}/VFDB_setA_pro_20230917.txt" ;;
+        VFDB_setB) db_file="${ref_db}/VFDB_setB_pro_20260923.txt" ;;
+    esac
+    sample_alignment_output="${alignment_dir}/vfdb_all_orfs/${version}/\
+${origin}_${sample}_vf"
+    python3 data_wrangling/search_vfdb.py \
+        "$orfs_file" "${annotations_dir}/${sample}.gff" \
+        "$db_file" "$sample_alignment_output" "$version" \
+        "$num_cores" "$hmmsearch" || return 1
+done

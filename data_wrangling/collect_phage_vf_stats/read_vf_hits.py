@@ -15,7 +15,7 @@ def read_vf_hits(path):
     with open(path, newline="", encoding="utf-8-sig") as handle:
         reader = csv.DictReader(handle)
         fieldnames = set(reader.fieldnames or [])
-        missing_columns = sorted(VF_REQUIRED_COLUMNS - fieldnames)
+        missing_columns = sorted((VF_REQUIRED_COLUMNS | {"vfdb_version", "orf_pool"}) - fieldnames)
         if missing_columns:
             raise ValueError(
                 "VFDB table missing required columns: "

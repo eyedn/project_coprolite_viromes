@@ -28,7 +28,9 @@ if [ "$origin" != "all" ]; then
     exit 2
 fi
 
-python3 "${script_dir}/data_wrangling/collect_checkv_genome_stats.py" \
-    "$project_dir"
+for version in VFDB_setA VFDB_setB; do
+    python3 "${script_dir}/data_wrangling/collect_checkv_genome_stats.py" \
+        "$project_dir" --vfdb-version "$version"
+done
 
 echo "4a_get_checkv_genome_stats: complete with ${num_cores} requested cores"

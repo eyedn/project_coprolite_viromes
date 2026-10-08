@@ -20,7 +20,7 @@ def select_best_vf_hits(rows, eligible_feature_ids):
     for row_number, row in enumerate(rows, start=1):
         target_name = str(row.get("target_name", "")).strip()
         if target_name not in eligible_feature_ids:
-            continue
+            raise ValueError(f"unknown HMMER target: {target_name}")
         try:
             evalue = float(row["full_seq_evalue"])
             score = float(row["full_seq_score"])

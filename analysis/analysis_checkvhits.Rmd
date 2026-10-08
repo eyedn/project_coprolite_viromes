@@ -6,8 +6,8 @@ output: html_document
 
 This report separates the original selected-network-genome analysis from the
 new analysis of complete genomes supplied by CheckV. The complete-genome
-analysis preserves conservative and aggressive trimming results as separate
-observations.
+pipeline retains both trimming filters; the active report uses conservative
+trimming only. The external selected-network analysis is historical.
 
 ## Analysis setup
 
@@ -38,10 +38,11 @@ figs_dir <-
 max_iter <- 1000
 ```
 
-## Original CheckV analysis
+## Historical selected-network analysis
 
 The following selected-network-genome analysis was moved from the contig
-report without changing its calculations.
+report without changing its calculations. Its external inputs remain historical
+and do not represent regenerated full-pool set A/B results.
 
 ### Selected-network-genome results
 
@@ -212,19 +213,17 @@ kruskal.test(vf_hit_downsampled$value, vf_hit_downsampled$Var2)
 ## Complete CheckV genome analysis
 
 The complete-genome tables use `checkv_filter` plus `genome_id` as their
-key. The report analyzes the historical VFDB set A files and the current VFDB
+key. The report analyzes the regenerated full-pool VFDB set A and VFDB
 set B files independently, using conservative trimming only.
 
 ### Version-specific CheckV summaries
 
 Prevalence is the number of qualifying VFDB-hit bacterial ORFs divided by the
-number of eligible bacterial ORFs. Genomes without eligible bacterial ORFs
-remain missing; genomes with eligible ORFs and no qualifying hit remain zero.
+total number of bacterial-mode Prokka ORFs. Genomes with no bacterial ORFs
+have missing prevalence; positive-denominator genomes with no qualifying hit
+remain zero.
 
 ```{r versioned complete CheckV analysis, results='asis'}
-# pattern: Mixed (unavoidable)
-# Reason: This report validates external tables, calculates summaries, and
-# writes versioned tables and figures in one reproducible analysis workflow.
 checkv.input.bundles <- list(
   list(
     label = "VFDB set A",
@@ -260,7 +259,7 @@ checkv.required.columns <- list(
   ),
   vf.stats = c(
     "checkv_filter", "genome_id", "checkv_contig_id", "category",
-    "eligible_bacterial_orfs", "qualifying_vf_orfs", "vf_present",
+    "total_bacterial_orfs", "qualifying_vf_orfs", "vf_present",
     "vf_orf_prevalence"
   ),
   qc = c("checkv_filter", "metric", "value", "details")
@@ -288,6 +287,7 @@ read.checkv.bundle <- function(bundle) {
 
   tables <- lapply(table.paths, read.csv, check.names = TRUE)
   for (table.name in names(tables)) {
+    validate.vf.pool(tables[[table.name]], bundle$tag)
     missing.columns <- setdiff(
       checkv.required.columns[[table.name]],
       names(tables[[table.name]])
@@ -358,7 +358,7 @@ for (bundle in checkv.input.bundles) {
     rename(
       checkv.filter = checkv_filter,
       genome.id = genome_id,
-      eligible.bacterial.orfs = eligible_bacterial_orfs,
+      total.bacterial.orfs = total_bacterial_orfs,
       qualifying.vf.orfs = qualifying_vf_orfs,
       vf.orf.prevalence = vf_orf_prevalence
     )
@@ -534,7 +534,7 @@ for (bundle in checkv.input.bundles) {
         ")"
       ),
       x.title = "Sample category",
-      y.title = "Qualifying VFDB-hit bacterial ORFs / eligible bacterial ORFs"
+      y.title = "Qualifying VFDB-hit ORFs / all Prokka ORFs"
     )
     print(vf.prevalence.violin[[1]])
     print(vf.prevalence.violin[[2]])
@@ -670,7 +670,7 @@ make.vf.prevalence.plot <- function(data, lifestyle.column, lifestyle.label) {
     facet_grid(category ~ vfdb.version) +
     labs(
       x = lifestyle.label,
-      y = "Qualifying VFDB-hit bacterial ORFs / eligible bacterial ORFs",
+      y = "Qualifying VFDB-hit ORFs / all Prokka ORFs",
       fill = lifestyle.label,
       title = paste(
         "Complete-genome VF prevalence by",

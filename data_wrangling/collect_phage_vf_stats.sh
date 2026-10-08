@@ -6,8 +6,9 @@
 ###############################################################################
 set -euo pipefail
 
-if [ "$#" -ne 1 ] && [ "$#" -ne 4 ] && [ "$#" -ne 5 ]; then
-    echo "Usage: bash data_wrangling/collect_phage_vf_stats.sh PROJECT_DIR [VF_HITS_FILE STATS_OUTPUT QC_OUTPUT COMPLETE_SAMPLES_FILE]" >&2
+if [ "$#" -ne 6 ]; then
+    echo "Usage: collect_phage_vf_stats.sh PROJECT_DIR VF_HITS_FILE " \
+        "STATS_OUTPUT QC_OUTPUT COMPLETE_SAMPLES_FILE VFDB_VERSION" >&2
     exit 2
 fi
 
@@ -15,21 +16,12 @@ project_dir="${1%/}"
 prediction_dir="${project_dir}/phage_predictions"
 annotation_dir="${project_dir}/genome_annotation"
 data_dir="${project_dir}/data"
-vf_hits_file="${data_dir}/all_vf_hits.csv"
 script_dir=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
 
-complete_samples_file=""
-if [ "$#" -ge 4 ]; then
-    vf_hits_file="${2}"
-    stats_output="${3}"
-    qc_output="${4}"
-    if [ "$#" -eq 5 ]; then
-        complete_samples_file="${5}"
-    fi
-else
-    stats_output="${data_dir}/phage_vf_stats.csv"
-    qc_output="${data_dir}/phage_vf_stats_qc.csv"
-fi
+vf_hits_file="$2"
+stats_output="$3"
+qc_output="$4"
+complete_samples_file="$5"
 
 for required_dir in \
     "${prediction_dir}" \
@@ -65,7 +57,8 @@ while IFS= read -r file_path; do
     gff_files+=("${file_path}")
 done < <(
     find "${annotation_dir}" -type f \
-        -path '*_annotation_bac_on_phage/*.gff.gz' | sort
+        \( -path '*_annotation_bac_on_phage/*.gff.gz' \
+        -o -path '*_annotation_bac_on_phage/*.gff' \) | sort
 )
 
 if [ "${#phatyp_files[@]}" -eq 0 ]; then
@@ -83,6 +76,7 @@ python_command=(
     python3
     "${script_dir}/collect_phage_vf_stats.py"
     "${project_dir}"
+    --vfdb-version "${6:?VFDB_VERSION is required as the sixth argument}"
     --vf-hits-file "${vf_hits_file}"
     --stats-output "${stats_output}"
     --qc-output "${qc_output}"

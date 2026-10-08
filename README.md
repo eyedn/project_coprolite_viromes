@@ -29,11 +29,51 @@ the stages in order. After stage 2 has completed for all origins, run
 report does not currently consume it. Its supporting scripts are in
 `pipeline/2a_supplement/` and use the `2b_{number}_...` name pattern.
 
+Stages 3 and 4 search **every bacterial-mode Prokka FAA protein**, joining
+exact FAA identifiers to GFF CDS identifiers. Hypothetical proteins, EC-labeled
+proteins, named proteins without EC numbers, and hypothetical proteins with EC
+numbers all enter the search pool. Complete existing Prokka outputs are reused without modifying or recompressing
+them. Stage 2 (`pipeline/2_predict_viral_character.sh`) and its PhaBOX/Prokka
+helper logic are unchanged; this migration begins at VFDB search and
+downstream aggregation.
+Duplicates, unmatched FAA/GFF identifiers, invalid coordinates, and unknown
+HMMER targets fail validation. Biological no-phage and zero-FAA stage-3 skips
+and alignment QC exclusions remain in effect.
+
+Both stages retain their three-argument interfaces and search these references
+independently, using the existing `hmmsearch --incE 1e-5` arguments:
+
+* `${ref_db}/VFDB_setA_pro_20230917.txt`
+* `${ref_db}/VFDB_setB_pro_20260923.txt`
+
+Raw `table.txt` and `results.txt` are retained in new directories, separate from
+historical searches:
+
+* Contigs: `alignment/vfdb_all_orfs/<version>/<sample>_vf/`, where `<sample>`
+  is the existing `<origin>_<sample_id>` label.
+* CheckV: `checkv_genomes/<filter>/vf_alignment_all_orfs/<version>/`.
+
+`<version>` is `VFDB_setA` or `VFDB_setB`. A `search_manifest.json` records the
+full-pool marker, exact protein count, FAA and database SHA-256 digests, and
+sample/filter search scope. Cached searches require both complete HMMER outputs
+ending in `[ok]`, matching provenance, and valid target identifiers. Partial or
+stale cached outputs fail; move them aside before rerunning that search.
+
 After stage 3 has completed for all origins, run
-`pipeline/3a_get_alignment_counts.sh` with the `all` origin. It writes
-`data/all_vf_hits.csv`, `phage_vf_stats.csv`, `phage_vf_stats_qc.csv`, and the
-legacy alignment count tables. Regenerate old data with this stage before
-rendering `analysis/analysis_contigs.Rmd`.
+`pipeline/3a_get_alignment_counts.sh` with the `all` origin. Each version
+publishes the following files under `data/`:
+
+* `all_vf_hits.csv`: raw combined HMMER rows.
+* `phage_vf_orfs.csv`: every bacterial ORF, including non-hit ORFs.
+* `phage_vf_stats.csv`: per-contig qualifying counts and interval-union coverage.
+* `sample_vf_stats.csv`: pooled sample counts, prevalence, and coverage.
+* `phage_vf_stats_qc.csv` and `vf_alignment_qc.csv`: aggregation and search QC.
+* `vf_alignment_counts.csv` and `vf_alignment_contig_hits.csv`: legacy
+  E-value-only diagnostics; these are not scientific prevalence inputs.
+
+Set B uses the filenames above. Set A inserts `_VFDB_setA` before `.csv` for
+all products, including `phage_vf_orfs_VFDB_setA.csv` and
+`sample_vf_stats_VFDB_setA.csv`.
 
 Step 4 is filter-specific rather than sample-origin-specific. `run_step.sh`
 submits one single-task job named `checkv-conservative` and one named
@@ -43,24 +83,65 @@ submits one single-task job named `checkv-conservative` and one named
 * `checkv_input/<filter>/quality_summary.tsv`
 * `checkv_input/<filter>/complete_contigs.txt`
 
-PhaTYP, PhaGCN, raw bacterial and viral Prokka results, filtered feature
-tables, eligible bacterial proteins, and VFDB alignment results are written
-under `checkv_genomes/<filter>/`. This directory is separate from the
-contig-level prediction, annotation, and alignment directories.
+PhaTYP, PhaGCN, raw bacterial and viral Prokka results, filtered annotation-map
+features, and VFDB search results are written under `checkv_genomes/<filter>/`.
+Filtered bacterial/viral map features still require an EC number and a
+non-hypothetical product. This display subset does **not** restrict the VFDB
+search pool. VF map features include every qualifying bacterial ORF, including
+hypothetical and non-EC proteins.
 
 After both filter jobs finish, run
-`pipeline/4a_get_checkv_genome_stats.sh`. It validates and aggregates the two
-filters into five files under `data/`:
+`pipeline/4a_get_checkv_genome_stats.sh`. It validates both filters independently
+for both reference versions and publishes these six files under `data/`:
 
 * `checkv_genome_metadata.csv`
 * `checkv_genome_features.csv`
 * `checkv_genome_vf_hits.csv`
 * `checkv_genome_vf_stats.csv`
+* `checkv_genome_orfs.csv`
 * `checkv_genome_qc.csv`
 
-The complete-genome VF prevalence is the number of qualifying VFDB-hit
-bacterial ORFs divided by the number of eligible bacterial ORFs. Eligibility
-requires a nonempty EC number and a non-hypothetical Prokka product.
+Set A uses `_VFDB_setA.csv` suffixes; set B is unsuffixed. The ORF inventories
+retain sample, contig/genome, ORF ID, coordinates, strand, Prokka product, EC
+number, independent `is_hypothetical`/`has_ec_number` flags, and the best
+qualifying VFDB hit and scores. Non-hit ORFs have blank hit fields. ORF
+inventories and scientific summaries identify `vfdb_version` and
+`orf_pool = all_bacterial_prokka_cds`.
+
+Scientific counts apply full-sequence **E-value ≤ 1e-10, score ≥ 25, and
+score ≥ 10 × bias**, retaining the existing deterministic best qualifying hit
+per ORF. An ORF counts once. Summaries include total and qualifying ORFs,
+hypothetical and EC-labeled totals/hits, and their intersection. These allow
+annotation-overlap queries without restricting the original search.
+
+`vf_orf_prevalence = qualifying_vf_orfs / total_bacterial_orfs`. Positive
+ORF totals with no hits give zero; zero denominators give missing prevalence.
+Sample prevalence pools counts across contigs. Coverage retains the union of
+qualifying full-CDS intervals per contig and pooled covered/total contig bases
+per sample. CheckV summaries use `total_bacterial_orfs` in place of the old
+`eligible_bacterial_orfs` field.
+
+The contig report runs separate set A/B analyses and writes plots and CSV
+exports under `figures/VFDB_setA/` and `figures/VFDB_setB/`. Sample prevalence
+and eligibility come from `sample_vf_stats`; setup exposes
+`MIN_TOTAL_ORFS <- 5L` and retains samples with totals **greater than** that
+value. Existing bootstrap, downsampling, coverage, and differential
+representation methods remain. Qualifying VFDB IDs without reference metadata
+remain in hit-count and differential-representation tables. The denominator
+label is “Qualifying VFDB-hit ORFs / all Prokka ORFs”; these are bacterial-mode
+calls on predicted phage contigs.
+
+The CheckV report consumes regenerated full-pool products and analyzes only
+conservative trimming, while retaining shared set A/B lifestyle facets and
+panel-specific means. PhaGCN plots remain commented. Its external selected
+network-contig analysis remains explicitly historical. Both active reports
+reject missing or incompatible pool/version markers.
+
+Rerun order: validate representative Hoffman2 searches for both databases,
+complete stages 3 and 4 (both references and both CheckV filters), complete
+stages 3a and 4a, copy regenerated products to the report's configured
+`data_dir`, then render the reports. Historical restricted-pool results must
+not be relabeled or activated as full-pool results.
 
 `pipeline/1a_get_combined_contig_stats.sh` is optional assembly/QC metadata;
 it is not required for the active analysis workflow.
