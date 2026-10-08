@@ -166,11 +166,11 @@ lifestyle_voilin_downsampled[[1]]
 lifestyle_voilin_downsampled[[2]]
 
 # Test whether bootstrap ratio distributions differ among groups and countries.
-lifestyle <- melt(lifestyle_boot_res)
+lifestyle <- reshape2::melt(lifestyle_boot_res)
 kruskal.test(lifestyle$value, lifestyle$Var2)
-lifestyle_by_country <- melt(lifestyle_boot_res_by_country)
+lifestyle_by_country <- reshape2::melt(lifestyle_boot_res_by_country)
 kruskal.test(lifestyle_by_country$value, lifestyle_by_country$Var2)
-lifestyle_downsampled <- melt(lifestyle_boot_res_downsample)
+lifestyle_downsampled <- reshape2::melt(lifestyle_boot_res_downsample)
 kruskal.test(lifestyle_downsampled$value, lifestyle_downsampled$Var2)
 ```
 
@@ -193,7 +193,7 @@ dot_cats    <- c("AUT","AWC","BMS","ZAF","ZAP")
 cats_order <- c("AUT","AWC","BMS","ZAF","ZAP","FJI","MDG","MEX","NPL","PER","TZA","CHN","DNK","ESP","USA")
 
 # Convert both inputs to a common long format and retain their display groups.
-boot_long <- melt(as.data.frame(boot_wide)) %>%
+boot_long <- reshape2::melt(as.data.frame(boot_wide)) %>%
   setNames(c("cat", "value")) %>%
   mutate(
     value = as.numeric(value),
@@ -714,11 +714,11 @@ vf_prot_voilin_downsampled[[1]]
 vf_prot_voilin_downsampled[[2]]
 
 # Test prevalence differences among group and country bootstrap distributions.
-vf_prot <- melt(vf_prot_boot_res)
+vf_prot <- reshape2::melt(vf_prot_boot_res)
 kruskal.test(vf_prot$value, vf_prot$Var2)
-vf_prot_by_country <- melt(vf_prot_boot_res_by_country)
+vf_prot_by_country <- reshape2::melt(vf_prot_boot_res_by_country)
 kruskal.test(vf_prot_by_country$value, vf_prot_by_country$Var2)
-vf_prot_downsampled <- melt(pal_size_vf_prot_boot_res_downsample)
+vf_prot_downsampled <- reshape2::melt(pal_size_vf_prot_boot_res_downsample)
 kruskal.test(vf_prot_downsampled$value, vf_prot_downsampled$Var2)
 ```
 
@@ -902,11 +902,11 @@ vf_aln_voilin_downsampled[[1]]
 vf_aln_voilin_downsampled[[2]]
 
 # Test coverage differences among group and country bootstrap distributions.
-vf_aln <- melt(vf_aln_boot_res)
+vf_aln <- reshape2::melt(vf_aln_boot_res)
 kruskal.test(vf_aln$value, vf_aln$Var2)
-vf_aln_by_country <- melt(vf_aln_boot_res)
+vf_aln_by_country <- reshape2::melt(vf_aln_boot_res)
 kruskal.test(vf_aln_by_country$value, vf_aln_by_country$Var2)
-vf_aln_downsampled <- melt(pal_size_vf_aln_boot_res_downsample)
+vf_aln_downsampled <- reshape2::melt(pal_size_vf_aln_boot_res_downsample)
 kruskal.test(vf_aln_downsampled$value, vf_aln_downsampled$Var2)
 ```
 

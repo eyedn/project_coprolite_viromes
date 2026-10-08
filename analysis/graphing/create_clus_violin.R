@@ -14,7 +14,7 @@ library(reshape2)
 # create a violin plot of paired-clustering tendencies with permutation CI
 create_clus_violin <- function(boot_data, clus_res, file_name, plot_dir) {
   
-  melted_data <- as.data.frame(melt(boot_data))
+  melted_data <- as.data.frame(reshape2::melt(boot_data))
   colnames(melted_data) <- c("sample", "pair", "prob")
   
   # get confidence interval from permutation data

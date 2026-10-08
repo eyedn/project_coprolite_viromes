@@ -14,7 +14,7 @@ get_diff_repres_ec <- function(data) {
   for (i in seq_len(7)) {
     class_subset <- data[, startsWith(colnames(data), as.character(i)),
                          drop = FALSE]
-    class_subset <- melt(class_subset)
+    class_subset <- reshape2::melt(class_subset)
     colnames(class_subset) <- c("sample", "ec", "value")
     class_subset$sample <- substr(class_subset$sample, 0, 3)
     

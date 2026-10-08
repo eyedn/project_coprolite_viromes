@@ -15,7 +15,7 @@ create_cat_voilins <- function(data, ci_offset, file_name, plot_dir,
                                cats_order = NULL, plot.title = NULL,
                                x.title = NULL, y.title = NULL) {
   # reshape
-  melted_data <- melt(data)
+  melted_data <- reshape2::melt(data)
   if (ncol(melted_data) == 3) {
     colnames(melted_data) <- c("point", "cat", "value")
   } else if (ncol(melted_data) == 2) {

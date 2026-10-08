@@ -11,7 +11,7 @@ library(reshape2)
 get_diff_repres_vf <- function(data, vf_reference) {
   value_res <- vector()
   
-  melted_data <- as.data.frame(melt(data))
+  melted_data <- as.data.frame(reshape2::melt(data))
   melted_data[,1] <- substr(melted_data[,1], 1, 3)
   colnames(melted_data) <- c("cat_name", "VFID", "value")
   melted_data$cat_name <- as.character(melted_data$cat_name)
