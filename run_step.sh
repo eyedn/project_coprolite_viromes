@@ -53,6 +53,10 @@ elif [[ $filename =~ ^[0-9]+_ ]]; then
             ;;
     esac
 
+elif [ "$filename" = "3a_get_alignment_counts.sh" ]; then
+    # Stage 3a aggregates the full ORF pool: 16 GB per slot, 64 GB total.
+    ./run_ori.sh -s "$script" -d 16 -c 4 \
+        -p "$SCRATCH/project_coprolite_viromes" -o all
 elif [[ $filename =~ ^[0-9]+a_ ]]; then
     # run auxiliary script not specific to origin
     ./run_ori.sh -s "$script" -d 8 -c 4 -p "$SCRATCH/project_coprolite_viromes" -o all
