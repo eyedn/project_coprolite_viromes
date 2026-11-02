@@ -34,7 +34,7 @@ source_files_from_dir("misc")
 
 # Define the shared random seed, input/output directories, and bootstrap size.
 set.seed(seed = 123)
-data_dir <- "~/Documents/ucla/research/project_coprolite_viromes_NOT_CODE/data/20260920"
+data_dir <- "~/Documents/ucla/research/project_coprolite_viromes_NOT_CODE/data/20261019"
 figs_dir <- "~/Documents/ucla/research/project_coprolite_viromes_NOT_CODE/figures"
 max_iter <- 1000
 MIN_TOTAL_ORFS <- 5L
@@ -372,24 +372,49 @@ colnames(vf_reference) <- vf_reference[1, ]
 vf_reference <- vf_reference[-1, c("VFID", "VFCID", "VF_Name", "VFcategory")]
 ```
 
-### Independent full-pool VFDB analyses
+### Single-set full-pool VFDB analysis
 
-Set A and set B use independently regenerated inventories and pooled sample
-summaries. These bacterial-mode calls are on predicted phage contigs; hits
-are sequence-similarity signals. Annotation status does not restrict the
-search pool. Outputs are written under each version's figure directory.
+This analysis uses one independently regenerated inventory and pooled
+sample summary, using the unsuffixed set B inputs below. These bacterial-mode
+calls are on predicted phage contigs; hits are sequence-similarity signals.
+Annotation status does not restrict the search pool. Outputs are written
+under the selected version's figure directory.
 
 ```{r versioned contig VFDB analysis, results='asis'}
-# run the same analysis independently for each regenerated reference version.
-run.contig.vf.analysis <- function(vfdb.version, vfdb.suffix, figs_dir) {
+# Use regenerated set B tables and validate their provenance.
+vfdb.input.paths <- file.path(data_dir, c(
+  phage.stats = "phage_vf_stats.csv",
+  sample.stats = "sample_vf_stats.csv",
+  orfs = "phage_vf_orfs.csv"
+))
+names(vfdb.input.paths) <- c("phage.stats", "sample.stats", "orfs")
+vfdb.version <- "VFDB_setB"
+vfdb.label <- sub("VFDB_set", "VFDB set ", vfdb.version)
+
+# Analyze the selected reference set once.
+run.contig.vf.analysis <- function(vfdb.version, vfdb.input.paths,
+                                   figs_dir) {
   cat("### Phage-level lifestyle and VFDB statistics\n\nThe unit in these descriptive comparisons is one predicted phage contig,\nwhich is not necessarily a complete phage genome. Both statistics use the\nsame qualifying set of VFDB hits from all bacterial-mode Prokka CDS calls\nafter the full-sequence\nE-value, score, and bias thresholds have been applied. Unknown lifestyle\nclassifications remain in the source table but are excluded from these\ntwo-level plots.", "\n\n")
   # Read and validate one threshold-consistent row per predicted phage contig.
-  phage.vf.stats <- read.csv(
-    file = paste0(data_dir, "/phage_vf_stats", vfdb.suffix, ".csv"),
-    header = TRUE
+  phage.columns <- c(
+    "category", "origin", "sample", "contig_id", "lifestyle",
+    "contig_length", "total_bacterial_orfs", "qualifying_vf_orfs",
+    "vf_orf_prevalence", "vf_covered_bases", "vf_contig_coverage",
+    "orf_pool", "vfdb_version"
+  )
+  phage.vf.stats <- data.table::fread(
+    vfdb.input.paths[["phage.stats"]], select = phage.columns,
+    data.table = FALSE
   )
   validate.vf.pool(phage.vf.stats, vfdb.version)
-  phage.vf.plot.data <- prepare.phage.vf.plot.data(phage.vf.stats)
+  phage.vf.plot.data <- prepare.phage.vf.plot.data(phage.vf.stats) %>%
+    select(category, origin, lifestyle, vf.orf.prevalence, vf.contig.coverage)
+  sample.vf.coverage <- pool.phage.vf.coverage(
+    data = phage.vf.stats,
+    exclusions = c("pal.ENG_LG4560.69", "pal.BEL_SRS510175")
+  )
+  rm(phage.vf.stats)
+  invisible(gc())
 
   # Compare qualifying VFDB-hit ORF prevalence by lifestyle across sample groups.
   phage.vf.prevalence.group.plot <- create.phage.vf.plot(
@@ -462,11 +487,16 @@ run.contig.vf.analysis <- function(vfdb.version, vfdb.suffix, figs_dir) {
     height = 10,
     width = 14
   )
+  # Release full-data plot inputs once all four SVGs have been written.
+  rm(phage.vf.plot.data, phage.vf.prevalence.group.plot,
+     phage.vf.prevalence.origin.plot, phage.vf.coverage.group.plot,
+     phage.vf.coverage.origin.plot)
+  invisible(gc())
   cat("### Per-ORF prevalence\n\nAll bacterial-mode Prokka proteins are searched, including hypothetical\nand named non-EC proteins. Alignments are filtered with stringent\nE-value, score, and bias thresholds. For each sample and ORF, only the\nbest-ranked qualifying hit is retained, then counts are completed with zeros\nfor samples lacking a hit.", "\n\n")
   # Filter to qualifying VFDB alignments and retain the dominant hit per
   # sample--ORF pair before tabulating counts.
   sample.vf.stats <- read.csv(
-    file.path(data_dir, paste0("sample_vf_stats", vfdb.suffix, ".csv"))
+    vfdb.input.paths[["sample.stats"]]
   )
   validate.vf.pool(sample.vf.stats, vfdb.version)
   if (anyDuplicated(sample.vf.stats$sample)) {
@@ -474,26 +504,15 @@ run.contig.vf.analysis <- function(vfdb.version, vfdb.suffix, figs_dir) {
   }
   sample.vf.stats <- sample.vf.stats %>%
     filter(!sample %in% c("pal.ENG_LG4560.69", "pal.AUT_2612"))
-  orf.inventory <- read.csv(
-    file.path(data_dir, paste0("phage_vf_orfs", vfdb.suffix, ".csv"))
+  vf.counts.long <- read.vf.inventory.counts(
+    vfdb.input.paths[["orfs"]], vfdb.version, sample.vf.stats$sample
   )
-  validate.vf.pool(orf.inventory, vfdb.version)
-  all_vf_hits <- orf.inventory %>%
-    filter(!is.na(vf_id), vf_id != "", sample %in% sample.vf.stats$sample) %>%
-    rename(query_name = vf_id, target_name = orf_id)
   write.csv(sample.vf.stats, file.path(figs_dir, "sample_vf_stats.csv"),
             row.names = FALSE)
-  write.csv(orf.inventory, file.path(figs_dir, "phage_vf_orfs.csv"),
-            row.names = FALSE)
-
-  vf_counts <- all_vf_hits %>%
-    count(query_name, sample) %>%
-    pivot_wider(
-      names_from = sample,
-      values_from = n,
-      values_fill = 0
-    ) %>%
-    rename(VFID = query_name)
+  vf_counts <- vf.counts.long %>%
+    pivot_wider(names_from = sample, values_from = n, values_fill = 0) %>%
+    rename(VFID = vf_id)
+  rm(vf.counts.long)
 
   all_samples <- sample.vf.stats$sample
   missing_samples <- setdiff(all_samples, colnames(vf_counts))
@@ -694,14 +713,7 @@ run.contig.vf.analysis <- function(vfdb.version, vfdb.suffix, figs_dir) {
   vf_prot_downsampled <- reshape2::melt(pal_size_vf_prot_boot_res_downsample)
   print(kruskal.test(vf_prot_downsampled$value, vf_prot_downsampled$Var2))
   cat("### Contig coverage\n\nThis section measures the fraction of phage-contig bases covered by qualifying\nVFDB-hit ORFs. After removing excluded samples, it summarizes coverage with\nbootstrap medians, country-level and downsampled comparisons, violin plots,\nand Kruskal\u2013Wallis tests.", "\n\n")
-  # Pool covered and total bases across phage rows within each sample. The helper
-  # calculates sample.vf.covered.bases and sample.phage.bases by summation, then
-  # divides them to obtain sample.vf.contig.coverage. The legacy coverage table
-  # remains available but is not used here.
-  sample.vf.coverage <- pool.phage.vf.coverage(
-    data = phage.vf.stats,
-    exclusions = c("pal.ENG_LG4560.69", "pal.BEL_SRS510175")
-  )
+  # Use sample coverage pooled before releasing the phage table above.
 
   # Retain the established metric-by-sample layout for bootstrap summaries.
   vf_contig_hits <- sample.vf.coverage %>%
@@ -868,7 +880,7 @@ run.contig.vf.analysis <- function(vfdb.version, vfdb.suffix, figs_dir) {
   # Test coverage differences among group and country bootstrap distributions.
   vf_aln <- reshape2::melt(vf_aln_boot_res)
   print(kruskal.test(vf_aln$value, vf_aln$Var2))
-  vf_aln_by_country <- reshape2::melt(vf_aln_boot_res)
+  vf_aln_by_country <- reshape2::melt(vf_aln_boot_res_by_country)
   print(kruskal.test(vf_aln_by_country$value, vf_aln_by_country$Var2))
   vf_aln_downsampled <- reshape2::melt(pal_size_vf_aln_boot_res_downsample)
   print(kruskal.test(vf_aln_downsampled$value, vf_aln_downsampled$Var2))
@@ -930,16 +942,13 @@ run.contig.vf.analysis <- function(vfdb.version, vfdb.suffix, figs_dir) {
   return(invisible(NULL))
 }
 
-for (vfdb.version in c("VFDB_setA", "VFDB_setB")) {
-  vfdb.suffix <- if (vfdb.version == "VFDB_setA") "_VFDB_setA" else ""
-  version.figs.dir <- file.path(figs_dir, vfdb.version)
-  for (directory in c("", "vf", "lifestyle")) {
-    dir.create(file.path(version.figs.dir, directory), recursive = TRUE,
-               showWarnings = FALSE)
-  }
-  cat("### ", vfdb.version, "\n\n", sep = "")
-  run.contig.vf.analysis(vfdb.version, vfdb.suffix, version.figs.dir)
+version.figs.dir <- file.path(figs_dir, vfdb.version)
+for (directory in c("", "vf", "lifestyle")) {
+  dir.create(file.path(version.figs.dir, directory), recursive = TRUE,
+             showWarnings = FALSE)
 }
+cat("### ", vfdb.label, "\n\n", sep = "")
+run.contig.vf.analysis(vfdb.version, vfdb.input.paths, version.figs.dir)
 ```
 
 ## SourceTracker attribution of coprolite samples

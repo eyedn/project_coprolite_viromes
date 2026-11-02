@@ -28,11 +28,6 @@ create.phage.vf.plot <- function(data, statistic, facet.variable,
       width = 0.16, fill = "grey65", color = "black",
       outlier.shape = NA, na.rm = TRUE
     ) +
-    geom_point(
-      position = position_jitter(width = 0.08, height = 0, seed = 123),
-      shape = 21, fill = "grey95", color = "black", alpha = 0.55,
-      size = 1.4, na.rm = TRUE
-    ) +
     facet_wrap(
       vars(.data[[facet.variable]]),
       scales = "fixed",

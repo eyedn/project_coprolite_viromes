@@ -32,7 +32,7 @@ source.files.from.dir("misc")
 
 set.seed(seed = 123)
 data_dir <-
-  "~/Documents/ucla/research/project_coprolite_viromes_NOT_CODE/data/20260920"
+  "~/Documents/ucla/research/project_coprolite_viromes_NOT_CODE/data/20261019"
 figs_dir <-
   "~/Documents/ucla/research/project_coprolite_viromes_NOT_CODE/figures"
 max_iter <- 1000
@@ -42,7 +42,7 @@ max_iter <- 1000
 
 The following selected-network-genome analysis was moved from the contig
 report without changing its calculations. Its external inputs remain historical
-and do not represent regenerated full-pool set A/B results.
+and do not represent regenerated full-pool results.
 
 ### Selected-network-genome results
 
@@ -213,8 +213,9 @@ kruskal.test(vf_hit_downsampled$value, vf_hit_downsampled$Var2)
 ## Complete CheckV genome analysis
 
 The complete-genome tables use `checkv_filter` plus `genome_id` as their
-key. The report analyzes the regenerated full-pool VFDB set A and VFDB
-set B files independently, using conservative trimming only.
+key. The report analyzes regenerated full-pool VFDB set B using the
+unsuffixed inputs below and conservative trimming only. Every table must
+carry full-pool set B provenance.
 
 ### Version-specific CheckV summaries
 
@@ -224,25 +225,18 @@ have missing prevalence; positive-denominator genomes with no qualifying hit
 remain zero.
 
 ```{r versioned complete CheckV analysis, results='asis'}
-checkv.input.bundles <- list(
-  list(
-    label = "VFDB set A",
-    tag = "VFDB_setA",
-    suffix = "_VFDB_setA"
-  ),
-  list(
-    label = "VFDB set B",
-    tag = "VFDB_setB",
-    suffix = ""
-  )
+# Use regenerated set B tables and validate their provenance.
+checkv.input.paths <- file.path(data_dir, c(
+  metadata = "checkv_genome_metadata.csv",
+  features = "checkv_genome_features.csv",
+  vf.hits = "checkv_genome_vf_hits.csv",
+  vf.stats = "checkv_genome_vf_stats.csv",
+  qc = "checkv_genome_qc.csv"
+))
+names(checkv.input.paths) <- c(
+  "metadata", "features", "vf.hits", "vf.stats", "qc"
 )
-checkv.input.files <- c(
-  metadata = "checkv_genome_metadata",
-  features = "checkv_genome_features",
-  vf.hits = "checkv_genome_vf_hits",
-  vf.stats = "checkv_genome_vf_stats",
-  qc = "checkv_genome_qc"
-)
+bundle <- list(tag = "VFDB_setB", label = "VFDB set B")
 checkv.required.columns <- list(
   metadata = c(
     "checkv_filter", "genome_id", "checkv_contig_id", "category",
@@ -271,11 +265,7 @@ checkv.figs.dir <- file.path(figs_dir, "checkv")
 dir.create(checkv.figs.dir, recursive = TRUE, showWarnings = FALSE)
 
 read.checkv.bundle <- function(bundle) {
-  table.paths <- file.path(
-    data_dir,
-    paste0(checkv.input.files, bundle$suffix, ".csv")
-  )
-  names(table.paths) <- names(checkv.input.files)
+  table.paths <- checkv.input.paths
   missing.paths <- table.paths[!file.exists(table.paths)]
   if (length(missing.paths) > 0) {
     stop(
@@ -321,379 +311,333 @@ write.checkv.table <- function(table, table.name, bundle) {
   return(invisible(output.path))
 }
 
-for (bundle in checkv.input.bundles) {
-  cat("#### ", bundle$label, "\n\n", sep = "")
-  checkv.tables <- read.checkv.bundle(bundle)
-  checkv.tables <- lapply(
-    checkv.tables,
-    function(table) {
-      if ("checkv_filter" %in% names(table)) {
-        table <- table %>% filter(checkv_filter == conservative.filter)
-      }
-      return(table)
+cat("#### ", bundle$label, "\n\n", sep = "")
+checkv.tables <- read.checkv.bundle(bundle)
+checkv.tables <- lapply(
+  checkv.tables,
+  function(table) {
+    if ("checkv_filter" %in% names(table)) {
+      table <- table %>% filter(checkv_filter == conservative.filter)
     }
+    return(table)
+  }
+)
+if (nrow(checkv.tables$metadata) == 0 ||
+    nrow(checkv.tables$vf.stats) == 0) {
+  stop(bundle$label, " has no conservative-trimmed CheckV genomes")
+}
+
+checkv.metadata <- checkv.tables$metadata %>%
+  rename(
+    checkv.filter = checkv_filter,
+    checkv.lifestyle = checkv_lifestyle,
+    phatyp.lifestyle = phatyp_lifestyle,
+    phagcn.family = phagcn_family,
+    genome.id = genome_id,
+    genome.length = genome_length
   )
-  if (nrow(checkv.tables$metadata) == 0 ||
-      nrow(checkv.tables$vf.stats) == 0) {
-    stop(bundle$label, " has no conservative-trimmed CheckV genomes")
-  }
+checkv.features <- checkv.tables$features %>%
+  rename(
+    checkv.filter = checkv_filter,
+    genome.id = genome_id,
+    ec.number = ec_number,
+    vf.id = vf_id
+  )
+checkv.vf.stats <- checkv.tables$vf.stats %>%
+  rename(
+    checkv.filter = checkv_filter,
+    genome.id = genome_id,
+    total.bacterial.orfs = total_bacterial_orfs,
+    qualifying.vf.orfs = qualifying_vf_orfs,
+    vf.orf.prevalence = vf_orf_prevalence
+  )
 
-  checkv.metadata <- checkv.tables$metadata %>%
-    rename(
-      checkv.filter = checkv_filter,
-      checkv.lifestyle = checkv_lifestyle,
-      phatyp.lifestyle = phatyp_lifestyle,
-      phagcn.family = phagcn_family,
-      genome.id = genome_id,
-      genome.length = genome_length
-    )
-  checkv.features <- checkv.tables$features %>%
-    rename(
-      checkv.filter = checkv_filter,
-      genome.id = genome_id,
-      ec.number = ec_number,
-      vf.id = vf_id
-    )
-  checkv.vf.stats <- checkv.tables$vf.stats %>%
-    rename(
-      checkv.filter = checkv_filter,
-      genome.id = genome_id,
-      total.bacterial.orfs = total_bacterial_orfs,
-      qualifying.vf.orfs = qualifying_vf_orfs,
-      vf.orf.prevalence = vf_orf_prevalence
-    )
+metadata.keys <- checkv.metadata %>% select(checkv.filter, genome.id)
+stats.keys <- checkv.vf.stats %>% select(checkv.filter, genome.id)
+if (nrow(anti_join(metadata.keys, stats.keys)) > 0 ||
+    nrow(anti_join(stats.keys, metadata.keys)) > 0) {
+  stop(bundle$label, " has unmatched metadata and VF-stat genome keys")
+}
 
-  metadata.keys <- checkv.metadata %>% select(checkv.filter, genome.id)
-  stats.keys <- checkv.vf.stats %>% select(checkv.filter, genome.id)
-  if (nrow(anti_join(metadata.keys, stats.keys)) > 0 ||
-      nrow(anti_join(stats.keys, metadata.keys)) > 0) {
-    stop(bundle$label, " has unmatched metadata and VF-stat genome keys")
-  }
-
-  vf.plot.data <- checkv.vf.stats %>%
-    left_join(
-      checkv.metadata %>%
-        select(
-        checkv.filter,
-        genome.id,
-        phatyp.lifestyle,
-        checkv.lifestyle
-        ),
-      by = c("checkv.filter", "genome.id")
-    ) %>%
-    mutate(vfdb.version = bundle$label, vfdb.version.tag = bundle$tag)
-  if (nrow(vf.plot.data) != nrow(checkv.vf.stats) ||
-      anyDuplicated(vf.plot.data[c("checkv.filter", "genome.id")])) {
-    stop(bundle$label, " VF-stat join duplicated genome rows")
-  }
-
-  lifestyle.confusion <- checkv.metadata %>%
-    count(
+vf.plot.data <- checkv.vf.stats %>%
+  left_join(
+    checkv.metadata %>%
+      select(
       checkv.filter,
-      category,
-      origin,
-      checkv.lifestyle,
+      genome.id,
       phatyp.lifestyle,
-      name = "genomes"
+      checkv.lifestyle
+      ),
+    by = c("checkv.filter", "genome.id")
+  ) %>%
+  mutate(vfdb.version = bundle$label, vfdb.version.tag = bundle$tag)
+if (nrow(vf.plot.data) != nrow(checkv.vf.stats) ||
+    anyDuplicated(vf.plot.data[c("checkv.filter", "genome.id")])) {
+  stop(bundle$label, " VF-stat join duplicated genome rows")
+}
+
+lifestyle.confusion <- checkv.metadata %>%
+  count(
+    checkv.filter,
+    category,
+    origin,
+    checkv.lifestyle,
+    phatyp.lifestyle,
+    name = "genomes"
+  ) %>%
+  mutate(vfdb.version = bundle$label, vfdb.version.tag = bundle$tag)
+lifestyle.agreement <- checkv.metadata %>%
+  mutate(
+    checkv.lifestyle.normalized = normalize.checkv.lifestyle(checkv.lifestyle),
+    phatyp.lifestyle.normalized = normalize.checkv.lifestyle(
+      phatyp.lifestyle
+    ),
+    agrees = checkv.lifestyle.normalized == phatyp.lifestyle.normalized
+  ) %>%
+  count(checkv.filter, category, origin, agrees, name = "genomes") %>%
+  mutate(vfdb.version = bundle$label, vfdb.version.tag = bundle$tag)
+family.summary <- checkv.metadata %>%
+  count(
+    checkv.filter,
+    category,
+    origin,
+    phatyp.lifestyle,
+    phagcn.family,
+    name = "genomes"
+  ) %>%
+  group_by(checkv.filter, category, origin, phatyp.lifestyle) %>%
+  mutate(fraction = genomes / sum(genomes)) %>%
+  ungroup() %>%
+  mutate(vfdb.version = bundle$label, vfdb.version.tag = bundle$tag)
+
+write.checkv.table(lifestyle.confusion, "lifestyle_confusion", bundle)
+write.checkv.table(lifestyle.agreement, "lifestyle_agreement", bundle)
+write.checkv.table(family.summary, "phagcn_family_summary", bundle)
+write.checkv.table(vf.plot.data, "vf_prevalence", bundle)
+print(lifestyle.confusion)
+print(lifestyle.agreement)
+print(family.summary)
+print(vf.plot.data)
+
+lifestyle.agreement.plot <- lifestyle.agreement %>%
+  ggplot(aes(x = checkv.filter, y = genomes, fill = agrees)) +
+  geom_col(position = "fill", color = "black") +
+  facet_wrap(~ origin, scales = "free_x", space = "free_x") +
+  scale_y_continuous(labels = scales::percent) +
+  labs(
+    x = "CheckV trimming filter",
+    y = "Fraction of complete genomes",
+    fill = "Lifestyle agrees",
+    title = paste("CheckV and PhaTYP lifestyle agreement:", bundle$label)
+  ) +
+  theme_bw()
+# family.plot <- family.summary %>%
+#   ggplot(aes(x = phagcn.family, y = genomes, fill = phatyp.lifestyle)) +
+#   geom_col(position = "dodge", color = "black") +
+#   facet_grid(category + origin ~ checkv.filter, scales = "free_y") +
+#   labs(
+#     x = "PhaGCN family",
+#     y = "Complete genomes",
+#     fill = "PhaTYP lifestyle",
+#     title = paste("PhaGCN family assignments:", bundle$label)
+#   ) +
+#   theme_bw() +
+#   theme(axis.text.x = element_text(angle = 45, hjust = 1))
+checkv.vf.plot.data[[bundle$tag]] <- vf.plot.data %>%
+  filter(
+    checkv.filter == conservative.filter,
+    category %in% analysis.categories,
+    is.finite(vf.orf.prevalence)
+  ) %>%
+  mutate(
+    phatyp.lifestyle.plot = normalize.checkv.lifestyle(phatyp.lifestyle),
+    checkv.lifestyle.plot = normalize.checkv.lifestyle(checkv.lifestyle)
+  )
+versioned.plots <- list(
+  lifestyle_agreement = lifestyle.agreement.plot
+)
+for (plot.name in names(versioned.plots)) {
+  ggsave(
+    file.path(checkv.figs.dir, paste0(plot.name, "_", bundle$tag, ".svg")),
+    plot = versioned.plots[[plot.name]],
+    width = 10,
+    height = 7
+  )
+  print(versioned.plots[[plot.name]])
+}
+
+eligible.vf.data <- vf.plot.data %>%
+  filter(category %in% analysis.categories, is.finite(vf.orf.prevalence))
+required.violin.groups <- tidyr::expand_grid(
+  checkv.filter = sort(unique(vf.plot.data$checkv.filter)),
+  category = analysis.categories
+)
+observed.violin.groups <- eligible.vf.data %>% count(checkv.filter, category)
+if (nrow(anti_join(required.violin.groups, observed.violin.groups)) > 0) {
+  stop(bundle$label, " has no finite eligible VF prevalence in a violin group")
+}
+
+for (filter.name in sort(unique(eligible.vf.data$checkv.filter))) {
+  bootstrap.input <- eligible.vf.data %>%
+    filter(checkv.filter == filter.name) %>%
+    transmute(
+      genome.column = paste(category, genome.id, sep = "__"),
+      vf.orf.prevalence
     ) %>%
-    mutate(vfdb.version = bundle$label, vfdb.version.tag = bundle$tag)
-  lifestyle.agreement <- checkv.metadata %>%
+    pivot_wider(names_from = genome.column, values_from = vf.orf.prevalence)
+  vf.prevalence.bootstrap <- get_row_median(
+    data = bootstrap.input,
+    num_iter = max_iter,
+    row_num = 1,
+    cats = analysis.categories
+  ) %>%
+    as.data.frame() %>%
     mutate(
-      checkv.lifestyle.normalized = normalize.checkv.lifestyle(checkv.lifestyle),
-      phatyp.lifestyle.normalized = normalize.checkv.lifestyle(
-        phatyp.lifestyle
-      ),
-      agrees = checkv.lifestyle.normalized == phatyp.lifestyle.normalized
-    ) %>%
-    count(checkv.filter, category, origin, agrees, name = "genomes") %>%
-    mutate(vfdb.version = bundle$label, vfdb.version.tag = bundle$tag)
-  family.summary <- checkv.metadata %>%
-    count(
-      checkv.filter,
-      category,
-      origin,
-      phatyp.lifestyle,
-      phagcn.family,
-      name = "genomes"
-    ) %>%
-    group_by(checkv.filter, category, origin, phatyp.lifestyle) %>%
-    mutate(fraction = genomes / sum(genomes)) %>%
-    ungroup() %>%
-    mutate(vfdb.version = bundle$label, vfdb.version.tag = bundle$tag)
-
-  write.checkv.table(lifestyle.confusion, "lifestyle_confusion", bundle)
-  write.checkv.table(lifestyle.agreement, "lifestyle_agreement", bundle)
-  write.checkv.table(family.summary, "phagcn_family_summary", bundle)
-  write.checkv.table(vf.plot.data, "vf_prevalence", bundle)
-  print(lifestyle.confusion)
-  print(lifestyle.agreement)
-  print(family.summary)
-  print(vf.plot.data)
-
-  lifestyle.agreement.plot <- lifestyle.agreement %>%
-    ggplot(aes(x = checkv.filter, y = genomes, fill = agrees)) +
-    geom_col(position = "fill", color = "black") +
-    facet_wrap(~ origin, scales = "free_x", space = "free_x") +
-    scale_y_continuous(labels = scales::percent) +
-    labs(
-      x = "CheckV trimming filter",
-      y = "Fraction of complete genomes",
-      fill = "Lifestyle agrees",
-      title = paste("CheckV and PhaTYP lifestyle agreement:", bundle$label)
-    ) +
-    theme_bw()
-  # family.plot <- family.summary %>%
-  #   ggplot(aes(x = phagcn.family, y = genomes, fill = phatyp.lifestyle)) +
-  #   geom_col(position = "dodge", color = "black") +
-  #   facet_grid(category + origin ~ checkv.filter, scales = "free_y") +
-  #   labs(
-  #     x = "PhaGCN family",
-  #     y = "Complete genomes",
-  #     fill = "PhaTYP lifestyle",
-  #     title = paste("PhaGCN family assignments:", bundle$label)
-  #   ) +
-  #   theme_bw() +
-  #   theme(axis.text.x = element_text(angle = 45, hjust = 1))
-  checkv.vf.plot.data[[bundle$tag]] <- vf.plot.data %>%
-    filter(
-      checkv.filter == conservative.filter,
-      category %in% analysis.categories,
-      is.finite(vf.orf.prevalence)
-    ) %>%
-    mutate(
-      phatyp.lifestyle.plot = normalize.checkv.lifestyle(phatyp.lifestyle),
-      checkv.lifestyle.plot = normalize.checkv.lifestyle(checkv.lifestyle)
+      checkv.filter = filter.name,
+      vfdb.version = bundle$label,
+      vfdb.version.tag = bundle$tag
     )
-  versioned.plots <- list(
-    lifestyle_agreement = lifestyle.agreement.plot
+  write.checkv.table(
+    vf.prevalence.bootstrap,
+    paste0("vf_prevalence_bootstrap_", filter.name),
+    bundle
   )
-  for (plot.name in names(versioned.plots)) {
-    ggsave(
-      file.path(checkv.figs.dir, paste0(plot.name, "_", bundle$tag, ".svg")),
-      plot = versioned.plots[[plot.name]],
-      width = 10,
-      height = 7
-    )
-    print(versioned.plots[[plot.name]])
-  }
-
-  eligible.vf.data <- vf.plot.data %>%
-    filter(category %in% analysis.categories, is.finite(vf.orf.prevalence))
-  required.violin.groups <- tidyr::expand_grid(
-    checkv.filter = sort(unique(vf.plot.data$checkv.filter)),
-    category = analysis.categories
+  print(vf.prevalence.bootstrap)
+  vf.prevalence.violin <- create_cat_voilins(
+    data = vf.prevalence.bootstrap %>%
+      select(all_of(analysis.categories)),
+    ci_offset = c(0.15, 0.55, 0.55),
+    file_name = paste0(
+      "vf_prevalence_",
+      bundle$tag,
+      "_",
+      filter.name
+    ),
+    plot_dir = checkv.figs.dir,
+    cats_order = c("pal", "pre", "ind"),
+    plot.title = paste(
+      "Bootstrap median VF prevalence:",
+      bundle$label,
+      "(",
+      filter.name,
+      ")"
+    ),
+    x.title = "Sample category",
+    y.title = "Qualifying VFDB-hit ORFs / all Prokka ORFs"
   )
-  observed.violin.groups <- eligible.vf.data %>% count(checkv.filter, category)
-  if (nrow(anti_join(required.violin.groups, observed.violin.groups)) > 0) {
-    stop(bundle$label, " has no finite eligible VF prevalence in a violin group")
-  }
+  print(vf.prevalence.violin[[1]])
+  print(vf.prevalence.violin[[2]])
+}
 
-  for (filter.name in sort(unique(eligible.vf.data$checkv.filter))) {
-    bootstrap.input <- eligible.vf.data %>%
-      filter(checkv.filter == filter.name) %>%
-      transmute(
-        genome.column = paste(category, genome.id, sep = "__"),
-        vf.orf.prevalence
-      ) %>%
-      pivot_wider(names_from = genome.column, values_from = vf.orf.prevalence)
-    vf.prevalence.bootstrap <- get_row_median(
-      data = bootstrap.input,
-      num_iter = max_iter,
-      row_num = 1,
-      cats = analysis.categories
-    ) %>%
-      as.data.frame() %>%
-      mutate(
-        checkv.filter = filter.name,
-        vfdb.version = bundle$label,
-        vfdb.version.tag = bundle$tag
-      )
-    write.checkv.table(
-      vf.prevalence.bootstrap,
-      paste0("vf_prevalence_bootstrap_", filter.name),
-      bundle
-    )
-    print(vf.prevalence.bootstrap)
-    vf.prevalence.violin <- create_cat_voilins(
-      data = vf.prevalence.bootstrap %>%
-        select(all_of(analysis.categories)),
-      ci_offset = c(0.15, 0.55, 0.55),
-      file_name = paste0(
-        "vf_prevalence_",
-        bundle$tag,
-        "_",
-        filter.name
-      ),
-      plot_dir = checkv.figs.dir,
-      cats_order = c("pal", "pre", "ind"),
-      plot.title = paste(
-        "Bootstrap median VF prevalence:",
-        bundle$label,
-        "(",
-        filter.name,
-        ")"
-      ),
-      x.title = "Sample category",
-      y.title = "Qualifying VFDB-hit ORFs / all Prokka ORFs"
-    )
-    print(vf.prevalence.violin[[1]])
-    print(vf.prevalence.violin[[2]])
-  }
-
-  selected.genome.id <- "pre-TZA_ERS9106184_k141_65577"
-  selected.annotation <- "vf"
-  selected.features <- prepare.checkv.feature.map(
-    features = checkv.features,
-    selected.genome.id = selected.genome.id,
-    selected.annotation = selected.annotation
+selected.genome.id <- "pre-TZA_ERS9106184_k141_65577"
+selected.annotation <- "vf"
+selected.features <- prepare.checkv.feature.map(
+  features = checkv.features,
+  selected.genome.id = selected.genome.id,
+  selected.annotation = selected.annotation
+)
+if (nrow(selected.features) == 0) {
+  stop(
+    "No eligible ",
+    selected.annotation,
+    " features found for ",
+    selected.genome.id,
+    " in ",
+    bundle$label
   )
-  if (nrow(selected.features) == 0) {
-    stop(
-      "No eligible ",
+}
+selected.backbones <- checkv.metadata %>%
+  filter(genome.id == selected.genome.id) %>%
+  transmute(
+    checkv.filter,
+    backbone.start = 1,
+    backbone.end = genome.length
+  )
+selected.features <- selected.features %>%
+  inner_join(selected.backbones, by = "checkv.filter") %>%
+  mutate(vfdb.version = bundle$label, vfdb.version.tag = bundle$tag)
+write.checkv.table(
+  selected.features,
+  paste0(
+    str_replace_all(selected.genome.id, "[^A-Za-z0-9._-]", "_"),
+    "_",
+    selected.annotation,
+    "_features"
+  ),
+  bundle
+)
+print(selected.features)
+
+selected.map <- ggplot() +
+  geom_segment(
+    data = selected.backbones,
+    aes(x = backbone.start, xend = backbone.end, y = 0, yend = 0),
+    color = "black",
+    linewidth = 0.8
+  ) +
+  geom_segment(
+    data = selected.features,
+    aes(x = start, xend = end, y = y, yend = y, color = annotation),
+    linewidth = 3
+  ) +
+  facet_wrap(~ checkv.filter, ncol = 1) +
+  scale_color_manual(
+    values = c(viral = "#0072B2", bacterial = "#D55E00", vf = "#009E73")
+  ) +
+  scale_y_continuous(
+    breaks = c(-1, 0, 1),
+    labels = c("Negative", "Genome", "Positive"),
+    limits = c(-1.4, 1.4)
+  ) +
+  labs(
+    x = "Genome coordinate",
+    y = "Feature strand",
+    color = "Annotation",
+    title = paste(
       selected.annotation,
-      " features found for ",
+      "features on",
       selected.genome.id,
-      " in ",
+      ":",
       bundle$label
     )
-  }
-  selected.backbones <- checkv.metadata %>%
-    filter(genome.id == selected.genome.id) %>%
-    transmute(
-      checkv.filter,
-      backbone.start = 1,
-      backbone.end = genome.length
-    )
-  selected.features <- selected.features %>%
-    inner_join(selected.backbones, by = "checkv.filter") %>%
-    mutate(vfdb.version = bundle$label, vfdb.version.tag = bundle$tag)
-  write.checkv.table(
-    selected.features,
+  ) +
+  theme_bw()
+ggsave(
+  file.path(
+    checkv.figs.dir,
     paste0(
       str_replace_all(selected.genome.id, "[^A-Za-z0-9._-]", "_"),
       "_",
       selected.annotation,
-      "_features"
-    ),
-    bundle
-  )
-  print(selected.features)
-
-  selected.map <- ggplot() +
-    geom_segment(
-      data = selected.backbones,
-      aes(x = backbone.start, xend = backbone.end, y = 0, yend = 0),
-      color = "black",
-      linewidth = 0.8
-    ) +
-    geom_segment(
-      data = selected.features,
-      aes(x = start, xend = end, y = y, yend = y, color = annotation),
-      linewidth = 3
-    ) +
-    facet_wrap(~ checkv.filter, ncol = 1) +
-    scale_color_manual(
-      values = c(viral = "#0072B2", bacterial = "#D55E00", vf = "#009E73")
-    ) +
-    scale_y_continuous(
-      breaks = c(-1, 0, 1),
-      labels = c("Negative", "Genome", "Positive"),
-      limits = c(-1.4, 1.4)
-    ) +
-    labs(
-      x = "Genome coordinate",
-      y = "Feature strand",
-      color = "Annotation",
-      title = paste(
-        selected.annotation,
-        "features on",
-        selected.genome.id,
-        ":",
-        bundle$label
-      )
-    ) +
-    theme_bw()
-  ggsave(
-    file.path(
-      checkv.figs.dir,
-      paste0(
-        str_replace_all(selected.genome.id, "[^A-Za-z0-9._-]", "_"),
-        "_",
-        selected.annotation,
-        "_map_",
-        bundle$tag,
-        ".svg"
-      )
-    ),
-    plot = selected.map,
-    width = 10,
-    height = 5
-  )
-  print(selected.map)
-}
+      "_map_",
+      bundle$tag,
+      ".svg"
+    )
+  ),
+  plot = selected.map,
+  width = 10,
+  height = 5
+)
+print(selected.map)
 
 combined.vf.plot.data <- bind_rows(checkv.vf.plot.data)
 if (nrow(combined.vf.plot.data) == 0) {
   stop("No finite VF prevalence data for conservative-trimmed genomes")
 }
 
-make.vf.prevalence.plot <- function(data, lifestyle.column, lifestyle.label) {
-  mean.data <- data %>%
-    group_by(vfdb.version, category, .data[[lifestyle.column]]) %>%
-    summarise(
-      mean.prevalence = mean(vf.orf.prevalence),
-      .groups = "drop"
-    ) %>%
-    rename(lifestyle = all_of(lifestyle.column))
-
-  plot <- ggplot(
-    data,
-    aes(
-      x = .data[[lifestyle.column]],
-      y = vf.orf.prevalence,
-      fill = .data[[lifestyle.column]]
-    )
-  ) +
-    geom_violin(alpha = 0.35) +
-    geom_boxplot(fill = "white", color = "black") +
-    geom_text(
-      data = mean.data,
-      aes(
-        x = lifestyle,
-        y = mean.prevalence,
-        label = paste0("Mean = ", sprintf("%.3f", mean.prevalence))
-      ),
-      inherit.aes = FALSE,
-      vjust = -0.7,
-      size = 3
-    ) +
-    facet_grid(category ~ vfdb.version) +
-    labs(
-      x = lifestyle.label,
-      y = "Qualifying VFDB-hit ORFs / all Prokka ORFs",
-      fill = lifestyle.label,
-      title = paste(
-        "Complete-genome VF prevalence by",
-        lifestyle.label,
-        "(conservative trimming)"
-      )
-    ) +
-    theme_bw()
-  return(plot)
-}
-
-vf.by.phatyp.plot <- make.vf.prevalence.plot(
-  combined.vf.plot.data,
-  "phatyp.lifestyle.plot",
-  "PhaTYP lifestyle"
-)
 vf.by.checkv.plot <- make.vf.prevalence.plot(
   combined.vf.plot.data,
   "checkv.lifestyle.plot",
   "CheckV-table lifestyle"
 )
+vf.by.category.plot <- make.vf.prevalence.plot(
+  combined.vf.plot.data,
+  "category",
+  "Sample category",
+  facet.categories = FALSE
+)
 versioned.vf.plots <- list(
-  vf_by_phatyp = vf.by.phatyp.plot,
+  vf_by_category = vf.by.category.plot,
   vf_by_checkv = vf.by.checkv.plot
 )
 for (plot.name in names(versioned.vf.plots)) {
@@ -707,4 +651,83 @@ for (plot.name in names(versioned.vf.plots)) {
   print(plot)
 }
 
+```
+
+```{r category-level CheckV bootstrap}
+vf.bootstrap.categories <- c("pal", "pre", "ind")
+vf.hit.positive.data <- combined.vf.plot.data %>%
+  filter(qualifying.vf.orfs > 0)
+vf.empty.positive.categories <- setdiff(
+  vf.bootstrap.categories,
+  unique(vf.hit.positive.data$category)
+)
+if (length(vf.empty.positive.categories) > 0) {
+  stop(
+    "No hit-positive genomes for conditional VF prevalence in categories: ",
+    paste(vf.empty.positive.categories, collapse = ", ")
+  )
+}
+
+vf.hit.genome.fraction.bootstrap <- as.data.frame(setNames(
+  lapply(vf.bootstrap.categories, function(category.name) {
+    hit.present <- combined.vf.plot.data %>%
+      filter(category == category.name) %>%
+      pull(qualifying.vf.orfs) > 0
+    replicate(max_iter, {
+      draw.indices <- sample.int(
+        length(hit.present), length(hit.present), replace = TRUE
+      )
+      mean(hit.present[draw.indices])
+    })
+  }),
+  vf.bootstrap.categories
+))
+
+vf.prevalence.hit.positive.bootstrap <- as.data.frame(setNames(
+  lapply(vf.bootstrap.categories, function(category.name) {
+    positive.prevalence <- vf.hit.positive.data %>%
+      filter(category == category.name) %>%
+      pull(vf.orf.prevalence)
+    replicate(max_iter, {
+      draw.indices <- sample.int(
+        length(positive.prevalence), length(positive.prevalence),
+        replace = TRUE
+      )
+      median(positive.prevalence[draw.indices])
+    })
+  }),
+  vf.bootstrap.categories
+))
+
+vf.hit.genome.fraction.violin <- create_cat_voilins(
+  data = vf.hit.genome.fraction.bootstrap,
+  ci_offset = c(0.15, 0.55, 0.55),
+  file_name = "vf_hit_genome_fraction_VFDB_setB_conservative",
+  plot_dir = file.path(figs_dir, "checkv"),
+  cats_order = vf.bootstrap.categories,
+  plot.title = paste0(
+    "Bootstrap fraction of genomes with a VFDB hit\n",
+    "VFDB set B (conservative trimming)"
+  ),
+  x.title = "Sample category",
+  y.title = "Fraction of genomes with at least one qualifying VFDB hit"
+)
+print(vf.hit.genome.fraction.violin[[1]])
+print(vf.hit.genome.fraction.violin[[2]])
+
+vf.prevalence.hit.positive.violin <- create_cat_voilins(
+  data = vf.prevalence.hit.positive.bootstrap,
+  ci_offset = c(0.15, 0.55, 0.55),
+  file_name = "vf_prevalence_hit_positive_VFDB_setB_conservative",
+  plot_dir = file.path(figs_dir, "checkv"),
+  cats_order = vf.bootstrap.categories,
+  plot.title = paste0(
+    "Bootstrap median VF-hit ORF prevalence\n",
+    "Hit-positive genomes, VFDB set B (conservative trimming)"
+  ),
+  x.title = "Sample category",
+  y.title = "Qualifying VFDB-hit ORFs / all Prokka ORFs (hit-positive genomes)"
+)
+print(vf.prevalence.hit.positive.violin[[1]])
+print(vf.prevalence.hit.positive.violin[[2]])
 ```

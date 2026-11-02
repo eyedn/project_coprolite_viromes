@@ -121,8 +121,16 @@ qualifying full-CDS intervals per contig and pooled covered/total contig bases
 per sample. CheckV summaries use `total_bacterial_orfs` in place of the old
 `eligible_bacterial_orfs` field.
 
-The contig report runs separate set A/B analyses and writes plots and CSV
-exports under `figures/VFDB_setA/` and `figures/VFDB_setB/`. Sample prevalence
+The active reports are `analysis/analysis_contigs.Rmd` and
+`analysis/analysis_checkvhits.Rmd`. Both use unsuffixed set B inputs from
+`data/20261019` and reject tables without full-pool `VFDB_setB` provenance.
+The contig report writes plots and derived CSV exports under
+`figures/VFDB_setB/`; the CheckV report retains `figures/checkv/`.
+The ORF inventory is counted in 100,000-row chunks and is not copied to the
+figures directory. Phage-level plots retain full-data violins and boxplots
+without individual points. CheckV prevalence plots show means and genome
+counts (including zero prevalence) by CheckV lifestyle and by sample category.
+The category plot pools lifestyles. Sample prevalence
 and eligibility come from `sample_vf_stats`; setup exposes
 `MIN_TOTAL_ORFS <- 5L` and retains samples with totals **greater than** that
 value. Existing bootstrap, downsampling, coverage, and differential
@@ -132,8 +140,8 @@ label is “Qualifying VFDB-hit ORFs / all Prokka ORFs”; these are bacterial-m
 calls on predicted phage contigs.
 
 The CheckV report consumes regenerated full-pool products and analyzes only
-conservative trimming, while retaining shared set A/B lifestyle facets and
-panel-specific means. PhaGCN plots remain commented. Its external selected
+conservative trimming, with category facets for CheckV lifestyle and
+column-specific means and genome counts. PhaGCN plots remain commented. Its external selected
 network-contig analysis remains explicitly historical. Both active reports
 reject missing or incompatible pool/version markers.
 
