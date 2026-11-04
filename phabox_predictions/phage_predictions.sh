@@ -4,6 +4,8 @@
 #       Project Coprolite Viromes
 #       phage_predictions.sh
 ###############################################################################
+
+
 cd $HOME/project_coprolite_viromes
 for FILE in phabox_predictions/bash_functions/* ; do source $FILE ; done
 for FILE in general_bash_functions/* ; do source $FILE ; done
@@ -60,7 +62,7 @@ get_lifestyles "$sample" "$phage_file" "$predict_dir" "$num_cores"
 # compress files
 echo "$(timestamp): phage_predictions: compressing extra files from phage predictions of $sample"
 
-# Check if the directories exist before attempting to create compressed archives
+# check if the directories exist before attempting to create compressed archives
 if [ -d "$predict_dir/midfolder" ]; then
 	echo "$(timestamp): phage_predictions: compressing 'midfolder' from phage predictions of $sample"
 	gzip $predict_dir/*

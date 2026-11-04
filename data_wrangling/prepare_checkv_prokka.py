@@ -3,6 +3,8 @@
 #       Project Coprolite Viromes
 #       prepare_checkv_prokka.py
 ###############################################################################
+
+
 """Filter Prokka features and optionally extract their protein sequences."""
 
 ##### set up

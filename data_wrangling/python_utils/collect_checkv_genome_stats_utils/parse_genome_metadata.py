@@ -3,6 +3,8 @@
 #       Project Coprolite Viromes
 #       parse_genome_metadata.py
 ###############################################################################
+
+
 """Resolve a genome identifier through repository sample manifests."""
 
 

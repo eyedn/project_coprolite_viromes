@@ -3,6 +3,8 @@
 #   Project Coprolite Viromes
 #   get_diff_repres_cols.R
 ###############################################################################
+
+
 library(stats)
 library(progress)
 library(dunn.test)
@@ -34,7 +36,7 @@ get_diff_repres_cols <- function(data) {
     total  = ncol(data)
   )
   
-  ## 1) Kruskal–Wallis for all columns
+  ## 1) run Kruskal–Wallis for all columns
   for (i in seq_len(ncol(data))) {
     kruskal_test_result <- kruskal.test(data[, i], groups)
     kruskal_res[i, "kruskal_p"] <- kruskal_test_result$p.value
@@ -44,7 +46,7 @@ get_diff_repres_cols <- function(data) {
   ## 1a) Multiple-testing correction across all Kruskal–Wallis tests
   kruskal_q <- p.adjust(kruskal_res[, "kruskal_p"], method = "BH")
   
-  ## 2) Dunn's test for columns with significant Kruskal p-value
+  ## 2) use Dunn's test for columns with significant Kruskal p-value
   for (i in seq_len(ncol(data))) {
     # keep original behavior: threshold on raw p; you can change to kruskal_q[i] < 0.05 if desired
     if (kruskal_res[i, "kruskal_p"] < 0.05) {
@@ -52,7 +54,7 @@ get_diff_repres_cols <- function(data) {
         dunn_test_result <- dunn.test(data[, i], groups, method = "bh")
       )
       
-      # Dunn's P.adjusted are already BH-corrected within this feature
+      # the P.adjusted values from Dunn's test are already BH-corrected within this feature
       kruskal_res[i, "ind_vs_pre_p"] <- dunn_test_result$P.adjusted[1]
       kruskal_res[i, "ind_vs_pal_p"] <- dunn_test_result$P.adjusted[2]
       kruskal_res[i, "pre_vs_pal_p"] <- dunn_test_result$P.adjusted[3]

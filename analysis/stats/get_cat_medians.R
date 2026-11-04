@@ -3,6 +3,8 @@
 #   Project Coprolite Viromes
 #   get_cat_medians.R
 ###############################################################################
+
+
 # create a beeswarms plot of paired-cluserting tendencies
 get_cat_medians <- function(data) {
   class_data <- matrix(nrow = length(cat_labels), ncol = ncol(data))

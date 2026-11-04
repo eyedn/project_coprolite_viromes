@@ -4,6 +4,8 @@
 #       Project Coprolite Viromes
 #       get_biom.sh
 ###############################################################################
+
+
 #$ -cwd
 #$ -N mpa
 #$ -o /u/scratch/a/ayd1n/joblogs/sourcetracker/
@@ -46,21 +48,21 @@ metaphlan "$fastqs" \
 
 
 ###############################################################################
-# After all MetaPhlAn jobs have completed
+# after all MetaPhlAn jobs have completed
 ###############################################################################
 
 # conda activate mpa
 
-# # Merge MetaPhlAn profiles
+# # merge MetaPhlAn profiles
 # merge_metaphlan_tables.py *_fastq_clean_profile.out > combined_profile.out
 
-# # Keep only the header row and species-level taxa
+# # keep only the header row and species-level taxa
 # awk 'NR==2 || $1 ~ /\|s__/' combined_profile.out > combined_profile_species_only.tsv
 
-# # Convert relative abundances to integer pseudo-counts
+# # convert relative abundances to integer pseudo-counts
 # awk '
-# BEGIN {FS=OFS="\t"}
-# NR==1 {print; next}
+# disabled awk: BEGIN {FS=OFS="\t"}
+# disabled awk: NR==1 {print; next}
 # {
 #     for(i=2;i<=NF;i++)
 #         $i=int($i*1000+0.5)
@@ -69,20 +71,20 @@ metaphlan "$fastqs" \
 # ' combined_profile_species_only.tsv \
 # > combined_profile_species_only_counts.tsv
 
-# # Convert to BIOM
+# # convert to BIOM
 # biom convert \
 #     -i combined_profile_species_only_counts.tsv \
 #     -o combined_profile_species_only_counts.biom \
 #     --table-type="OTU table" \
 #     --to-hdf5
 
-# # Check BIOM table
+# # check BIOM table
 # biom summarize-table \
 #     -i combined_profile_species_only_counts.biom
 
-# # Run SourceTracker2
+# # run SourceTracker2
 
-# Create mapping file for Sourcetracker2
+# create mapping file for Sourcetracker2
 # (
 # echo -e "SampleID\tSourceSink\tEnv"
 

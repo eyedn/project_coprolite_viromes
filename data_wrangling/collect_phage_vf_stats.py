@@ -3,6 +3,8 @@
 #       Project Coprolite Viromes
 #       collect_phage_vf_stats.py
 ###############################################################################
+
+
 """Collect threshold-consistent phage-level lifestyle and VFDB statistics.
 
 The entrypoint gathers PhaTYP, Prokka, and combined HMMER inputs, delegates

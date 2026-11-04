@@ -3,6 +3,8 @@
 #       Project Coprolite Viromes
 #       parse_sample_path.py
 ###############################################################################
+
+
 """Parse category, origin, and sample identifiers from input paths."""
 
 import re

@@ -3,6 +3,8 @@
 #       Project Coprolite Viromes
 #       protein.py
 ###############################################################################
+
+
 import typing
 from . import contig
 

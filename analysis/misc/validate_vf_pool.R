@@ -3,6 +3,8 @@
 #   Project Coprolite Viromes
 #   validate_vf_pool.R
 ###############################################################################
+
+
 # validate the regenerated full bacterial Prokka denominator contract.
 validate.vf.pool <- function(data, version) {
   required.columns <- c("orf_pool", "vfdb_version")

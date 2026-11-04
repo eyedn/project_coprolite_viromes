@@ -3,6 +3,8 @@
 #       Project Coprolite Viromes
 #       join_bacterial_orfs.py
 ###############################################################################
+
+
 """Require a bijection between bacterial FAA proteins and GFF CDS IDs."""
 
 

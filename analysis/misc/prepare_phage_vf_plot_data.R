@@ -3,7 +3,9 @@
 #   Project Coprolite Viromes
 #   prepare_phage_vf_plot_data.R
 ###############################################################################
-# Validate the collector contract and retain two-level lifestyle plot rows.
+
+
+# validate the collector contract and retain two-level lifestyle plot rows.
 prepare.phage.vf.plot.data <- function(data) {
   required.columns <- c(
     "category", "origin", "sample", "contig_id", "lifestyle",

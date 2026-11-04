@@ -3,6 +3,8 @@
 #   Project Coprolite Viromes
 #   create_cazy_heatmap.R
 ###############################################################################
+
+
 library(gplots)
 library(svglite)
 library(RColorBrewer)
@@ -99,7 +101,7 @@ create_cazy_heatmap <- function(data, signif_res, subset,
           width = 35,
           height = 45)
   
-  # Generate the heatmap with adjusted sizes
+  # generate the heatmap with adjusted sizes
   heatmap.2(t(sig_data_concat),
             trace = "none",
             Colv = reordered_dend, 

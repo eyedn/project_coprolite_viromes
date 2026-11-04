@@ -4,30 +4,32 @@
 #       Project Coprolite Viromes
 #       get_hosts.sh
 ###############################################################################
-# Predict phage hosts with PhaBOX CHERRY.
+
+
+# predict phage hosts with PhaBOX CHERRY.
 get_hosts() {
     local sample=$1
 	local contigs_file=$2
 	local predict_dir=$3
 	local num_cores=$4
 
-	# Reuse a completed CHERRY host-prediction table.
+	# reuse a completed CHERRY host-prediction table.
     if [ -s "$predict_dir/out/cherry_prediction.csv" ]; then
         echo "$(timestamp): get_hosts: host predictions already completed"
         return 0
     fi
 
-    # Decompress the gzipped contig input before host prediction.
+    # decompress the gzipped contig input before host prediction.
     if ls ${contigs_file}.gz 1> /dev/null 2>&1; then
         gunzip ${contigs_file}.gz
     fi
 
-    # Create the CHERRY output directory.
+    # create the CHERRY output directory.
     mkdir -p $predict_dir
 
     echo "$(timestamp): get_hosts: $sample"
 	echo "__________________________________________________"
-    # Run CHERRY to predict a host for each supplied phage contig.
+    # run CHERRY to predict a host for each supplied phage contig.
     cd $phabox
     python3 Cherry_single.py \
         --contigs $contigs_file \
@@ -37,15 +39,15 @@ get_hosts() {
     cd $HOME
     echo "__________________________________________________"
 
-    # Recompress the contig input after CHERRY finishes.
+    # recompress the contig input after CHERRY finishes.
     if ls ${contigs_file} 1> /dev/null 2>&1; then
         gzip ${contigs_file}
     fi
 
-    # Require a nonempty CHERRY prediction table before returning.
+    # require a nonempty CHERRY prediction table before returning.
 	if ls $predict_dir/out/cherry_prediction.csv 1> /dev/null 2>&1; then
 		echo "$(timestamp): get_hosts: host predictions file created"
-		# Reject an empty output table as an incomplete prediction.
+		# reject an empty output table as an incomplete prediction.
 		if ! [ -s "$predict_dir/out/cherry_prediction.csv" ]; then
 			echo "$(timestamp): get_hosts: ERROR! host predictions file is empty"
 			exit 1

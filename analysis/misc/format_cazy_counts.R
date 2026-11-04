@@ -3,6 +3,8 @@
 #   Project Coprolite Viromes
 #   format_cazy_counts.R
 ###############################################################################
+
+
 format_cazy_counts <- function(data, cazy_cat) {
   data[, "cat"] <- NA
   profiles <- rownames(data)

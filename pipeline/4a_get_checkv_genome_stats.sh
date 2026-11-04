@@ -1,9 +1,11 @@
-#!/bin/bash
+#!/usr/bin/env bash
 ###############################################################################
 #       Aydin Karatas
 #       Project Coprolite Viromes
 #       4a_get_checkv_genome_stats.sh
 ###############################################################################
+
+
 set -euo pipefail
 
 if [ "$#" -ne 3 ]; then
@@ -32,5 +34,9 @@ for version in VFDB_setA VFDB_setB; do
     python3 "${script_dir}/data_wrangling/collect_checkv_genome_stats.py" \
         "$project_dir" --vfdb-version "$version"
 done
+
+# supplement filtered features with every conservative viral CDS for maps.
+python3 "${script_dir}/data_wrangling/export_checkv_viral_cds.py" \
+    "$project_dir" "${project_dir}/data/checkv_viral_cds_conservative.csv"
 
 echo "4a_get_checkv_genome_stats: complete with ${num_cores} requested cores"

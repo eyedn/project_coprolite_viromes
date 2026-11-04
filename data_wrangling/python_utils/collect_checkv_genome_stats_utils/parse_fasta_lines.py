@@ -3,6 +3,8 @@
 #       Project Coprolite Viromes
 #       parse_fasta_lines.py
 ###############################################################################
+
+
 """Parse exact FASTA identifiers and sequence lengths."""
 
 

@@ -4,6 +4,8 @@
 #       Project Coprolite Viromes
 #       4_analyze_checkv_genomes.sh
 ###############################################################################
+
+
 set -euo pipefail
 
 if [ "$#" -ne 3 ]; then
@@ -133,7 +135,7 @@ python3 "${script_dir}/data_wrangling/prepare_checkv_prokka.py" \
     "${viral_dir}/${prefix}.gff" \
     "${viral_dir}/valid_features.csv"
 
-# Reuse Prokka calls, searching both full-pool reference versions.
+# reuse Prokka calls, searching both full-pool reference versions.
 for version in VFDB_setA VFDB_setB; do
     case "$version" in
         VFDB_setA) vf_database="${ref_db}/VFDB_setA_pro_20230917.txt" ;;

@@ -4,6 +4,8 @@
 #       Project Coprolite Viromes
 #       megahit_assembler_wo_pydamage.sh
 ###############################################################################
+
+
 # contains the megahit command to assembly fastq/fasta files
 megahit_assembler_wo_pydamage() {
 	# define argument variables

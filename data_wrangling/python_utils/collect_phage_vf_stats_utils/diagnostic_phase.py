@@ -3,6 +3,8 @@
 #       Project Coprolite Viromes
 #       diagnostic_phase.py
 ###############################################################################
+
+
 """Report phase boundaries without swallowing collector exceptions."""
 
 from contextlib import contextmanager

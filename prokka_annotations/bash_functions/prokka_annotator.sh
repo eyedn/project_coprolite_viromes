@@ -4,7 +4,9 @@
 #       Project Coprolite Viromes
 #       prokka_annotator.sh
 ###############################################################################
-# Run Prokka and, only for CheckV genomes, optionally retain completed GFF/FAA
+
+
+# run Prokka and, only for CheckV genomes, optionally retain completed GFF/FAA
 # output when Prokka's optional GenBank/Sequin export fails.
 checkv_prokka_outputs_complete() {
     local annot_dir="$1"

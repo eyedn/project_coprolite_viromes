@@ -4,6 +4,8 @@
 #       Project Coprolite Viromes
 #       download_and_MetaPhlAn2.sh
 ###############################################################################
+
+
 cd "$HOME/project_coprolite_viromes"
 for FILE in download/bash_functions/* ; do source "$FILE" ; done
 for FILE in general_bash_functions/* ; do source "$FILE" ; done
@@ -74,7 +76,7 @@ touch "${reads_dir}/${origin}_${sample}_DONE.txt"
 echo "$(timestamp): download_and_pre_process: pre-processing complete for $sample"
 
 ###############################################################################
-# MetaPhlAn2 per-sample profiling
+# per-sample profiling with MetaPhlAn2
 ###############################################################################
 
 # path for MetaPhlAn2
@@ -89,7 +91,7 @@ mkdir -p "$mpa_out_dir"
 prof_tsv="${mpa_out_dir}/${sample}_metaphlan.tsv"
 prof_done="${mpa_out_dir}/${sample}_DONE.txt"
 
-# Gather cleaned reads for this sample across all accessions
+# gather cleaned reads for this sample across all accessions
 tmp_dir="${fastq_clean_dir}/__metaphlan_tmp_${sample}"
 mkdir -p "$tmp_dir"
 cat_R1="${tmp_dir}/${sample}_R1.cat.fastq.gz"
@@ -118,7 +120,7 @@ if (( have_paired == 0 && have_single == 0 )); then
     exit 1
 fi
 
-# Build MetaPhlAn2 input using process substitution (safe for .gz)
+# build MetaPhlAn2 input using process substitution (safe for .gz)
 if (( have_paired == 1 && have_single == 1 )); then
     mp_input_str="<(zcat \"$cat_R1\"),<(zcat \"$cat_R2\"),<(zcat \"$cat_SE\")"
 elif (( have_paired == 1 )); then
@@ -127,26 +129,26 @@ else
     mp_input_str="<(zcat \"$cat_SE\")"
 fi
 
-# Bowtie2 mapping file (MetaPhlAn2 will bzip if you use .bz2 suffix)
+# mapping file for Bowtie2 (MetaPhlAn2 will bzip if you use .bz2 suffix)
 bt2_out="${mpa_out_dir}/${sample}.bowtie2.bz2"
 
-# Compose MetaPhlAn2 command line as a string so process substitutions expand
+# compose MetaPhlAn2 command line as a string so process substitutions expand
 mp_cmd_line="python \"$metaphlan_py\" $mp_input_str --input_type fastq \
   --bowtie2_exe \"$bowtie2\" --bt2_ps very-sensitive --bowtie2out \"$bt2_out\" \
   --nproc \"$num_cores\" -o \"$prof_tsv\""
 
-# Optionally append DB/PKL if defined
+# optionally append DB/PKL if defined
 [[ -n "${mpa_db:-}"  ]] && mp_cmd_line+=" --bowtie2db \"$mpa_db\""
 [[ -n "${mpa_pkl:-}" ]] && mp_cmd_line+=" --mpa_pkl \"$mpa_pkl\""
 
-# Run MetaPhlAn2 (eval required for <( ) expansion inside the string)
+# run MetaPhlAn2 (eval required for <( ) expansion inside the string)
 if ! eval "$mp_cmd_line"; then
     echo "$(timestamp): MetaPhlAn2: ERROR running metaphlan2.py for ${sample}"
     rm -rf "$tmp_dir"
     exit 1
 fi
 
-# Sanity check output
+# sanity check output
 if [[ ! -s "$prof_tsv" ]]; then
     echo "$(timestamp): MetaPhlAn2: ERROR no output profile for ${sample}"
     rm -rf "$tmp_dir"

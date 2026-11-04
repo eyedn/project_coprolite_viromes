@@ -4,6 +4,8 @@
 #       Project Coprolite Viromes
 #       assemble_libraries_wo_pydamage.sh
 ###############################################################################
+
+
 # create final.contigs.fa with megahit assembly from fastq/fasta files
 assemble_libraries_wo_pydamage() {
 	local sample=$1
@@ -27,10 +29,10 @@ assemble_libraries_wo_pydamage() {
 	megahit_assembler_wo_pydamage "$assembly_extra_dir" "$single_end_data" "$paired_end_data_1" "$paired_end_data_2" "$num_cores"
 	echo "__________________________________________________"
 
-	# Check if assembly was completed
+	# check if assembly was completed
 	if ls "$assembly_extra_dir/final.contigs.fa" 1> /dev/null 2>&1; then
 		echo "$(timestamp): assemble_libraries_wo_pydamage: final contigs file created"
-		# Check if the file is empty
+		# check if the file is empty
 		if ! [ -s "$assembly_extra_dir/final.contigs.fa" ]; then
 			echo "$(timestamp): assemble_libraries_wo_pydamage: ERROR! contigs file is empty"
 			exit 1

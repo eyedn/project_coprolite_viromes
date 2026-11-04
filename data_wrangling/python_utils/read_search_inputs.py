@@ -3,6 +3,8 @@
 #       Project Coprolite Viromes
 #       read_search_inputs.py
 ###############################################################################
+
+
 """Read plain or compressed search inputs without altering Prokka outputs."""
 import gzip
 from pathlib import Path

@@ -4,6 +4,8 @@
 #       Project Coprolite Viromes
 #       pydamage.sh
 ###############################################################################
+
+
 #$ -cwd
 #$ -N pydam
 #$ -o /u/scratch/a/ayd1n/joblogs/pydamage_extra/
@@ -49,7 +51,7 @@ source /u/local/Modules/default/init/modules.sh
 module load anaconda3
 conda activate qc
 
-# ----------------------------- Positional args --------------------------------
+# ----------------------------- positional args --------------------------------
 if [[ "${1:-}" == "-h" || "${1:-}" == "--help" || "$#" -lt 2 ]]; then
     usage; exit 0
 fi
@@ -63,37 +65,37 @@ threads_in="${6:-"-"}"
 pydmg_thresh_in="${7:-"-"}"
 sample_id_in="${8:-"-"}"
 
-# ----------------------------- Defaults/normalize -----------------------------
+# ----------------------------- defaults/normalize -----------------------------
 if [[ -z "$contigs" ]]; then
     echo "ERROR: <contigs.fa> is required." >&2
     usage; exit 1
 fi
 
-# Interpret "-" as "no_data" for read args
+# interpret "-" as "no_data" for read args
 R1="${R1:-"-"}"; [[ "$R1" == "-" ]] && R1="no_data"
 R2="${R2:-"-"}"; [[ "$R2" == "-" ]] && R2="no_data"
 SE="${SE:-"-"}"; [[ "$SE" == "-" ]] && SE="no_data"
 
-# Threads default: prefer NSLOTS if available, else 16
+# threads default: prefer NSLOTS if available, else 16
 threads="${threads_in}"
 if [[ -z "${threads}" || "${threads}" == "-" ]]; then
     threads="${NSLOTS:-16}"
 fi
 
-# Threshold default 0.5
+# threshold default 0.5
 pydmg_thresh="${pydmg_thresh_in}"
 if [[ -z "${pydmg_thresh}" || "${pydmg_thresh}" == "-" ]]; then
     pydmg_thresh="0.5"
 fi
 
-# Sample ID default derived from contigs filename (strip common fasta extensions)
+# sample ID default derived from contigs filename (strip common fasta extensions)
 if [[ -z "${sample_id_in}" || "${sample_id_in}" == "-" ]]; then
     sample_id="$(basename "$contigs" | sed 's/\.[Ff][Aa]\([Ss][Tt]\)\{0,1\}[Aa]*$//')"
 else
     sample_id="${sample_id_in}"
 fi
 
-# ----------------------------- Checks ----------------------------------------
+# ----------------------------- checks ----------------------------------------
 if [[ "$R1" == "no_data" && "$R2" == "no_data" && "$SE" == "no_data" ]]; then
     echo "ERROR: Provide at least one read input among R1, R2, or SE." >&2
     usage; exit 1
@@ -103,10 +105,10 @@ if [[ ! -s "$contigs" ]]; then
     exit 1
 fi
 
-# Ensure log dir exists for SGE
+# ensure log dir exists for SGE
 mkdir -p "$SCRATCH/joblogs/pydamage_extra/"
 
-# ---------------------------- Paths & names ----------------------------------
+# ---------------------------- paths & names ----------------------------------
 mkdir -p "$outdir"
 mapdir="${outdir}/align"
 pd_dir="${outdir}/pydamage"
@@ -120,7 +122,7 @@ keep_ids="${pd_dir}/keep_ids.txt"
 
 mkdir -p "$mapdir" "$pd_dir"
 
-# --------------------------- Tool discovery ----------------------------------
+# --------------------------- tool discovery ----------------------------------
 bt2_build="$software/bowtie2-2.5.1-linux-x86_64/bowtie2-build"
 bowtie2="$software/bowtie2-2.5.1-linux-x86_64/bowtie2"
 samtools="$software/samtools-1.18/samtools"
@@ -135,8 +137,8 @@ if [[ ! -x "$bt2_build" || ! -x "$bowtie2" || ! -x "$samtools" || -z "$pydamage"
     exit 1
 fi
 
-# ------------------------------ Align (Step 2) --------------------------------
-# Skip alignment + MD tagging entirely if final output already exists
+# ------------------------------ align (Step 2) --------------------------------
+# skip alignment + MD tagging entirely if final output already exists
 if [[ -f "$calmd_bam" ]]; then
     echo "$(timestamp): $calmd_bam already exists — skipping alignment and calmd steps."
 else
@@ -167,7 +169,7 @@ else
     "$samtools" index "$calmd_bam"
 fi
 
-# ------------------------------ PyDamage (Step 3) -----------------------------
+# ------------------------------ run PyDamage (Step 3) -----------------------------
 echo "$(timestamp): running PyDamage analyze (threads=$threads)"
 rm -rf "$pd_dir"; mkdir -p "$pd_dir"
 "$pydamage" --outdir "$pd_dir" analyze --force -p "$threads" "$calmd_bam"
@@ -175,7 +177,7 @@ rm -rf "$pd_dir"; mkdir -p "$pd_dir"
 echo "$(timestamp): filtering PyDamage results (threshold=$pydmg_thresh)"
 "$pydamage" --outdir "$pd_dir" -t "$pydmg_thresh" filter "${pd_dir}/pydamage_results.csv"
 
-# ----------------------- Export filtered FASTA (Step 4) -----------------------
+# ----------------------- export filtered FASTA (Step 4) -----------------------
 echo "$(timestamp): writing unfiltered copy -> $final_all_unfiltered"
 cp -f "$contigs" "$final_all_unfiltered"
 
@@ -190,7 +192,7 @@ if [[ -z "$csv_to_use" ]]; then
     echo "$(timestamp): PyDamage CSV not found; exporting UNFILTERED contigs as final."
     cp -f "$final_all_unfiltered" "$final_all"
 else
-    # Extract contig IDs to keep (header-robust: 'reference' or 'contig')
+    # extract contig IDs to keep (header-robust: 'reference' or 'contig')
     awk -F',' '
         NR==1 {
             for (i=1;i<=NF;i++) { h[tolower($i)]=i }

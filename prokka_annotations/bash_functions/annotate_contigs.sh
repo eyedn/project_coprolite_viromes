@@ -4,6 +4,8 @@
 #       Project Coprolite Viromes
 #       annotate_contigs.sh
 ###############################################################################
+
+
 # generate informative files by annotating contigs file 
 annotate_contigs() {
 	local sample=$1
@@ -37,10 +39,10 @@ annotate_contigs() {
 		gzip ${contigs_file}
 	fi
 
-	# Check if annotation was completed
+	# check if annotation was completed
 	if ls $annot_dir 1> /dev/null 2>&1; then
 		echo "$(timestamp): annotate_contigs: annotation files created"
-		# Check if the tbl file is empty
+		# check if the tbl file is empty
 		if ! [ -s "$annot_dir/"*.tbl  ]; then
 			echo "$(timestamp): annotate_contigs: ERROR! .tbl file is empty"
 			exit 1

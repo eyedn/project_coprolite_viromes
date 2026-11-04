@@ -4,7 +4,9 @@
 #       Project Coprolite Viromes
 #       get_families.sh
 ###############################################################################
-# Predict viral taxonomy, including family assignments, with PhaBOX PhaGCN.
+
+
+# predict viral taxonomy, including family assignments, with PhaBOX PhaGCN.
 get_families() {
     local sample=$1
     local contigs_file=$2
@@ -14,16 +16,16 @@ get_families() {
     local temporary_fasta=""
     local previous_dir
 
-    # Reuse a completed PhaGCN taxonomy table.
+    # reuse a completed PhaGCN taxonomy table.
     if [ -s "$predict_dir/out/phagcn_prediction.csv" ]; then
         echo "$(timestamp): get_families: predictions already completed"
         return 0
     fi
 
-    # Create the PhaGCN output directory.
+    # create the PhaGCN output directory.
     mkdir -p "$predict_dir"
 
-    # Prepare a temporary readable FASTA when the canonical input is gzipped.
+    # prepare a temporary readable FASTA when the canonical input is gzipped.
     if [ -f "${contigs_file}" ] && [[ "${contigs_file}" == *.gz ]]; then
         temporary_fasta=$(mktemp "${predict_dir}/.phagcn_input.XXXXXX.fa")
         gzip -cd "${contigs_file}" > "${temporary_fasta}"
@@ -39,7 +41,7 @@ get_families() {
 
     echo "$(timestamp): get_families: $sample"
     echo "__________________________________________________"
-    # Run PhaGCN with the core count requested by the submitting job.
+    # run PhaGCN with the core count requested by the submitting job.
     previous_dir=$(pwd)
     cd "$phabox"
     if ! python3 PhaGCN_single.py \
@@ -56,10 +58,10 @@ get_families() {
     [ -z "$temporary_fasta" ] || rm -f "$temporary_fasta"
     echo "__________________________________________________"
 
-    # Require a nonempty PhaGCN prediction table before returning.
+    # require a nonempty PhaGCN prediction table before returning.
     if ls $predict_dir/out/phagcn_prediction.csv 1> /dev/null 2>&1; then
         echo "$(timestamp): get_families: taxonomic predictions file created"
-        # Reject an empty output table as an incomplete prediction.
+        # reject an empty output table as an incomplete prediction.
         if ! [ -s "$predict_dir/out/phagcn_prediction.csv" ]; then
             echo "$(timestamp): get_families: ERROR!" \
                 "taxonomic predictions file is empty"

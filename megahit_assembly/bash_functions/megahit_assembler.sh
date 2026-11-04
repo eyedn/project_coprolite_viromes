@@ -4,6 +4,8 @@
 #       Project Coprolite Viromes
 #       megahit_assembler.sh
 ###############################################################################
+
+
 # contains the megahit command to assemble fastq/fasta files,
 # then maps reads back to contigs and runs PyDamage to filter poor contigs.
 megahit_assembler() {
@@ -16,7 +18,7 @@ megahit_assembler() {
     local sample_id
     sample_id="$(basename "$output_dir")"
 
-    # PyDamage filtering threshold (default)
+    # filtering threshold for PyDamage (default)
     local pydmg_thresh=0.5
 
     # define paths for pydamage
@@ -37,7 +39,7 @@ megahit_assembler() {
         echo "$(timestamp): megahit_assembler: PE1=$paired_end_data_1"
         echo "$(timestamp): megahit_assembler: PE2=$paired_end_data_2"
 
-        # 1) Assemble with MEGAHIT
+        # 1) assemble with MEGAHIT
         if ! [ "$single_end_data" == "no_data" ] && \
         ! [ "$paired_end_data_1" == "no_data" ] && \
         ! [ "$paired_end_data_2" == "no_data" ]; then
@@ -59,13 +61,13 @@ megahit_assembler() {
             exit 1
         fi
 
-        # MEGAHIT contigs
+        # contigs from MEGAHIT
         if ! [ -s "$contigs_raw" ]; then
             echo "$(timestamp): ERROR: contigs not found at $contigs_raw"
             exit 1
         fi
 
-        # 2) Align reads → contigs (Bowtie2) + MD tags
+        # 2) align reads → contigs (Bowtie2) + MD tags
         mkdir -p "$mapdir"
         local bt2_build
         bt2_build="$(dirname "$bowtie2")/bowtie2-build"
@@ -97,7 +99,7 @@ megahit_assembler() {
         "$samtools" index "$calmd_bam"
     fi
 
-    # 3) PyDamage
+    # 3) run PyDamage
     # clear out pydamage dir if it already exists
     rm -rf "$pd_dir"
 
@@ -111,7 +113,7 @@ megahit_assembler() {
         echo "$(timestamp): WARNING: no PyDamage results CSV found"
     fi
 
-    # 4) Create final *_all_contigs.fa filtered by PyDamage (keep unfiltered copy)
+    # 4) create final *_all_contigs.fa filtered by PyDamage (keep unfiltered copy)
     cp -f "$contigs_raw" "$final_all_unfiltered"
 
     # prefer the official filtered CSV name; fall back to unfiltered CSV
@@ -130,7 +132,7 @@ megahit_assembler() {
         return 0
     fi
 
-    # Extract contig IDs to keep from CSV (header-robust: 'reference' or 'contig')
+    # extract contig IDs to keep from CSV (header-robust: 'reference' or 'contig')
     awk -F',' '
         NR==1 {
             for (i=1;i<=NF;i++) { h[tolower($i)]=i }

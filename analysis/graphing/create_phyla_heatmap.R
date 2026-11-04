@@ -3,6 +3,8 @@
 #   Project Coprolite Viromes
 #   create_phyla_heatmap.R
 ###############################################################################
+
+
 library(gplots)
 library(svglite)
 library(RColorBrewer)
@@ -19,7 +21,7 @@ create_phyla_heatmap <- function(data, signif_res, subset,
   colnames(sig_data_concat) <- colnames(sig_data)
   rownames(sig_data_concat) <- cat_labels
   
-  # Combine all data from same category by taking median
+  # combine all data from same category by taking median
   for (i in seq_len(length(cat_labels))) {
     cat_subset <- sig_data[grep(cat_labels[i], rownames(sig_data)), ]
     
@@ -32,12 +34,12 @@ create_phyla_heatmap <- function(data, signif_res, subset,
     sig_data_concat[cat_labels[i], ] <- cat_stats
   }
   
-  # Remove rows where all values are NA
+  # remove rows where all values are NA
   sig_data_concat <- sig_data_concat[
     rowSums(is.na(sig_data_concat)) != ncol(sig_data_concat), 
   ]
   
-  # Define dfs for samples location, category, dend. weight, and side bar color
+  # define dfs for samples location, category, dend. weight, and side bar color
   sample_loc <- data.frame(
     loc = rownames(sig_data_concat),
     cat = substr(rownames(sig_data_concat), 1, 3)
@@ -53,7 +55,7 @@ create_phyla_heatmap <- function(data, signif_res, subset,
   sample_weights <- merge_and_retain_order(sample_loc, cat_weights, "cat", "cat")
   loc_cols <- merge_and_retain_order(sample_loc, cat_cols, "cat", "cat")
   
-  # Define groups dendrogram order, colors, and labels
+  # define groups dendrogram order, colors, and labels
   dend_width <- 15
   hc <- hclust(dist(sig_data_concat))
   dend_raw <- as.dendrogram(hc)
@@ -62,12 +64,12 @@ create_phyla_heatmap <- function(data, signif_res, subset,
   group_col <- loc_cols$col
   group_labels <- loc_cols$loc
   
-  # Define phyla dendrogram
+  # define phyla dendrogram
   hc_2 <- hclust(dist(t(sig_data_concat)))
   dend_raw_2 <- as.dendrogram(hc_2)
   phyla_dend <- dendextend::set(dend_raw_2, "branches_lwd", dend_width)
   
-  # Save plot to svg file
+  # save plot to svg file
   file_name <- append_time_to_filename(file_name)
   svglite(filename = paste0(plot_dir, "/", file_name, ".svg"),
           width = 45,

@@ -3,6 +3,8 @@
 #       Project Coprolite Viromes
 #       search_vfdb.py
 ###############################################################################
+
+
 """Search the complete bacterial FAA with validated, atomic cached outputs."""
 import argparse
 import hashlib

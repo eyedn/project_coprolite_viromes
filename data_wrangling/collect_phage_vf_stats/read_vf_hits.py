@@ -3,6 +3,8 @@
 #       Project Coprolite Viromes
 #       read_vf_hits.py
 ###############################################################################
+
+
 """Read and validate the combined VFDB HMMER hit CSV."""
 
 import csv

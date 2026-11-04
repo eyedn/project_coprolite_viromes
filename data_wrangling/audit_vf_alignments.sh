@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
+###############################################################################
+#       Aydin Karatas
+#       Project Coprolite Viromes
+#       audit_vf_alignments.sh
+###############################################################################
 
-###############################################################################
-#           Aydin Loid Karatas
-#           Project Coprolite Viromes
-#           audit_vf_alignments.sh
-###############################################################################
 
 set -euo pipefail
 
@@ -39,7 +39,7 @@ cleanup() {
 trap cleanup EXIT
 
 
-# Return 0 for a nonempty FASTA, 10 for zero records, and 1 for malformed data.
+# return 0 for a nonempty FASTA, 10 for zero records, and 1 for malformed data.
 check_faa_stream() {
     awk '
         BEGIN { records = 0; invalid = 0 }
@@ -70,7 +70,7 @@ check_faa_stream() {
 }
 
 
-# Return 0 for all-non-phage, 10 for phage-containing, and 1 for malformed.
+# return 0 for all-non-phage, 10 for phage-containing, and 1 for malformed.
 check_phamer_table() {
     local phamer_path=$1
 

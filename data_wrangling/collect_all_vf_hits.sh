@@ -4,6 +4,8 @@
 #       Project Coprolite Viromes
 #       collect_all_vf_hits.sh
 ###############################################################################
+
+
 set -euo pipefail
 
 if [ "$#" -lt 1 ] || [ "$#" -gt 4 ]; then

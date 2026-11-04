@@ -3,6 +3,8 @@
 #   Project Coprolite Viromes
 #   normalize_data.R
 ###############################################################################
+
+
 normalize_data <- function(df) {
   df <- as.matrix(df)
   

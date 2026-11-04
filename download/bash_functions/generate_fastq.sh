@@ -4,6 +4,8 @@
 #       Project Coprolite Viromes
 #       generate_fastq.sh
 ###############################################################################
+
+
 # use fasterq dump to download fastq files
 generate_fastq() {
 	local id=$1

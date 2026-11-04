@@ -4,6 +4,8 @@
 #       Project Coprolite Viromes
 #       3a_get_alignment_counts.sh
 ###############################################################################
+
+
 set -euo pipefail
 
 if [ "$#" -ne 3 ]; then
@@ -26,7 +28,7 @@ data_dir="${project_dir}/data"
 alignment_dir="${project_dir}/alignment"
 annotation_dir="${project_dir}/genome_annotation"
 prediction_dir="${project_dir}/phage_predictions"
-# The legacy Python collector expands or substitutes these ! path tokens.
+# the legacy Python collector expands or substitutes these ! path tokens.
 annotation_path_template="${annotation_dir}/!_annotation_bac_on_phage"
 
 timestamp_message() {
@@ -92,7 +94,7 @@ ulimit -Sa >&2
 stage_message "effective shell memory limits (hard; includes data, RSS, virtual memory)"
 ulimit -Ha >&2
 
-# Set up the cluster environment when the Hoffman2 module files are present.
+# set up the cluster environment when the Hoffman2 module files are present.
 if [ -d "${script_dir}/general_bash_functions" ]; then
     for file_path in "${script_dir}"/general_bash_functions/*; do
         source "${file_path}"
@@ -111,7 +113,7 @@ require_directory "${annotation_dir}" "genome annotation directory"
 require_directory "${prediction_dir}" "PhaTYP prediction directory"
 mkdir -p "${data_dir}"
 
-# Publish independently validated full-pool bundles for each reference.
+# publish independently validated full-pool bundles for each reference.
 for version in VFDB_setA VFDB_setB; do
     start_phase "bundle setup"
     suffix=""
@@ -134,7 +136,7 @@ for version in VFDB_setA VFDB_setB; do
         "${temporary_dir}/complete_samples.csv" "$version"
     end_phase
 
-    # E-value-only legacy products are diagnostics, never prevalence inputs.
+    # the E-value-only legacy products are diagnostics, never prevalence inputs.
     start_phase "legacy count collection"
     python3 "${script_dir}/data_wrangling/get_alignment_counts.py" \
         "$vf_alignment_pattern" "$annotation_path_template" "$data_dir" \

@@ -3,6 +3,8 @@
 #       Project Coprolite Viromes
 #       parse_gff_lines.py
 ###############################################################################
+
+
 """Parse contig lengths and CDS-to-contig mappings from GFF text."""
 
 

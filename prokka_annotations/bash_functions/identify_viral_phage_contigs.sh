@@ -4,6 +4,8 @@
 #       Project Coprolite Viromes
 #       identify_viral_phage_contigs.sh
 ###############################################################################
+
+
 # create a contigs file with only contigs with viral annotations
 identify_viral_phage_contigs() {
 	all_contigs=$1
@@ -35,10 +37,10 @@ identify_viral_phage_contigs() {
 		gzip ${phage_contigs}
 	fi
 
-	# Check if identification was completed
+	# check if identification was completed
 	if ls $viral_phage_contigs 1> /dev/null 2>&1; then
 		echo "$(timestamp): identify_viral_phage_contigs: viral contigs files created"
-		# Check if the tbl file is empty
+		# check if the tbl file is empty
 		if ! [ -s "$viral_phage_contigs"  ]; then
 			echo "$(timestamp): identify_viral_phage_contigs: ERROR! viral contigs file is empty"
 			rm $viral_phage_contigs

@@ -3,6 +3,8 @@
 #       Project Coprolite Viromes
 #       parse_phatyp_rows.py
 ###############################################################################
+
+
 """Normalize installed legacy and current PhaTYP table rows."""
 
 

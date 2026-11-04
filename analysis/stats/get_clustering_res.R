@@ -3,6 +3,8 @@
 #   Project Coprolite Viromes
 #   get_clustering_res.R
 ###############################################################################
+
+
 library(stats)
 
 get_clustering_res <- function(boot_data, perm_data, star_bounds, num_iter, k) {
@@ -12,14 +14,14 @@ get_clustering_res <- function(boot_data, perm_data, star_bounds, num_iter, k) {
   abline_size <- 1.5
   abline_cols <- c("green", "orange", "red", "brown", "black")
   
-  # NEW: output directory + ensure it exists
+  # new: output directory + ensure it exists
   out_dir <- "/Users/aydinkaratas/Documents/ucla/research/project_coprolite_viromes_NOT_CODE/figures/metabolism"
   dir.create(out_dir, recursive = TRUE, showWarnings = FALSE)
   
   for (i in seq_len(length(observed_stats))) {
     observation <- observed_stats[i]
     cat(paste0(pair_labels[i], " observation: ", observation, "\n"))
-    # NEW: open svg device per figure
+    # new: open svg device per figure
     svg_file <- file.path(out_dir, paste0("hist_", gsub("[^A-Za-z0-9_-]+", "_", pair_labels[i]), k,".svg"))
     svglite::svglite(svg_file)
     
@@ -49,7 +51,7 @@ get_clustering_res <- function(boot_data, perm_data, star_bounds, num_iter, k) {
     }
     results[[i]] <- pair_results
     
-    # NEW: close device after each figure
+    # new: close device after each figure
     dev.off()
   }
   

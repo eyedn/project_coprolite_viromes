@@ -4,6 +4,8 @@
 #       Project Coprolite Viromes
 #       quality_control.sh
 ###############################################################################
+
+
 # use trim galore to remove adapters and trim reads for quality
 quality_control() {
 	local id=$1

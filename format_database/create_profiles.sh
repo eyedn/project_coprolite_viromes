@@ -4,6 +4,8 @@
 #       Project Coprolite Viromes
 #       create_profiles.sh
 ###############################################################################
+
+
 source /u/local/Modules/default/init/modules.sh
 module load anaconda3
 conda activate msa
@@ -20,7 +22,7 @@ FAS=$(head -n ${SGE_TASK_ID} $profiles_dir/clusters.txt | tail -n 1)
 ALN=$(echo $FAS | sed 's/.fas/.aln/')
 mafft --auto --thread $cores $FAS > $ALN
 
-# Run hmmbuild on aligned fasta file to produce profile
+# run hmmbuild on aligned fasta file to produce profile
 software="$HOME/software"
 hmmbuild="$software/hmmer-3.4/src/hmmbuild"
 HMM=$(echo $ALN | sed 's/.aln/.hmm/')

@@ -1,10 +1,11 @@
 #!/bin/bash
-
 ###############################################################################
 #       Aydin Karatas
 #       Project Coprolite Viromes
 #       submit_VFDB_extract_clusters.sh
 ###############################################################################
+
+
 set -euo pipefail
 
 source /u/local/Modules/default/init/modules.sh

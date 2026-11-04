@@ -3,6 +3,8 @@
 #       Project Coprolite Viromes
 #       parse_hmmer_lines.py
 ###############################################################################
+
+
 """Parse HMMER tblout rows used for CheckV-genome VFDB alignment."""
 
 

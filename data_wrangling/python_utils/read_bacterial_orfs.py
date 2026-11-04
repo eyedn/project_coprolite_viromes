@@ -3,11 +3,17 @@
 #       Project Coprolite Viromes
 #       read_bacterial_orfs.py
 ###############################################################################
+
+
 """Read complete bacterial Prokka outputs and validate exact joins."""
 import gzip
 from pathlib import Path
 
-from collect_phage_vf_stats.parse_gff_lines import parse_gff_lines
+# support both pipeline entrypoints and repository-qualified package imports.
+if __package__ and "." in __package__:
+    from ..collect_phage_vf_stats.parse_gff_lines import parse_gff_lines
+else:
+    from collect_phage_vf_stats.parse_gff_lines import parse_gff_lines
 from .parse_protein_ids import parse_protein_ids
 from .join_bacterial_orfs import join_bacterial_orfs
 

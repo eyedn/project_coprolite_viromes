@@ -3,6 +3,8 @@
 #       Project Coprolite Viromes
 #       make_orf_inventory.py
 ###############################################################################
+
+
 """Attach best qualifying hits while retaining non-hit bacterial ORFs."""
 
 

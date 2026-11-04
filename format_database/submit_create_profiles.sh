@@ -5,6 +5,7 @@
 #       submit_create_profiles.sh
 ###############################################################################
 
+
 profiles_dir=$1
 cores=2
 tot_clusters=$(wc -l < $profiles_dir/clusters.txt)

@@ -3,6 +3,8 @@
 #       Project Coprolite Viromes
 #       write_csv.py
 ###############################################################################
+
+
 """Write collector rows with an explicit stable column order."""
 
 import csv

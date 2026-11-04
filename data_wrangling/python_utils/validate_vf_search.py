@@ -3,6 +3,8 @@
 #       Project Coprolite Viromes
 #       validate_vf_search.py
 ###############################################################################
+
+
 """Reject partial, stale, wrong-version, and restricted-pool searches."""
 import hashlib
 import json
@@ -45,6 +47,6 @@ def validate_vf_search(directory, version, faa_path, protein_ids, db_path=None,
             raise ValueError(f"incomplete HMMER output: {directory / name}")
         outputs.append(text)
     hits = parse_hmmer_lines(outputs[0].splitlines())
-    # Validate all targets, including rows below the qualifying thresholds.
+    # validate all targets, including rows below the qualifying thresholds.
     select_best_vf_hits(hits, protein_ids)
     return hits

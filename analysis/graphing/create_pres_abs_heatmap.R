@@ -3,6 +3,8 @@
 #   Project Coprolite Viromes
 #   create_pres_abs_heatmap.R
 ###############################################################################
+
+
 library(gplots)
 library(svglite)
 library(RColorBrewer)
@@ -17,7 +19,7 @@ create_pres_abs_heatmap <- function(data, lifestyle, file_name, plot_dir) {
   life_vec <- substr(data[, (ncol(data) - 2)], 1, 3)
   data <- data[, -(c(ncol(data) - 2):ncol(data))]
   
-  # Define dfs for samples location, category, dend. weight, and side bar color
+  # define dfs for samples location, category, dend. weight, and side bar color
   sample_loc <- data.frame(
     loc = substr(rownames(data), 1, 7),
     cat = cat_vec,
@@ -39,7 +41,7 @@ create_pres_abs_heatmap <- function(data, lifestyle, file_name, plot_dir) {
   sample_weights <- merge_and_retain_order(loc_life, cat_weights, "cat", "cat")
   loc_cols <- merge_and_retain_order(loc_life, cat_cols, "cat", "cat")
   
-  # Define groups dendrogram order, colors, and labels
+  # define groups dendrogram order, colors, and labels
   col_hc <- hclust(dist(data))
   col_dend <- as.dendrogram(col_hc)
   group_dend <- reorder(col_dend, wts = sample_weights$weight,

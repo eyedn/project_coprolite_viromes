@@ -3,6 +3,8 @@
 #       Project Coprolite Viromes
 #       parse_protein_ids.py
 ###############################################################################
+
+
 """Validate protein FASTA records without changing exact identifiers."""
 import re
 
@@ -25,7 +27,7 @@ def parse_protein_ids(lines):
             ids.add(current)
             has_sequence = False
         else:
-            # Prokka translations can contain internal or terminal stops.
+            # translations from Prokka can contain internal or terminal stops.
             if current is None or re.fullmatch(r"[A-Za-z*]+", line) is None:
                 raise ValueError("malformed protein FASTA")
             has_sequence = True

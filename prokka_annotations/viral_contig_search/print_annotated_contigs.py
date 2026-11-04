@@ -3,6 +3,8 @@
 #       Project Coprolite Viromes
 #       print_annotated_contigs.py
 ###############################################################################
+
+
 import typing
 from . import contig
 from . import annotation as annot

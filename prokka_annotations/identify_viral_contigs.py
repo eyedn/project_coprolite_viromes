@@ -3,11 +3,8 @@
 #       Project Coprolite Viromes
 #       identify_viral_contigs.py
 ###############################################################################
-###############################################################################
-#       Aydin Karatas
-#       Project Coporlite Viromes
-#       identify_viral_contigs.py
-###############################################################################
+
+
 from sys import argv
 import viral_contig_search as vcs
 

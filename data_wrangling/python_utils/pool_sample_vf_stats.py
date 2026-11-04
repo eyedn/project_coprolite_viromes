@@ -3,6 +3,8 @@
 #       Project Coprolite Viromes
 #       pool_sample_vf_stats.py
 ###############################################################################
+
+
 """Pool contig counts and interval-union bases within each sample."""
 from .vfdb_constants import GROUP_COLUMNS
 

@@ -3,6 +3,8 @@
 #       Project Coprolite Viromes
 #       parse_phagcn_rows.py
 ###############################################################################
+
+
 """Normalize legacy and current PhaGCN output schemas."""
 
 import json

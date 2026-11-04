@@ -3,7 +3,9 @@
 #   Project Coprolite Viromes
 #   create_phage_vf_plot.R
 ###############################################################################
-# Create one descriptive phage-level lifestyle-by-VFDB plot.
+
+
+# create one descriptive phage-level lifestyle-by-VFDB plot.
 create.phage.vf.plot <- function(data, statistic, facet.variable,
                                  plot.title, y.title) {
   category.labels <- c(

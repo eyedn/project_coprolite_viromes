@@ -3,5 +3,18 @@
 #       Project Coprolite Viromes
 #       __init__.py
 ###############################################################################
-from . import search_files as search
+
+
+"""Helpers for collecting Phred quality counts."""
+
+from . import get_counts
 from . import get_counts as get
+from . import search_files
+from . import search_files as search
+
+__all__ = [
+    "get",
+    "get_counts",
+    "search",
+    "search_files",
+]

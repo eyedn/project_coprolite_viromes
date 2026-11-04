@@ -3,6 +3,8 @@
 #       Project Coprolite Viromes
 #       parse_phatyp_rows.py
 ###############################################################################
+
+
 """Validate and normalize rows from one PhaTYP prediction table."""
 
 

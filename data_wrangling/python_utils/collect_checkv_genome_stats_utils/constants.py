@@ -3,6 +3,8 @@
 #       Project Coprolite Viromes
 #       constants.py
 ###############################################################################
+
+
 """Schemas and scientific thresholds for CheckV-genome collection."""
 
 CHECKV_FILTERS = ("conservative", "aggressive")

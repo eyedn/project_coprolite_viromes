@@ -4,6 +4,7 @@ author: "Aydin Karatas"
 output: html_document
 ---
 
+
 This report separates the original selected-network-genome analysis from the
 new analysis of complete genomes supplied by CheckV. The complete-genome
 pipeline retains both trimming filters; the active report uses conservative
@@ -33,8 +34,10 @@ source.files.from.dir("misc")
 set.seed(seed = 123)
 data_dir <-
   "~/Documents/ucla/research/project_coprolite_viromes_NOT_CODE/data/20261019"
-figs_dir <-
+figs_dir <- getOption(
+  "coprolite.figs.dir",
   "~/Documents/ucla/research/project_coprolite_viromes_NOT_CODE/figures"
+)
 max_iter <- 1000
 ```
 
@@ -52,7 +55,7 @@ stringent VFDB-hit thresholds, keeps one dominant hit per ORF, and compares
 qualifying-hit prevalence across sample groups.
 
 ```{r read in vfdb hits on network genomes}
-# Parse every protein identifier to recover its sample, contig, and ORF.
+# parse every protein identifier to recover its sample, contig, and ORF.
 all_contigs <- read.table(
   paste0(data_dir, "/proteins_all_ids.txt"),
   header = FALSE
@@ -64,7 +67,7 @@ all_contigs <- all_contigs %>%
 all_contigs <- all_contigs %>%
   separate(contig, into = c("contig_id", "orf_id"), sep = "_(?=[^_]+$)")
 
-# Read the selected network contigs that define the focused subset.
+# read the selected network contigs that define the focused subset.
 best_contigs <- read.table(
   paste0(data_dir, "/proteins_best_ids.txt"),
   header = FALSE
@@ -75,7 +78,7 @@ best_contigs <- best_contigs %>%
   mutate(sample = str_replace(sample, "-", ".")) %>%
   rename(contig_id = contig)
 
-# Count proteins on selected contigs to define each sample's denominator.
+# count proteins on selected contigs to define each sample's denominator.
 usable_proteins <- all_contigs %>%
   semi_join(best_contigs,
             by = c("sample" = "sample",
@@ -83,7 +86,7 @@ usable_proteins <- all_contigs %>%
 all_contig_counts <- usable_proteins %>%
   count(sample, name = "total")
 
-# Filter formatted HMMER hits, retain selected contigs, and keep the dominant
+# filter formatted HMMER hits, retain selected contigs, and keep the dominant
 # qualifying hit per sample--contig--ORF combination.
 hits <- read.csv(
   paste0(data_dir, "/proteins_all_hits_formatted.csv"),
@@ -117,7 +120,7 @@ hit_counts <- hits %>%
   rename(VF_hit = query_name) %>%
   column_to_rownames("VF_hit")
 
-# Convert selected-contig hit counts and protein totals to the shared summary
+# convert selected-contig hit counts and protein totals to the shared summary
 # matrix format.
 hit_totals <- hit_counts %>%
   summarise(across(everything(), sum)) %>%
@@ -136,7 +139,7 @@ vf_hit_counts_t$country <- sub("^[^.]+\\.([A-Za-z]{3}).*$", "\\1", rownames(vf_h
 ```
 
 ```{r analyze in vfdb hits on network genomes}
-# Bootstrap medians of qualifying VFDB-hit ORFs per selected-contig protein.
+# bootstrap medians of qualifying VFDB-hit ORFs per selected-contig protein.
 vf_hit_boot_res <- get_row_median(
   data = vf_hit_counts,
   num_iter = max_iter, 
@@ -152,7 +155,7 @@ vf_hit_boot_res_by_country <- get_row_median(
            "FJI", "MEX", "MDG", "TZA", "NPL", "PER")
   )
 pal_size_vf_hit <- nrow(vf_hit_counts_t %>% filter(group == "pal"))
-# Balance resampling to the number of paleofecal samples.
+# balance resampling to the number of paleofecal samples.
 pal_size_vf_hit_boot_res_downsample <- get_row_median(
   data = vf_hit_counts,
   num_iter = max_iter, 
@@ -161,7 +164,7 @@ pal_size_vf_hit_boot_res_downsample <- get_row_median(
   max_resample = pal_size_vf_hit
   )
 
-# Produce group, country, and balanced-group selected-contig violin plots.
+# produce group, country, and balanced-group selected-contig violin plots.
 vf_hit_voilin <- create_cat_voilins(
   data = vf_hit_boot_res, 
   ci_offset = c(0.15, 0.55, 0.55),
@@ -201,7 +204,7 @@ vf_hit_voilin_downsampled <- create_cat_voilins(
 vf_hit_voilin_downsampled[[1]]
 vf_hit_voilin_downsampled[[2]]
 
-# Test selected-contig prevalence differences among bootstrap distributions.
+# test selected-contig prevalence differences among bootstrap distributions.
 vf_hit <- reshape2::melt(vf_hit_boot_res)
 kruskal.test(vf_hit$value, vf_hit$Var2)
 vf_hit_by_country <- reshape2::melt(vf_hit_boot_res_by_country)
@@ -219,13 +222,21 @@ carry full-pool set B provenance.
 
 ### Version-specific CheckV summaries
 
-Prevalence is the number of qualifying VFDB-hit bacterial ORFs divided by the
-total number of bacterial-mode Prokka ORFs. Genomes with no bacterial ORFs
-have missing prevalence; positive-denominator genomes with no qualifying hit
-remain zero.
+Sample prevalence pools qualifying VFDB-hit ORFs across retained genomes and
+divides by the pooled count of all bacterial-mode Prokka CDS calls on those
+genomes, including hypothetical and non-EC proteins. Each ORF is counted once
+regardless of its number of qualifying hits. Hits require full-sequence
+E-value ≤ `1e-10`, score ≥ `25`, and score ≥ `10 × bias`.
+
+Each observation and bootstrap resampling unit is one sample. This cohort
+contains samples with eligible conservative-trimmed CheckV genomes and differs
+from the full contig cohort. Samples without retained genomes are excluded.
+After pooling, samples must have more than five bacterial ORFs; eligible
+zero-hit samples remain zero. The contig exclusions `pal.ENG_LG4560.69` and
+`pal.AUT_2612` also apply here. Stages 4 and 4a require no rerun.
 
 ```{r versioned complete CheckV analysis, results='asis'}
-# Use regenerated set B tables and validate their provenance.
+# use regenerated set B tables and validate their provenance.
 checkv.input.paths <- file.path(data_dir, c(
   metadata = "checkv_genome_metadata.csv",
   features = "checkv_genome_features.csv",
@@ -240,7 +251,7 @@ bundle <- list(tag = "VFDB_setB", label = "VFDB set B")
 checkv.required.columns <- list(
   metadata = c(
     "checkv_filter", "genome_id", "checkv_contig_id", "category",
-    "origin", "genome_length", "checkv_lifestyle", "phatyp_lifestyle",
+    "origin", "sample", "genome_length", "checkv_lifestyle", "phatyp_lifestyle",
     "phagcn_family"
   ),
   features = c(
@@ -253,14 +264,14 @@ checkv.required.columns <- list(
   ),
   vf.stats = c(
     "checkv_filter", "genome_id", "checkv_contig_id", "category",
-    "total_bacterial_orfs", "qualifying_vf_orfs", "vf_present",
+    "origin", "sample", "total_bacterial_orfs", "qualifying_vf_orfs",
+    "vf_present",
     "vf_orf_prevalence"
   ),
   qc = c("checkv_filter", "metric", "value", "details")
 )
-analysis.categories <- c("ind", "pal", "pre")
+analysis.categories <- c("pal", "pre", "ind")
 conservative.filter <- "conservative"
-checkv.vf.plot.data <- list()
 checkv.figs.dir <- file.path(figs_dir, "checkv")
 dir.create(checkv.figs.dir, recursive = TRUE, showWarnings = FALSE)
 
@@ -359,6 +370,17 @@ if (nrow(anti_join(metadata.keys, stats.keys)) > 0 ||
   stop(bundle$label, " has unmatched metadata and VF-stat genome keys")
 }
 
+identity.columns <- c(
+  "checkv.filter", "genome.id", "checkv_contig_id", "category", "origin", "sample"
+)
+if (nrow(anti_join(
+  checkv.vf.stats %>% select(all_of(identity.columns)),
+  checkv.metadata %>% select(all_of(identity.columns)),
+  by = identity.columns
+)) > 0) {
+  stop(bundle$label, " metadata and VF-stat sample identifiers disagree")
+}
+
 vf.plot.data <- checkv.vf.stats %>%
   left_join(
     checkv.metadata %>%
@@ -413,11 +435,9 @@ family.summary <- checkv.metadata %>%
 write.checkv.table(lifestyle.confusion, "lifestyle_confusion", bundle)
 write.checkv.table(lifestyle.agreement, "lifestyle_agreement", bundle)
 write.checkv.table(family.summary, "phagcn_family_summary", bundle)
-write.checkv.table(vf.plot.data, "vf_prevalence", bundle)
 print(lifestyle.confusion)
 print(lifestyle.agreement)
 print(family.summary)
-print(vf.plot.data)
 
 lifestyle.agreement.plot <- lifestyle.agreement %>%
   ggplot(aes(x = checkv.filter, y = genomes, fill = agrees)) +
@@ -443,16 +463,6 @@ lifestyle.agreement.plot <- lifestyle.agreement %>%
 #   ) +
 #   theme_bw() +
 #   theme(axis.text.x = element_text(angle = 45, hjust = 1))
-checkv.vf.plot.data[[bundle$tag]] <- vf.plot.data %>%
-  filter(
-    checkv.filter == conservative.filter,
-    category %in% analysis.categories,
-    is.finite(vf.orf.prevalence)
-  ) %>%
-  mutate(
-    phatyp.lifestyle.plot = normalize.checkv.lifestyle(phatyp.lifestyle),
-    checkv.lifestyle.plot = normalize.checkv.lifestyle(checkv.lifestyle)
-  )
 versioned.plots <- list(
   lifestyle_agreement = lifestyle.agreement.plot
 )
@@ -466,268 +476,417 @@ for (plot.name in names(versioned.plots)) {
   print(versioned.plots[[plot.name]])
 }
 
-eligible.vf.data <- vf.plot.data %>%
-  filter(category %in% analysis.categories, is.finite(vf.orf.prevalence))
-required.violin.groups <- tidyr::expand_grid(
-  checkv.filter = sort(unique(vf.plot.data$checkv.filter)),
-  category = analysis.categories
-)
-observed.violin.groups <- eligible.vf.data %>% count(checkv.filter, category)
-if (nrow(anti_join(required.violin.groups, observed.violin.groups)) > 0) {
-  stop(bundle$label, " has no finite eligible VF prevalence in a violin group")
-}
-
-for (filter.name in sort(unique(eligible.vf.data$checkv.filter))) {
-  bootstrap.input <- eligible.vf.data %>%
-    filter(checkv.filter == filter.name) %>%
-    transmute(
-      genome.column = paste(category, genome.id, sep = "__"),
-      vf.orf.prevalence
-    ) %>%
-    pivot_wider(names_from = genome.column, values_from = vf.orf.prevalence)
-  vf.prevalence.bootstrap <- get_row_median(
-    data = bootstrap.input,
-    num_iter = max_iter,
-    row_num = 1,
-    cats = analysis.categories
-  ) %>%
-    as.data.frame() %>%
-    mutate(
-      checkv.filter = filter.name,
-      vfdb.version = bundle$label,
-      vfdb.version.tag = bundle$tag
-    )
-  write.checkv.table(
-    vf.prevalence.bootstrap,
-    paste0("vf_prevalence_bootstrap_", filter.name),
-    bundle
-  )
-  print(vf.prevalence.bootstrap)
-  vf.prevalence.violin <- create_cat_voilins(
-    data = vf.prevalence.bootstrap %>%
-      select(all_of(analysis.categories)),
-    ci_offset = c(0.15, 0.55, 0.55),
-    file_name = paste0(
-      "vf_prevalence_",
-      bundle$tag,
-      "_",
-      filter.name
-    ),
-    plot_dir = checkv.figs.dir,
-    cats_order = c("pal", "pre", "ind"),
-    plot.title = paste(
-      "Bootstrap median VF prevalence:",
-      bundle$label,
-      "(",
-      filter.name,
-      ")"
-    ),
-    x.title = "Sample category",
-    y.title = "Qualifying VFDB-hit ORFs / all Prokka ORFs"
-  )
-  print(vf.prevalence.violin[[1]])
-  print(vf.prevalence.violin[[2]])
-}
-
-selected.genome.id <- "pre-TZA_ERS9106184_k141_65577"
-selected.annotation <- "vf"
-selected.features <- prepare.checkv.feature.map(
-  features = checkv.features,
-  selected.genome.id = selected.genome.id,
-  selected.annotation = selected.annotation
-)
-if (nrow(selected.features) == 0) {
-  stop(
-    "No eligible ",
-    selected.annotation,
-    " features found for ",
-    selected.genome.id,
-    " in ",
-    bundle$label
-  )
-}
-selected.backbones <- checkv.metadata %>%
-  filter(genome.id == selected.genome.id) %>%
-  transmute(
-    checkv.filter,
-    backbone.start = 1,
-    backbone.end = genome.length
-  )
-selected.features <- selected.features %>%
-  inner_join(selected.backbones, by = "checkv.filter") %>%
-  mutate(vfdb.version = bundle$label, vfdb.version.tag = bundle$tag)
-write.checkv.table(
-  selected.features,
-  paste0(
-    str_replace_all(selected.genome.id, "[^A-Za-z0-9._-]", "_"),
-    "_",
-    selected.annotation,
-    "_features"
-  ),
-  bundle
-)
-print(selected.features)
-
-selected.map <- ggplot() +
-  geom_segment(
-    data = selected.backbones,
-    aes(x = backbone.start, xend = backbone.end, y = 0, yend = 0),
-    color = "black",
-    linewidth = 0.8
-  ) +
-  geom_segment(
-    data = selected.features,
-    aes(x = start, xend = end, y = y, yend = y, color = annotation),
-    linewidth = 3
-  ) +
-  facet_wrap(~ checkv.filter, ncol = 1) +
-  scale_color_manual(
-    values = c(viral = "#0072B2", bacterial = "#D55E00", vf = "#009E73")
-  ) +
-  scale_y_continuous(
-    breaks = c(-1, 0, 1),
-    labels = c("Negative", "Genome", "Positive"),
-    limits = c(-1.4, 1.4)
-  ) +
-  labs(
-    x = "Genome coordinate",
-    y = "Feature strand",
-    color = "Annotation",
-    title = paste(
-      selected.annotation,
-      "features on",
-      selected.genome.id,
-      ":",
-      bundle$label
-    )
-  ) +
-  theme_bw()
-ggsave(
-  file.path(
-    checkv.figs.dir,
-    paste0(
-      str_replace_all(selected.genome.id, "[^A-Za-z0-9._-]", "_"),
-      "_",
-      selected.annotation,
-      "_map_",
-      bundle$tag,
-      ".svg"
-    )
-  ),
-  plot = selected.map,
-  width = 10,
-  height = 5
-)
-print(selected.map)
-
-combined.vf.plot.data <- bind_rows(checkv.vf.plot.data)
-if (nrow(combined.vf.plot.data) == 0) {
-  stop("No finite VF prevalence data for conservative-trimmed genomes")
-}
-
-vf.by.checkv.plot <- make.vf.prevalence.plot(
-  combined.vf.plot.data,
-  "checkv.lifestyle.plot",
-  "CheckV-table lifestyle"
-)
-vf.by.category.plot <- make.vf.prevalence.plot(
-  combined.vf.plot.data,
-  "category",
-  "Sample category",
-  facet.categories = FALSE
-)
-versioned.vf.plots <- list(
-  vf_by_category = vf.by.category.plot,
-  vf_by_checkv = vf.by.checkv.plot
-)
-for (plot.name in names(versioned.vf.plots)) {
-  plot <- versioned.vf.plots[[plot.name]]
-  ggsave(
-    file.path(checkv.figs.dir, paste0(plot.name, "_conservative.svg")),
-    plot = plot,
-    width = 10,
-    height = 7
-  )
-  print(plot)
-}
 
 ```
 
-```{r category-level CheckV bootstrap}
-vf.bootstrap.categories <- c("pal", "pre", "ind")
-vf.hit.positive.data <- combined.vf.plot.data %>%
-  filter(qualifying.vf.orfs > 0)
-vf.empty.positive.categories <- setdiff(
-  vf.bootstrap.categories,
-  unique(vf.hit.positive.data$category)
+### Sample-level VF ORF prevalence
+
+Observed plots show one point per eligible sample, including zeros. Bootstrap
+plots summarize medians from 1,000 draws with replacement and 95% percentile
+intervals. Balanced draws use the eligible paleofecal sample count for every
+group. The Kruskal–Wallis tests below compare **bootstrap median distributions**;
+they are not tests directly on the observed sample proportions. Constant and
+all-zero bootstrap distributions are retained.
+The exported sample table uses `sample.id` for the canonical identifier and
+`sample` for the original bare identifier.
+
+```{r sample-level CheckV VF prevalence, results='asis'}
+# pool integer genome counts before calculating each sample's prevalence.
+vf.sample.data <- prepare.checkv.sample.vf(vf.plot.data)
+if (!all(analysis.categories %in% vf.sample.data$category)) {
+  stop("Sample VF prevalence requires eligible samples in pal, pre, and ind")
+}
+write.checkv.table(vf.sample.data, "vf_sample_prevalence", bundle)
+vf.sample.summary <- vf.sample.data %>%
+  group_by(category) %>%
+  summarise(
+    samples = n(), zero.hit.samples = sum(qualifying.vf.orfs == 0L),
+    genomes = sum(genome.count),
+    total.bacterial.orfs = sum(total.bacterial.orfs),
+    qualifying.vf.orfs = sum(qualifying.vf.orfs), .groups = "drop"
+  ) %>%
+  arrange(match(category, analysis.categories))
+write.checkv.table(vf.sample.summary, "vf_sample_cohort", bundle)
+print(knitr::kable(vf.sample.summary))
+
+# keep the contig report's origin order, reporting absent countries explicitly.
+vf.country.order <- c(
+  "AUT", "AWC", "BMS", "ZAF", "ZAP", "FJI", "MDG", "MEX",
+  "NPL", "PER", "TZA", "CHN", "DNK", "ESP", "USA"
 )
-if (length(vf.empty.positive.categories) > 0) {
-  stop(
-    "No hit-positive genomes for conditional VF prevalence in categories: ",
-    paste(vf.empty.positive.categories, collapse = ", ")
+vf.absent.countries <- setdiff(vf.country.order, vf.sample.data$origin)
+if (length(vf.absent.countries) > 0L) {
+  cat("\n\nCountries omitted because no eligible samples remain: ",
+      paste(vf.absent.countries, collapse = ", "), ".\n\n", sep = "")
+}
+if (length(setdiff(vf.sample.data$origin, vf.country.order)) > 0L) {
+  stop("Eligible sample origins are absent from the contig country order")
+}
+vf.country.order <- intersect(vf.country.order, vf.sample.data$origin)
+
+# plot one observed value per sample by group and by origin.
+vf.sample.observed.plots <- list()
+for (group.column in c("category", "origin")) {
+  group.order <- if (group.column == "category") {
+    analysis.categories
+  } else {
+    vf.country.order
+  }
+  plot.data <- vf.sample.data %>%
+    mutate(plot.group = factor(.data[[group.column]], levels = group.order))
+  observed.plot <- ggplot(
+    plot.data, aes(x = plot.group, y = vf.orf.prevalence)
+  ) +
+    geom_point(
+      position = position_jitter(width = 0.15, height = 0, seed = 123),
+      shape = 21, fill = "grey70", color = "black", alpha = 0.55, size = 2
+    ) +
+    labs(
+      title = "Sample VF ORF prevalence: VFDB set B (conservative trimming)",
+      x = if (group.column == "category") "Sample group" else "Sample origin",
+      y = "Qualifying VFDB-hit ORFs / all bacterial-mode Prokka ORFs"
+    ) +
+    theme_bw()
+  vf.sample.observed.plots[[group.column]] <- observed.plot
+  ggsave(
+    file.path(checkv.figs.dir, paste0(
+      "vf_sample_observed_by_", group.column, "_", bundle$tag, ".svg"
+    )),
+    plot = observed.plot, width = 10, height = 7
   )
+  print(observed.plot)
 }
 
-vf.hit.genome.fraction.bootstrap <- as.data.frame(setNames(
-  lapply(vf.bootstrap.categories, function(category.name) {
-    hit.present <- combined.vf.plot.data %>%
-      filter(category == category.name) %>%
-      pull(qualifying.vf.orfs) > 0
-    replicate(max_iter, {
-      draw.indices <- sample.int(
-        length(hit.present), length(hit.present), replace = TRUE
-      )
-      mean(hit.present[draw.indices])
-    })
-  }),
-  vf.bootstrap.categories
-))
-
-vf.prevalence.hit.positive.bootstrap <- as.data.frame(setNames(
-  lapply(vf.bootstrap.categories, function(category.name) {
-    positive.prevalence <- vf.hit.positive.data %>%
-      filter(category == category.name) %>%
-      pull(vf.orf.prevalence)
-    replicate(max_iter, {
-      draw.indices <- sample.int(
-        length(positive.prevalence), length(positive.prevalence),
-        replace = TRUE
-      )
-      median(positive.prevalence[draw.indices])
-    })
-  }),
-  vf.bootstrap.categories
-))
-
-vf.hit.genome.fraction.violin <- create_cat_voilins(
-  data = vf.hit.genome.fraction.bootstrap,
-  ci_offset = c(0.15, 0.55, 0.55),
-  file_name = "vf_hit_genome_fraction_VFDB_setB_conservative",
-  plot_dir = file.path(figs_dir, "checkv"),
-  cats_order = vf.bootstrap.categories,
-  plot.title = paste0(
-    "Bootstrap fraction of genomes with a VFDB hit\n",
-    "VFDB set B (conservative trimming)"
+# reset the seed so the sample analysis is independent of historical draws.
+set.seed(123)
+vf.sample.pal.size <- sum(vf.sample.data$category == "pal")
+vf.sample.bootstraps <- list(
+  group = bootstrap.checkv.sample.vf(
+    vf.sample.data, "category", analysis.categories, max_iter
   ),
-  x.title = "Sample category",
-  y.title = "Fraction of genomes with at least one qualifying VFDB hit"
-)
-print(vf.hit.genome.fraction.violin[[1]])
-print(vf.hit.genome.fraction.violin[[2]])
-
-vf.prevalence.hit.positive.violin <- create_cat_voilins(
-  data = vf.prevalence.hit.positive.bootstrap,
-  ci_offset = c(0.15, 0.55, 0.55),
-  file_name = "vf_prevalence_hit_positive_VFDB_setB_conservative",
-  plot_dir = file.path(figs_dir, "checkv"),
-  cats_order = vf.bootstrap.categories,
-  plot.title = paste0(
-    "Bootstrap median VF-hit ORF prevalence\n",
-    "Hit-positive genomes, VFDB set B (conservative trimming)"
+  country = bootstrap.checkv.sample.vf(
+    vf.sample.data, "origin", vf.country.order, max_iter
   ),
-  x.title = "Sample category",
-  y.title = "Qualifying VFDB-hit ORFs / all Prokka ORFs (hit-positive genomes)"
+  balanced = bootstrap.checkv.sample.vf(
+    vf.sample.data, "category", analysis.categories, max_iter,
+    resample.size = vf.sample.pal.size
+  )
 )
-print(vf.prevalence.hit.positive.violin[[1]])
-print(vf.prevalence.hit.positive.violin[[2]])
+vf.sample.violin.plots <- list()
+vf.sample.tests <- list()
+for (summary.name in names(vf.sample.bootstraps)) {
+  draws <- vf.sample.bootstraps[[summary.name]]
+  draw.table <- draws %>%
+    mutate(
+      draw = row_number(), checkv.filter = conservative.filter,
+      vfdb_version = bundle$tag, orf_pool = "all_bacterial_prokka_cds"
+    )
+  write.checkv.table(
+    draw.table, paste0("vf_sample_bootstrap_", summary.name), bundle
+  )
+  group.order <- colnames(draws)
+  violin.result <- create_cat_voilins(
+    data = draws,
+    ci_offset = if (summary.name == "country") 0.3 else c(0.15, 0.55, 0.55),
+    file_name = paste0("vf_sample_", summary.name, "_", bundle$tag),
+    plot_dir = checkv.figs.dir,
+    cats_order = group.order,
+    plot.title = paste(
+      "Bootstrap median sample VF prevalence:", summary.name,
+      "\nVFDB set B (conservative trimming)"
+    ),
+    x.title = if (summary.name == "country") "Sample origin" else "Sample group",
+    y.title = "Qualifying VFDB-hit ORFs / all bacterial-mode Prokka ORFs"
+  )
+  vf.sample.violin.plots[[summary.name]] <- violin.result[[1]]
+  print(violin.result[[1]])
+  interval.table <- violin.result[[2]] %>%
+    mutate(
+      eligible.samples = vapply(as.character(cat), function(group.name) {
+        column <- if (summary.name == "country") "origin" else "category"
+        sum(vf.sample.data[[column]] == group.name)
+      }, integer(1)),
+      resample.size = if (summary.name == "balanced") {
+        vf.sample.pal.size
+      } else {
+        eligible.samples
+      },
+      draws = max_iter, checkv.filter = conservative.filter,
+      vfdb_version = bundle$tag, orf_pool = "all_bacterial_prokka_cds"
+    )
+  write.checkv.table(
+    interval.table, paste0("vf_sample_intervals_", summary.name), bundle
+  )
+  print(knitr::kable(interval.table))
+
+  # preserve the selected contig procedure: test bootstrap median draws.
+  test.data <- draws %>%
+    pivot_longer(everything(), names_to = "group", values_to = "median")
+  cat("\n\nKruskal–Wallis comparison of bootstrap median distributions: ",
+      summary.name, "\n\n", sep = "")
+  if (length(unique(test.data$median)) == 1L || ncol(draws) < 2L) {
+    test.result <- tibble(
+      summary = summary.name, statistic = NA_real_, df = ncol(draws) - 1L,
+      p.value = NA_real_,
+      note = "Undefined: all medians identical or fewer than two groups"
+    )
+  } else {
+    test <- kruskal.test(median ~ group, data = test.data)
+    print(test)
+    test.result <- tibble(
+      summary = summary.name, statistic = unname(test$statistic),
+      df = unname(test$parameter), p.value = test$p.value,
+      note = "Kruskal-Wallis test on bootstrap median distributions"
+    )
+  }
+  vf.sample.tests[[summary.name]] <- test.result
+}
+write.checkv.table(
+  bind_rows(vf.sample.tests), "vf_sample_bootstrap_kruskal_tests", bundle
+)
+print(knitr::kable(bind_rows(vf.sample.tests)))
+```
+
+### Genome VF presence and absence by CheckV lifestyle
+
+Each bar counts all conservative-trimmed genomes in one category and CheckV
+lifestyle group. VF-present genomes have at least one qualifying VFDB-hit ORF;
+all other genomes are VF-absent. These descriptive genome counts do not apply
+the sample-level eligibility filters above. Unknown lifestyle assignments are
+excluded and reported below.
+
+```{r genome VF presence absence, results='asis', fig.width=10, fig.height=7}
+# count each validated genome once using its CheckV-table lifestyle.
+vf.genome.data <- vf.plot.data %>%
+  mutate(lifestyle = normalize.checkv.lifestyle(checkv.lifestyle))
+vf.genome.excluded <- vf.genome.data %>%
+  filter(!lifestyle %in% c("lytic", "temperate")) %>%
+  count(category, checkv.lifestyle, name = "excluded.genomes")
+cat("\n\nGenomes excluded for unknown CheckV lifestyle: ",
+    sum(vf.genome.excluded$excluded.genomes), ".\n\n", sep = "")
+if (nrow(vf.genome.excluded) > 0L) {
+  print(knitr::kable(vf.genome.excluded))
+}
+if (any(!vf.genome.data$category %in% analysis.categories)) {
+  stop("Genome VF presence/absence has an unexpected category")
+}
+
+# complete both statuses; empty bars cannot be interpreted as proportions.
+vf.genome.counts <- vf.genome.data %>%
+  filter(lifestyle %in% c("lytic", "temperate")) %>%
+  mutate(
+    category = factor(category, levels = analysis.categories),
+    lifestyle = factor(
+      lifestyle, levels = c("lytic", "temperate"),
+      labels = c("Lytic", "Temperate")
+    ),
+    vf.status = factor(
+      if_else(qualifying.vf.orfs > 0L, "present", "absent"),
+      levels = c("present", "absent")
+    )
+  ) %>%
+  count(category, lifestyle, vf.status, name = "segment.count") %>%
+  complete(category, lifestyle, vf.status, fill = list(segment.count = 0L)) %>%
+  arrange(category, lifestyle, vf.status) %>%
+  group_by(category, lifestyle) %>%
+  mutate(bar.total = sum(segment.count)) %>%
+  ungroup()
+if (any(vf.genome.counts$bar.total == 0L)) {
+  stop("Genome VF presence/absence requires genomes in every lifestyle bar")
+}
+vf.genome.counts <- vf.genome.counts %>%
+  group_by(category, lifestyle) %>%
+  mutate(
+    proportion = segment.count / bar.total,
+    segment.top = cumsum(proportion),
+    segment.bottom = segment.top - proportion,
+    label.y = (segment.bottom + segment.top) / 2
+  ) %>%
+  ungroup() %>%
+  mutate(
+    fill.key = factor(
+      paste(lifestyle, vf.status),
+      levels = c(
+        "Lytic present", "Lytic absent", "Temperate present",
+        "Temperate absent"
+      )
+    ),
+    bar.x = as.numeric(lifestyle),
+    count.label = paste0("n = ", format(segment.count, trim = TRUE)),
+    label.color = if_else(
+      lifestyle == "Lytic" & segment.count > 0L, "white", "black"
+    ),
+    checkv.filter = conservative.filter,
+    vfdb_version = bundle$tag,
+    orf_pool = "all_bacterial_prokka_cds"
+  )
+
+# explicit rectangle bounds keep present below absent without stack defaults.
+vf.genome.presence.plot <- ggplot(vf.genome.counts) +
+  geom_rect(
+    data = filter(vf.genome.counts, segment.count > 0L),
+    aes(
+      xmin = bar.x - 0.36, xmax = bar.x + 0.36,
+      ymin = segment.bottom, ymax = segment.top, fill = fill.key
+    ),
+    color = "black", linewidth = 0.4
+  ) +
+  geom_text(
+    data = filter(vf.genome.counts, segment.count > 0L),
+    aes(x = bar.x, y = label.y, label = count.label, color = label.color),
+    size = 3.8
+  ) +
+  geom_text(
+    data = filter(vf.genome.counts, segment.count == 0L),
+    aes(
+      x = bar.x, y = segment.bottom, label = count.label,
+      vjust = if_else(vf.status == "present", 1.3, -0.3)
+    ),
+    color = "black", size = 3.8
+  ) +
+  facet_grid(~ category, switch = "x", drop = FALSE) +
+  scale_x_continuous(
+    breaks = c(1, 2), labels = c("Lytic", "Temperate"),
+    limits = c(0.5, 2.5), expand = expansion(mult = 0)
+  ) +
+  scale_y_continuous(
+    breaks = seq(0, 1, 0.25), labels = scales::label_percent(),
+    limits = c(-0.06, 1.06), expand = expansion(mult = 0)
+  ) +
+  scale_fill_manual(
+    values = c(
+      "Lytic present" = "#08519C", "Lytic absent" = "#CB181D",
+      "Temperate present" = "#9ECAE1", "Temperate absent" = "#FCAE91"
+    ),
+    drop = FALSE
+  ) +
+  scale_color_identity() +
+  labs(
+    x = NULL, y = "Proportion of genomes", fill = NULL,
+    title = "Genome VF presence/absence by CheckV lifestyle",
+    subtitle = "VFDB set B; conservative trimming"
+  ) +
+  theme_bw() +
+  theme(
+    strip.placement = "outside",
+    strip.background = element_blank(),
+    panel.grid.major.x = element_blank(),
+    panel.grid.minor = element_blank(),
+    legend.position = "bottom"
+  )
+
+# export the descriptive counts and plot with full-pool provenance.
+vf.genome.output.stem <- paste0(
+  "vf_genome_presence_absence_by_category_lifestyle_",
+  bundle$tag, "_", conservative.filter
+)
+write.csv(
+  vf.genome.counts %>%
+    select(
+      category, lifestyle, vf.status, segment.count, bar.total, proportion,
+      checkv.filter, vfdb_version, orf_pool
+    ),
+  file.path(checkv.figs.dir, paste0(vf.genome.output.stem, ".csv")),
+  row.names = FALSE
+)
+ggsave(
+  file.path(checkv.figs.dir, paste0(vf.genome.output.stem, ".svg")),
+  plot = vf.genome.presence.plot, width = 10, height = 7
+)
+print(vf.genome.presence.plot)
+```
+
+
+### Annotated maps of the top VF-bearing genomes
+
+These maps rank the full conservative-trimmed genome pool by qualifying
+VF-bearing ORF count, with genome ID breaking ties. Three genomes per category
+are retained in `pal`, `pre`, `ind` order. Sample-prevalence exclusions and
+minimum-denominator filters do not apply to this selection.
+
+The supplemental `checkv_viral_cds_conservative.csv`, produced by stage 4a
+from the existing viral Prokka GFF, contains **all** viral CDS, including
+hypothetical proteins and proteins without EC numbers. VF calls come from the
+separate bacterial-mode Prokka annotation and validated full-pool VFDB set B
+search. Overlapping calls from these two prediction runs remain separate
+features; matching feature IDs across runs does not imply matching ORFs.
+
+Arrows retain original base-pair coordinates and point according to strand.
+Each panel has its own scale covering position 1 through the full genome
+length. Gray denotes viral CDS without EC annotations, blue denotes viral CDS
+with EC annotations, and red denotes qualifying VF calls. Labels identify all
+EC-bearing viral CDS and all VF calls, including features too narrow to contain
+text. Annotation IDs use category and selected-genome rank, followed by `V`
+(viral) or `F` (VF) and a coordinate-ordered index. They are deterministic for
+the selected genomes and shared by both figures and the annotation tables.
+Products and original VF descriptions are reproduced without inferring a
+function for hypothetical proteins.
+
+```{r top VF genome maps, results='asis', fig.width=15, fig.height=27}
+# read the complete viral-CDS supplement; existing filtered exports stay intact.
+viral.cds.path <- file.path(data_dir, "checkv_viral_cds_conservative.csv")
+if (!file.exists(viral.cds.path)) {
+  stop(
+    "Missing checkv_viral_cds_conservative.csv: rerun stage 4a and copy ",
+    "the supplemental CSV from the cluster data directory into data_dir."
+  )
+}
+viral.cds <- read.csv(
+  viral.cds.path, check.names = FALSE,
+  colClasses = c(checkv_filter = "character", genome_id = "character",
+                feature_id = "character", strand = "character",
+                product = "character", ec_number = "character")
+) %>%
+  rename(checkv.filter = checkv_filter, genome.id = genome_id,
+         ec.number = ec_number)
+vf.genome.maps <- prepare.checkv.genome.maps(
+  vf.plot.data, checkv.metadata, checkv.features, viral.cds
+)
+vf.top.genome.selection <- vf.genome.maps$selection
+vf.top.genome.annotations <- vf.genome.maps$annotations
+vf.top.genome.separate <- create.checkv.genome.map(
+  vf.genome.maps, "separate_tracks"
+)
+vf.top.genome.overlay <- create.checkv.genome.map(vf.genome.maps, "overlay")
+
+# export both views and their common selection and complete annotation tables.
+vf.map.tag <- paste0("_", bundle$tag, "_", conservative.filter)
+write.csv(
+  vf.top.genome.selection,
+  file.path(checkv.figs.dir, paste0("vf_top_genome_selection",
+                                  vf.map.tag, ".csv")),
+  row.names = FALSE, na = ""
+)
+write.csv(
+  vf.top.genome.annotations,
+  file.path(checkv.figs.dir, paste0("vf_top_genome_annotations",
+                                  vf.map.tag, ".csv")),
+  row.names = FALSE, na = ""
+)
+ggsave(
+  file.path(checkv.figs.dir, paste0("vf_top_genome_maps_separate_tracks",
+                                  vf.map.tag, ".svg")),
+  plot = vf.top.genome.separate, width = 15, height = 27
+)
+ggsave(
+  file.path(checkv.figs.dir, paste0("vf_top_genome_maps_overlay",
+                                  vf.map.tag, ".svg")),
+  plot = vf.top.genome.overlay, width = 15, height = 27
+)
+print(knitr::kable(vf.top.genome.selection, row.names = FALSE))
+cat("\n\n")
+print(vf.top.genome.separate)
+print(vf.top.genome.overlay)
+
+# print every plotted feature, keeping each genome's table together.
+for (genome in vf.top.genome.selection$genome.id) {
+  cat("\n\n#### ", genome, "\n\n", sep = "")
+  # keep large annotation tables as raw HTML during Pandoc conversion.
+  cat('\n\n```{=html}\n<div style="overflow-x: auto;">\n')
+  print(knitr::kable(
+    vf.top.genome.annotations %>% filter(genome.id == genome),
+    row.names = FALSE, format = "html", escape = TRUE
+  ))
+  cat("\n</div>\n```\n\n")
+}
 ```

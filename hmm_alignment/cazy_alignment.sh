@@ -4,6 +4,8 @@
 #       Project Coprolite Viromes
 #       cazy_alignment.sh
 ###############################################################################
+
+
 cd $HOME/project_coprolite_viromes
 for FILE in hmm_alignment/bash_functions/* ; do source $FILE ; done
 for FILE in general_bash_functions/* ; do source $FILE ; done

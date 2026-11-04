@@ -3,7 +3,9 @@
 #   Project Coprolite Viromes
 #   pool_phage_vf_coverage.R
 ###############################################################################
-# Pool covered and total phage-contig bases within each sample.
+
+
+# pool covered and total phage-contig bases within each sample.
 pool.phage.vf.coverage <- function(data, exclusions = character()) {
   required.columns <- c(
     "sample", "contig_length", "vf_covered_bases"

@@ -3,6 +3,8 @@
 #       Project Coprolite Viromes
 #       log_diagnostic.py
 ###############################################################################
+
+
 """Write flushed collector diagnostics with process peak resident memory."""
 
 from datetime import datetime, timezone

@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
+###############################################################################
+#       Aydin Karatas
+#       Project Coprolite Viromes
+#       vf_alignment.sh
+###############################################################################
 
-###############################################################################
-#           Aydin Loid Karatas
-#           Project Coprolite Viromes
-#           vf_alignment.sh
-###############################################################################
 
 cd "$HOME/project_coprolite_viromes" || return 1
 for file_path in hmm_alignment/bash_functions/*; do
@@ -15,18 +15,18 @@ for file_path in general_bash_functions/*; do
 done
 
 
-# Define input variables.
+# define input variables.
 origin=$1
 project_dir=$2
 num_cores=$3
 
-# Define sample variables.
+# define sample variables.
 sample=$(head -n "${SGE_TASK_ID}" \
     "${project_dir}/samples/${origin}_samples.txt" | \
     tail -n 1 | cut -d ' ' -f 1)
 label="bac_on_phage"
 
-# Define directories and files.
+# define directories and files.
 alignment_dir="${project_dir}/alignment"
 annotations_dir="${project_dir}/genome_annotation/\
 ${origin}_${sample}_annotation_${label}"
@@ -36,7 +36,7 @@ orfs_file="${annotations_dir}/${sample}.faa"
 phamer_file="${prediction_dir}/phamer_prediction.csv"
 
 
-# Return 0 for a nonempty FASTA, 10 for zero records, and 1 for malformed data.
+# return 0 for a nonempty FASTA, 10 for zero records, and 1 for malformed data.
 check_faa_stream() {
     awk '
         BEGIN { records = 0; invalid = 0 }
@@ -67,7 +67,7 @@ check_faa_stream() {
 }
 
 
-# Return 0 only when a valid PhaMer table contains all non-phage predictions.
+# return 0 only when a valid PhaMer table contains all non-phage predictions.
 check_all_non_phage() {
     local phamer_path=$1
 
@@ -123,7 +123,7 @@ check_all_non_phage() {
 }
 
 
-# Validate VF-specific empty inputs before calling the generic aligner.
+# validate VF-specific empty inputs before calling the generic aligner.
 faa_status=1
 if [ -f "${orfs_file}" ]; then
     if check_faa_stream < "${orfs_file}"; then
@@ -177,7 +177,7 @@ if [ "${faa_status}" -ne 0 ]; then
 fi
 
 
-# Search each reference independently against the complete bacterial FAA.
+# search each reference independently against the complete bacterial FAA.
 for version in VFDB_setA VFDB_setB; do
     case "$version" in
         VFDB_setA) db_file="${ref_db}/VFDB_setA_pro_20230917.txt" ;;

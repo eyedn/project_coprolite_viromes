@@ -3,6 +3,8 @@
 #       Project Coprolite Viromes
 #       read_gff.py
 ###############################################################################
+
+
 """Read one gzip-compressed Prokka GFF file."""
 
 import gzip

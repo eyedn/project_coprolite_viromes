@@ -3,6 +3,8 @@
 #   Project Coprolite Viromes
 #   normalize_checkv_lifestyle.R
 ###############################################################################
+
+
 # internal functions ----
 
 normalize.checkv.lifestyle <- function(lifestyle) {

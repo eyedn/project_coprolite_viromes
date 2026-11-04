@@ -3,6 +3,8 @@
 #   Project Coprolite Viromes
 #   get_ec_class_counts.R
 ###############################################################################
+
+
 # return df containing raw counts ec's, collapsed by ec class
 get_ec_class_counts <- function(data, classes) {
   class_counts <- matrix(nrow = length(classes), ncol = ncol(data))

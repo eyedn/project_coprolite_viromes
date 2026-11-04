@@ -4,6 +4,7 @@ author: "Aydin Karatas"
 output: html_document
 ---
 
+
 This report compares virome features among paleofecal/coprolite (`pal`),
 modern non-industrial (`pre`), and modern industrial (`ind`) samples. It
 summarizes phage lifestyle, functional diversity, virulence-factor signals,
@@ -16,7 +17,7 @@ tests.
 base_dir <- "~/Documents/ucla/research/project_coprolite_viromes/analysis/"
 knitr::opts_chunk$set(root.dir = base_dir)
 
-# Load the analysis helpers from the statistics, graphing, and miscellaneous
+# load the analysis helpers from the statistics, graphing, and miscellaneous
 # directories.
 library(tidyverse)
 source_files_from_dir <- function(directory) {
@@ -32,7 +33,7 @@ source_files_from_dir("stats")
 source_files_from_dir("graphing")
 source_files_from_dir("misc")
 
-# Define the shared random seed, input/output directories, and bootstrap size.
+# define the shared random seed, input/output directories, and bootstrap size.
 set.seed(seed = 123)
 data_dir <- "~/Documents/ucla/research/project_coprolite_viromes_NOT_CODE/data/20261019"
 figs_dir <- "~/Documents/ucla/research/project_coprolite_viromes_NOT_CODE/figures"
@@ -53,7 +54,7 @@ country-level bootstrap medians, a paleofecal-size downsampling sensitivity
 analysis, violin plots, and Kruskal–Wallis tests.
 
 ```{r lifestyle boot}
-# Read lifestyle counts and remove samples excluded from this analysis.
+# read lifestyle counts and remove samples excluded from this analysis.
 lifestyle_counts <- read.csv(
   file = paste0(data_dir, "/lifestyle_counts.csv"),
   header = TRUE,
@@ -62,7 +63,7 @@ lifestyle_counts <- read.csv(
 lifestyle_counts <- lifestyle_counts %>% select(
   -pal.AUT_2612, -pal.ENG_LG4560.69, -pal.BEL_SRS510175
   )
-# Derive total counts, the unadjusted ratio, a +1 pseudocount ratio for
+# derive total counts, the unadjusted ratio, a +1 pseudocount ratio for
 # zero-safe comparison, and the temperate fraction.
 lifestyle_counts["total", ] <- colSums(lifestyle_counts)
 lifestyle_counts["temp_to_lyt", ] <- 
@@ -72,14 +73,14 @@ lifestyle_counts["temp_to_lyt_+1", ] <-
 lifestyle_counts["temp_perc", ] <-
   lifestyle_counts["temperate", ] / lifestyle_counts["total", ]
 lifestyle_counts <- t(lifestyle_counts)
-# Retain samples with more than 100 lifestyle predictions before summarizing.
+# retain samples with more than 100 lifestyle predictions before summarizing.
 lifestyle_counts <- lifestyle_counts[lifestyle_counts[, "total"] > 100, ]
 lifestyle_counts <- t(lifestyle_counts)
 lifestyle_counts_t <- as.data.frame(t(lifestyle_counts))
 lifestyle_counts_t$group <- sub("\\..*$", "", rownames(lifestyle_counts_t))
 lifestyle_counts_t$country <- sub("^[^.]+\\.([A-Za-z]{3}).*$", "\\1", rownames(lifestyle_counts_t))
 
-# Bootstrap group and country medians of the temperate-to-virulent ratio.
+# bootstrap group and country medians of the temperate-to-virulent ratio.
 lifestyle_boot_res <- get_row_median(
   data = lifestyle_counts,
   num_iter = max_iter, 
@@ -115,7 +116,7 @@ lifestyle_boot_res_by_country <- get_row_median(
   bootstrap = TRUE
   )
 pal_size <- nrow(lifestyle_counts_t %>% filter(group == "pal"))
-# Downsample each group to the number of paleofecal samples for a balanced
+# downsample each group to the number of paleofecal samples for a balanced
 # comparison.
 lifestyle_boot_res_downsample <- get_row_median(
   data = lifestyle_counts,
@@ -125,7 +126,7 @@ lifestyle_boot_res_downsample <- get_row_median(
   max_resample = pal_size
   )
 
-# Produce group, country, and balanced-group violin plots with bootstrap
+# produce group, country, and balanced-group violin plots with bootstrap
 # intervals.
 lifestyle_voilin <- create_cat_voilins(
   data = lifestyle_boot_res, 
@@ -166,7 +167,7 @@ lifestyle_voilin_downsampled <- create_cat_voilins(
 lifestyle_voilin_downsampled[[1]]
 lifestyle_voilin_downsampled[[2]]
 
-# Test whether bootstrap ratio distributions differ among groups and countries.
+# test whether bootstrap ratio distributions differ among groups and countries.
 lifestyle <- reshape2::melt(lifestyle_boot_res)
 kruskal.test(lifestyle$value, lifestyle$Var2)
 lifestyle_by_country <- reshape2::melt(lifestyle_boot_res_by_country)
@@ -182,7 +183,7 @@ points and bootstrap distributions for the modern-country groups as violins;
 diamonds mark medians and intervals summarize the bootstrap distributions.
 
 ```{r supplemetary lifestyle plot}
-# Use bootstrap draws for modern-country violins and raw values for the
+# use bootstrap draws for modern-country violins and raw values for the
 # paleofecal-country points.
 
 boot_wide <- lifestyle_boot_res_by_country
@@ -193,7 +194,7 @@ dot_cats    <- c("AUT","AWC","BMS","ZAF","ZAP")
 
 cats_order <- c("AUT","AWC","BMS","ZAF","ZAP","FJI","MDG","MEX","NPL","PER","TZA","CHN","DNK","ESP","USA")
 
-# Convert both inputs to a common long format and retain their display groups.
+# convert both inputs to a common long format and retain their display groups.
 boot_long <- reshape2::melt(as.data.frame(boot_wide)) %>%
   setNames(c("cat", "value")) %>%
   mutate(
@@ -213,7 +214,7 @@ raw_long <- raw_df %>%
 plot_df <- bind_rows(boot_long, raw_long) %>%
   mutate(cat = factor(cat, levels = cats_order))
 
-# Calculate 95% bootstrap intervals for the violin groups only.
+# calculate 95% bootstrap intervals for the violin groups only.
 ci_data <- plot_df %>%
   filter(source == "boot") %>%
   group_by(cat) %>%
@@ -225,24 +226,24 @@ ci_data <- plot_df %>%
   ) %>%
   mutate(
     x_pos = as.numeric(cat),
-    # Offset interval bars slightly so they remain visible beside each violin.
+    # offset interval bars slightly so they remain visible beside each violin.
     x_lab_pos = x_pos + 0.15
   )
 
 first_mid    <- (ci_data$ymin[1] + ci_data$ymax[1]) / 2
 first_x_text <- ci_data$x_lab_pos[1] + 0.1
 
-# Define the shared grayscale and interval colors used in this supplementary
+# define the shared grayscale and interval colors used in this supplementary
 # figure.
 grey_border <- brewer.pal(9, "Greys")[8]
 grey_fill   <- brewer.pal(9, "Greys")[2]
 ci_color    <- brewer.pal(11, "RdBu")[10]
 
 
-# Draw individual paleofecal points, modern bootstrap violins, medians, and
+# draw individual paleofecal points, modern bootstrap violins, medians, and
 # their uncertainty intervals.
 p <- ggplot(plot_df, aes(x = cat)) +
-  # Draw raw points only for the paleofecal-country groups.
+  # draw raw points only for the paleofecal-country groups.
   geom_point(
     data = subset(plot_df, source == "raw"),
     aes(y = value), pch = 21, fill = grey_fill, 
@@ -250,22 +251,22 @@ p <- ggplot(plot_df, aes(x = cat)) +
     size = 5.5, alpha = 0.9,
     color = ci_color, stroke = 1
   ) +
-  # Draw violin distributions only for the bootstrap-based modern groups.
+  # draw violin distributions only for the bootstrap-based modern groups.
   geom_violin(
     data = subset(plot_df, source == "boot"),
     aes(y = value, fill = cat), 
     color = grey_border, linewidth = 1, trim = TRUE, width = 1
   ) +
-  # Use a consistent gray fill across violin groups.
+  # use a consistent gray fill across violin groups.
   scale_fill_manual(values = rep(grey_fill, length(cats_order)), guide = "none") +
-  # Mark each displayed group's median with a diamond.
+  # mark each displayed group's median with a diamond.
   stat_summary(
     aes(y = value),
     fun = median, geom = "point",
     fill = grey_border, color = grey_fill, stroke = 1,
     pch = 23, size = 5.5
   ) +
-  # Add intervals only where bootstrap draws provide uncertainty estimates.
+  # add intervals only where bootstrap draws provide uncertainty estimates.
   geom_segment(
     data = ci_data,
     aes(x = x_lab_pos, xend = x_lab_pos, y = ymin, yend = ymax),
@@ -308,7 +309,7 @@ excludes the listed samples, calculates per-sample diversity, and produces a
 raw-diversity plot plus bootstrap-median violin plots by sample group.
 
 ```{r metabolic gene analysis: read data}
-# Read EC-annotation counts and remove samples excluded from this analysis.
+# read EC-annotation counts and remove samples excluded from this analysis.
 vir_ec_counts <- read.csv(
   file = paste0(data_dir, "/bac_on_phage_ec_counts.csv"),
   header = TRUE,
@@ -320,14 +321,14 @@ vir_ec_counts <- vir_ec_counts %>% select(
 ```
 
 ```{r metabolic gene analysis: diversity}
-# Calculate Shannon diversity per sample and bootstrap its group medians.
+# calculate Shannon diversity per sample and bootstrap its group medians.
 diversity_data <- get_diversity_indeces(
   data = t(vir_ec_counts),
   div_index = "shannon",
   num_iter = max_iter
 )
 
-# Plot the unaggregated per-sample Shannon diversity values.
+# plot the unaggregated per-sample Shannon diversity values.
 diversity_plot <- create_diversity_plots(
   data = diversity_data[[1]],
   div_index = "Shannon", 
@@ -336,7 +337,7 @@ diversity_plot <- create_diversity_plots(
   )
 diversity_plot
 
-# Plot the bootstrapped group medians and their uncertainty intervals.
+# plot the bootstrapped group medians and their uncertainty intervals.
 diversity_violin <- create_cat_voilins(
   data = diversity_data[[2]], 
   ci_offset = c(0.2, 0.55, 0.55),
@@ -363,7 +364,7 @@ VFDB metadata are reshaped into the identifier and category fields needed to
 annotate subsequent hit-count results.
 
 ```{r vfdb alignment: format reference}
-# Read VFDB metadata and retain the identifier, name, and category fields.
+# read VFDB metadata and retain the identifier, name, and category fields.
 vf_meta_data <- read.csv(
   file = paste0(data_dir, "/VFs.csv"),
   header = TRUE)
@@ -381,7 +382,7 @@ Annotation status does not restrict the search pool. Outputs are written
 under the selected version's figure directory.
 
 ```{r versioned contig VFDB analysis, results='asis'}
-# Use regenerated set B tables and validate their provenance.
+# use regenerated set B tables and validate their provenance.
 vfdb.input.paths <- file.path(data_dir, c(
   phage.stats = "phage_vf_stats.csv",
   sample.stats = "sample_vf_stats.csv",
@@ -391,11 +392,11 @@ names(vfdb.input.paths) <- c("phage.stats", "sample.stats", "orfs")
 vfdb.version <- "VFDB_setB"
 vfdb.label <- sub("VFDB_set", "VFDB set ", vfdb.version)
 
-# Analyze the selected reference set once.
+# analyze the selected reference set once.
 run.contig.vf.analysis <- function(vfdb.version, vfdb.input.paths,
                                    figs_dir) {
   cat("### Phage-level lifestyle and VFDB statistics\n\nThe unit in these descriptive comparisons is one predicted phage contig,\nwhich is not necessarily a complete phage genome. Both statistics use the\nsame qualifying set of VFDB hits from all bacterial-mode Prokka CDS calls\nafter the full-sequence\nE-value, score, and bias thresholds have been applied. Unknown lifestyle\nclassifications remain in the source table but are excluded from these\ntwo-level plots.", "\n\n")
-  # Read and validate one threshold-consistent row per predicted phage contig.
+  # read and validate one threshold-consistent row per predicted phage contig.
   phage.columns <- c(
     "category", "origin", "sample", "contig_id", "lifestyle",
     "contig_length", "total_bacterial_orfs", "qualifying_vf_orfs",
@@ -416,7 +417,7 @@ run.contig.vf.analysis <- function(vfdb.version, vfdb.input.paths,
   rm(phage.vf.stats)
   invisible(gc())
 
-  # Compare qualifying VFDB-hit ORF prevalence by lifestyle across sample groups.
+  # compare qualifying VFDB-hit ORF prevalence by lifestyle across sample groups.
   phage.vf.prevalence.group.plot <- create.phage.vf.plot(
     data = phage.vf.plot.data,
     statistic = "vf.orf.prevalence",
@@ -434,7 +435,7 @@ run.contig.vf.analysis <- function(vfdb.version, vfdb.input.paths,
     width = 9
   )
 
-  # Compare qualifying VFDB-hit ORF prevalence by lifestyle across origins.
+  # compare qualifying VFDB-hit ORF prevalence by lifestyle across origins.
   phage.vf.prevalence.origin.plot <- create.phage.vf.plot(
     data = phage.vf.plot.data,
     statistic = "vf.orf.prevalence",
@@ -452,7 +453,7 @@ run.contig.vf.analysis <- function(vfdb.version, vfdb.input.paths,
     width = 14
   )
 
-  # Compare qualifying VFDB-hit ORF coverage by lifestyle across sample groups.
+  # compare qualifying VFDB-hit ORF coverage by lifestyle across sample groups.
   phage.vf.coverage.group.plot <- create.phage.vf.plot(
     data = phage.vf.plot.data,
     statistic = "vf.contig.coverage",
@@ -470,7 +471,7 @@ run.contig.vf.analysis <- function(vfdb.version, vfdb.input.paths,
     width = 9
   )
 
-  # Compare qualifying VFDB-hit ORF coverage by lifestyle across origins.
+  # compare qualifying VFDB-hit ORF coverage by lifestyle across origins.
   phage.vf.coverage.origin.plot <- create.phage.vf.plot(
     data = phage.vf.plot.data,
     statistic = "vf.contig.coverage",
@@ -487,13 +488,13 @@ run.contig.vf.analysis <- function(vfdb.version, vfdb.input.paths,
     height = 10,
     width = 14
   )
-  # Release full-data plot inputs once all four SVGs have been written.
+  # release full-data plot inputs once all four SVGs have been written.
   rm(phage.vf.plot.data, phage.vf.prevalence.group.plot,
      phage.vf.prevalence.origin.plot, phage.vf.coverage.group.plot,
      phage.vf.coverage.origin.plot)
   invisible(gc())
   cat("### Per-ORF prevalence\n\nAll bacterial-mode Prokka proteins are searched, including hypothetical\nand named non-EC proteins. Alignments are filtered with stringent\nE-value, score, and bias thresholds. For each sample and ORF, only the\nbest-ranked qualifying hit is retained, then counts are completed with zeros\nfor samples lacking a hit.", "\n\n")
-  # Filter to qualifying VFDB alignments and retain the dominant hit per
+  # filter to qualifying VFDB alignments and retain the dominant hit per
   # sample--ORF pair before tabulating counts.
   sample.vf.stats <- read.csv(
     vfdb.input.paths[["sample.stats"]]
@@ -548,7 +549,7 @@ run.contig.vf.analysis <- function(vfdb.version, vfdb.input.paths,
   vf_prot_counts_t$total <- as.numeric(vf_prot_counts_t$total)
   vf_prot_counts_t$proportion <- as.numeric(vf_prot_counts_t$proportion)
 
-  # Compare eligible samples' lifestyle ratios with their VFDB-hit ORF
+  # compare eligible samples' lifestyle ratios with their VFDB-hit ORF
   # prevalence. Each sample must pass both the lifestyle total (>100) and
   # total bacterial ORFs (>MIN_TOTAL_ORFS) eligibility filters used above.
   lifestyle_vf_plot_data <- lifestyle_counts_t %>%
@@ -640,7 +641,7 @@ run.contig.vf.analysis <- function(vfdb.version, vfdb.input.paths,
     width = 14
   )
 
-  # Bootstrap medians of qualifying VFDB-hit ORFs per bacterial-mode Prokka ORF.
+  # bootstrap medians of qualifying VFDB-hit ORFs per bacterial-mode Prokka ORF.
   vf_prot_boot_res <- get_row_median(
     data = vf_prot_counts,
     num_iter = max_iter,
@@ -656,7 +657,7 @@ run.contig.vf.analysis <- function(vfdb.version, vfdb.input.paths,
              "FJI", "MEX", "MDG", "TZA", "NPL", "PER")
     )
   pal_size_vf_prot <- nrow(vf_prot_counts_t %>% filter(group == "pal"))
-  # Balance the bootstrap resampling size to the paleofecal group.
+  # balance the bootstrap resampling size to the paleofecal group.
   pal_size_vf_prot_boot_res_downsample <- get_row_median(
     data = vf_prot_counts,
     num_iter = max_iter,
@@ -665,7 +666,7 @@ run.contig.vf.analysis <- function(vfdb.version, vfdb.input.paths,
     max_resample = pal_size_vf_prot
     )
 
-  # Produce group, country, and balanced-group prevalence violin plots.
+  # produce group, country, and balanced-group prevalence violin plots.
   vf_prot_voilin <- create_cat_voilins(
     data = vf_prot_boot_res,
     ci_offset = c(0.15, 0.55, 0.55),
@@ -705,7 +706,7 @@ run.contig.vf.analysis <- function(vfdb.version, vfdb.input.paths,
   print(vf_prot_voilin_downsampled[[1]])
   print(vf_prot_voilin_downsampled[[2]])
 
-  # Test prevalence differences among group and country bootstrap distributions.
+  # test prevalence differences among group and country bootstrap distributions.
   vf_prot <- reshape2::melt(vf_prot_boot_res)
   print(kruskal.test(vf_prot$value, vf_prot$Var2))
   vf_prot_by_country <- reshape2::melt(vf_prot_boot_res_by_country)
@@ -713,9 +714,9 @@ run.contig.vf.analysis <- function(vfdb.version, vfdb.input.paths,
   vf_prot_downsampled <- reshape2::melt(pal_size_vf_prot_boot_res_downsample)
   print(kruskal.test(vf_prot_downsampled$value, vf_prot_downsampled$Var2))
   cat("### Contig coverage\n\nThis section measures the fraction of phage-contig bases covered by qualifying\nVFDB-hit ORFs. After removing excluded samples, it summarizes coverage with\nbootstrap medians, country-level and downsampled comparisons, violin plots,\nand Kruskal\u2013Wallis tests.", "\n\n")
-  # Use sample coverage pooled before releasing the phage table above.
+  # use sample coverage pooled before releasing the phage table above.
 
-  # Retain the established metric-by-sample layout for bootstrap summaries.
+  # retain the established metric-by-sample layout for bootstrap summaries.
   vf_contig_hits <- sample.vf.coverage %>%
     pivot_longer(
       cols = -sample,
@@ -734,7 +735,7 @@ run.contig.vf.analysis <- function(vfdb.version, vfdb.input.paths,
     drop = FALSE
   ]
 
-  # Compare lifestyle ratios with the fraction of phage-contig bases covered by
+  # compare lifestyle ratios with the fraction of phage-contig bases covered by
   # qualifying VFDB-hit ORFs. Retain the same eligible samples as the ORF-
   # prevalence plot and discard non-finite coverage values.
   lifestyle_vf_coverage_plot_data <- lifestyle_vf_plot_data %>%
@@ -813,7 +814,7 @@ run.contig.vf.analysis <- function(vfdb.version, vfdb.input.paths,
     width = 14
   )
 
-  # Bootstrap medians of the fraction of total phage-contig length covered by
+  # bootstrap medians of the fraction of total phage-contig length covered by
   # qualifying VFDB-hit ORFs.
   vf_aln_boot_res <- get_row_median(
     data = vf_contig_hits,
@@ -830,7 +831,7 @@ run.contig.vf.analysis <- function(vfdb.version, vfdb.input.paths,
              "FJI", "MEX", "MDG", "TZA", "NPL", "PER")
     )
   pal_size_vf_prot <- nrow(vf_prot_counts_t %>% filter(group == "pal"))
-  # Use the paleofecal sample count as the balanced resampling size.
+  # use the paleofecal sample count as the balanced resampling size.
   pal_size_vf_aln_boot_res_downsample <- get_row_median(
     data = vf_contig_hits,
     num_iter = max_iter,
@@ -839,7 +840,7 @@ run.contig.vf.analysis <- function(vfdb.version, vfdb.input.paths,
     max_resample = pal_size_vf_prot
     )
 
-  # Produce group, country, and balanced-group contig-coverage violin plots.
+  # produce group, country, and balanced-group contig-coverage violin plots.
   vf_aln_voilin <- create_cat_voilins(
     data = vf_aln_boot_res,
     ci_offset = c(0.15, 0.55, 0.55),
@@ -877,7 +878,7 @@ run.contig.vf.analysis <- function(vfdb.version, vfdb.input.paths,
   print(vf_aln_voilin_downsampled[[1]])
   print(vf_aln_voilin_downsampled[[2]])
 
-  # Test coverage differences among group and country bootstrap distributions.
+  # test coverage differences among group and country bootstrap distributions.
   vf_aln <- reshape2::melt(vf_aln_boot_res)
   print(kruskal.test(vf_aln$value, vf_aln$Var2))
   vf_aln_by_country <- reshape2::melt(vf_aln_boot_res_by_country)
@@ -885,12 +886,12 @@ run.contig.vf.analysis <- function(vfdb.version, vfdb.input.paths,
   vf_aln_downsampled <- reshape2::melt(pal_size_vf_aln_boot_res_downsample)
   print(kruskal.test(vf_aln_downsampled$value, vf_aln_downsampled$Var2))
   cat("### Differential representation\n\nNormalized VFDB counts are compared among groups to rank individual VFDB\nentries by Kruskal\u2013Wallis and pairwise tests. The resulting table is joined to\nVFDB categories; category frequencies are summarized overall, among entries\nwith Kruskal\u2013Wallis *p* <= 0.05, and among the top-ranked entries for the\nsubsequent heatmap selection.", "\n\n")
-  # Normalize VFDB counts before comparing representation among sample groups.
+  # normalize VFDB counts before comparing representation among sample groups.
   vf_norm <- normalize_data(vf_counts)
   vf_t_norm <- t(vf_norm)
   vf_t_scale <- scale(vf_t_norm)
 
-  # Rank differentially represented VFDB entries and attach their VFDB
+  # rank differentially represented VFDB entries and attach their VFDB
   # categories.
   vf_diff_repres <- get_diff_repres_cols(data = vf_t_norm)
   vf_diff_repres <- cbind(rownames(vf_diff_repres), vf_diff_repres)
@@ -905,7 +906,7 @@ run.contig.vf.analysis <- function(vfdb.version, vfdb.input.paths,
   vf_diff_repres$pre_vs_pal_p <- as.numeric(vf_diff_repres$pre_vs_pal_p)
   vf_diff_repres <- vf_diff_repres[order(vf_diff_repres[, "kruskal_p"]), ]
 
-  # Summarize the most frequent VFDB categories across all ranked entries and
+  # summarize the most frequent VFDB categories across all ranked entries and
   # statistically significant entries.
   vfc_freq <- vf_diff_repres %>%
     filter(!is.na(VFCID)) %>% count(Var1 = VFCID, name = "Freq")
@@ -934,7 +935,7 @@ run.contig.vf.analysis <- function(vfdb.version, vfdb.input.paths,
   print(vfc_subset_freq)
 
 
-  # Use Jenks natural breaks on top-category frequencies to select the heatmap
+  # use Jenks natural breaks on top-category frequencies to select the heatmap
   # cutoff.
   library(BAMMtools)
   vfc_break <- getJenksBreaks(var = vfc_subset_freq$Freq, k = 4)[[2]]
@@ -962,7 +963,7 @@ Industrial. Positive log ratios indicate that the numerator source category is
 more strongly represented.
 
 ```{r plot source tracker results}
-# Read SourceTracker's estimated source proportions and their standard
+# read SourceTracker's estimated source proportions and their standard
 # deviations.
 mixing_props <- read.table(
   file = paste0(data_dir, "/sourcetracker_output/mixing_proportions.txt"),
@@ -975,7 +976,7 @@ mixing_sds
 ```
 
 ```{r plot mixing proportions from sourcetracker}
-# Create the output directory and reshape SourceTracker estimates into a
+# create the output directory and reshape SourceTracker estimates into a
 # sample-by-source table.
 source.tracker.fig.dir <- paste0(figs_dir, "/sourcetracker")
 dir.create(source.tracker.fig.dir, recursive = TRUE, showWarnings = FALSE)
@@ -1000,7 +1001,7 @@ sds.long <- mixing_sds %>%
     values_to = "sd"
   )
 
-# Join proportions to their standard deviations, order source categories, and
+# join proportions to their standard deviations, order source categories, and
 # bound displayed uncertainty intervals to the probability scale.
 source.levels <- c("Industrial", "NonIndustrial", "Soil", "Unknown")
 source.labels <- c("Industrial", "Non-industrial", "Soil", "Unknown")
@@ -1015,7 +1016,7 @@ mixing.df <- props.long %>%
     ymax = pmin(1, prop + sd)
   )
 
-# Plot source proportions with plus-or-minus-one-standard-deviation intervals.
+# plot source proportions with plus-or-minus-one-standard-deviation intervals.
 dodge.width <- 0.8
 mixing.prop.plot <- ggplot(
   mixing.df,
@@ -1067,7 +1068,7 @@ ggsave(
   width = 14
 )
 
-# For the log-scale plot, replace zeros and zero-bounded intervals with half
+# for the log-scale plot, replace zeros and zero-bounded intervals with half
 # the smallest observed nonzero proportion so they can be displayed.
 min.nonzero.prop <- min(mixing.df$prop[mixing.df$prop > 0], na.rm = TRUE)
 log.floor <- min.nonzero.prop / 2
@@ -1131,7 +1132,7 @@ ggsave(
   width = 14
 )
 
-# Calculate log10 ratios for modern-versus-soil and non-industrial-versus-
+# calculate log10 ratios for modern-versus-soil and non-industrial-versus-
 # industrial contributions using the same zero-safe floor.
 source.ratio.df <- mixing.df %>%
   select(sample, source, prop) %>%

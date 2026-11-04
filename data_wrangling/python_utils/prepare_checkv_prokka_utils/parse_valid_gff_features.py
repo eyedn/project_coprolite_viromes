@@ -3,6 +3,8 @@
 #       Project Coprolite Viromes
 #       parse_valid_gff_features.py
 ###############################################################################
+
+
 """Select EC-labelled, non-hypothetical Prokka CDS annotations."""
 
 from urllib.parse import unquote

@@ -3,6 +3,8 @@
 #   Project Coprolite Viromes
 #   create_cat_voilins.R
 ###############################################################################
+
+
 library(ggplot2)
 library(reshape2)
 library(RColorBrewer)
@@ -31,7 +33,7 @@ create_cat_voilins <- function(data, ci_offset, file_name, plot_dir,
   }
   melted_data$cat <- factor(melted_data$cat, levels = cats_order)
   
-  # 95% CI per category
+  # 95% confidence intervals per category
   ci_data <- as_tibble(melted_data) %>%
     group_by(cat) %>%
     summarise(
@@ -71,13 +73,13 @@ create_cat_voilins <- function(data, ci_offset, file_name, plot_dir,
       aes(y = value), fun = median, geom = "point",
       fill = grey_border, color = grey_fill, stroke = 1, pch = 23, size = 5.5
     ) +
-    # CI segments (vectorized)
+    # confidence interval segments (vectorized)
     geom_segment(
       data = ci_data,
       aes(x = x_lab_pos, xend = x_lab_pos, y = ymin, yend = ymax),
       inherit.aes = FALSE, linewidth = 2, color = ci_color
     ) +
-    # Single "95% CI" label like your original
+    # single "95% CI" label like your original
     {
       if (nrow(ci_data) >= 1 & ncol(melted_data) == 3) {
         annotate(

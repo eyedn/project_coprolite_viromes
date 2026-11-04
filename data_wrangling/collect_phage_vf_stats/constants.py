@@ -3,6 +3,8 @@
 #       Project Coprolite Viromes
 #       constants.py
 ###############################################################################
+
+
 """Shared collector schema and VFDB threshold constants."""
 
 MAX_FULL_SEQ_EVALUE = 1e-10

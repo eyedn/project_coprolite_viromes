@@ -4,6 +4,8 @@
 #       Project Coprolite Viromes
 #       align_w_db.sh
 ###############################################################################
+
+
 align_w_db() {
     sample=$1
     orfs_file=$2

@@ -3,6 +3,8 @@
 #       Project Coprolite Viromes
 #       read_phatyp.py
 ###############################################################################
+
+
 """Read one PhaTYP CSV file and pass its rows to the parser."""
 
 import csv

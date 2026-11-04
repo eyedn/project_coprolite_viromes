@@ -3,6 +3,8 @@
 #   Project Coprolite Viromes
 #   rle_normalize.R
 ###############################################################################
+
+
 # library(DESeq2)
 
 
@@ -17,12 +19,12 @@ rle_normalize <- function(data) {
     row_names = colnames(psuedo_data)
   )
   
-  # Create DESeqDataSet
+  # create DESeqDataSet
   dds <- DESeqDataSetFromMatrix(countData = psuedo_data,
                                 colData = col_categories,
                                 design = ~ category)
   
-  # Normalize data
+  # normalize data
   dds <- estimateSizeFactors(dds)
   normalized_counts <- counts(dds, normalized = TRUE)
   

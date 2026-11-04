@@ -3,6 +3,8 @@
 #       Project Coprolite Viromes
 #       protein.py
 ###############################################################################
+
+
 class Protein:
     def __init__(self, label: str) -> None:
         self.label = label

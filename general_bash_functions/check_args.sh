@@ -4,6 +4,8 @@
 #       Project Coprolite Viromes
 #       check_args.sh
 ###############################################################################
+
+
 # check the arguments given to the submission script are valid
 check_args() {
 	# define argument variables

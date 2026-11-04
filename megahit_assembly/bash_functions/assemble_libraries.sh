@@ -4,6 +4,8 @@
 #       Project Coprolite Viromes
 #       assemble_libraries.sh
 ###############################################################################
+
+
 # create final.contigs.fa with megahit assembly from fastq/fasta files
 assemble_libraries() {
     local sample="$1"
@@ -27,7 +29,7 @@ assemble_libraries() {
     megahit_assembler "$assembly_extra_dir" "$single_end_data" "$paired_end_data_1" "$paired_end_data_2" "$num_cores"
     echo "__________________________________________________"
 
-    # Check for filtered output produced by megahit_assembler
+    # check for filtered output produced by megahit_assembler
     filtered_extra="${assembly_extra_dir}/$(basename "$assembly_extra_dir")_all_contigs.fa"
     if [ -e "$filtered_extra" ]; then
         echo "$(timestamp): assemble_libraries: filtered contigs file created"
@@ -40,7 +42,7 @@ assemble_libraries() {
         exit 1
     fi
 
-    # Export exactly what we want to keep into the main assembly dir
+    # export exactly what we want to keep into the main assembly dir
     # 1) filtered contigs (final)
     mv "$filtered_extra" \
        "${assembly_dir}/${origin}_${sample}_all_contigs.fa"
@@ -49,13 +51,13 @@ assemble_libraries() {
     cp -f "${assembly_extra_dir}/$(basename "$assembly_extra_dir")_all_contigs.fa.unfiltered.fa" \
           "${assembly_dir}/${origin}_${sample}_all_contigs.fa.unfiltered.fa"
 
-    # 3) MEGAHIT log (file named 'log' in MEGAHIT output)
+    # 3) the MEGAHIT log (file named 'log' in MEGAHIT output)
     if [ -e "${assembly_extra_dir}/log" ]; then
         mv "${assembly_extra_dir}/log" \
            "${assembly_dir}/${origin}_${sample}_log.txt"
     fi
 
-    # 4) PyDamage results (move them over so we can delete extra dir)
+    # 4) the PyDamage results (move them over so we can delete extra dir)
     if [ -d "${assembly_extra_dir}/pydamage" ]; then
         mkdir -p "${assembly_dir}/pydamage"
         rsync -a "${assembly_extra_dir}/pydamage/" "${assembly_dir}/pydamage/"

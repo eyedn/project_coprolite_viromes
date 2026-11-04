@@ -3,6 +3,8 @@
 #       Project Coprolite Viromes
 #       qualify_vf_hits.py
 ###############################################################################
+
+
 """Apply VFDB thresholds and retain one deterministic best hit per ORF."""
 
 import math

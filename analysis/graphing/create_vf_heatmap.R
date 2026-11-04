@@ -3,6 +3,8 @@
 #   Project Coprolite Viromes
 #   create_vf_heatmap.R
 ###############################################################################
+
+
 library(gplots)
 library(svglite)
 library(RColorBrewer)
@@ -33,7 +35,7 @@ create_vf_heatmap <- function(data, signif_res, subset, vfc_subset,
   }
   sig_data_concat <- na.omit(sig_data_concat)
   
-  # Define dfs for samples location, category, dend. weight, and side bar color
+  # define dfs for samples location, category, dend. weight, and side bar color
   sample_loc <- data.frame(
     loc = rownames(sig_data_concat),
     cat = substr(rownames(sig_data_concat), 1, 3)
@@ -49,7 +51,7 @@ create_vf_heatmap <- function(data, signif_res, subset, vfc_subset,
   sample_weights <- merge_and_retain_order(sample_loc, cat_weights, "cat", "cat")
   loc_cols <- merge_and_retain_order(sample_loc, cat_cols, "cat", "cat")
   
-  # Define groups dendrogram order, colors, and labels
+  # define groups dendrogram order, colors, and labels
   dend_width <- 15
   hc <- hclust(dist(sig_data_concat))
   dend_raw <- as.dendrogram(hc)

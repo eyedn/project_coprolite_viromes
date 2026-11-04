@@ -3,6 +3,8 @@
 #       Project Coprolite Viromes
 #       parse_checkv_lines.py
 ###############################################################################
+
+
 """Parse supplied CheckV tables, including the merged-header variant."""
 
 import csv

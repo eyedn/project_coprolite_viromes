@@ -1,13 +1,11 @@
-# ______________________________________________________________________________
-# Aydin Karatas
-# ___
-# University of Southern California
-# Department of Quantitative and Computational Biology
-# Mooney Lab
-# ___
-# make_vf_prevalence_plot.R
-# ______________________________________________________________________________
-# Summaries and layers use exactly the same finite genome observations.
+###############################################################################
+#   Aydin Karatas
+#   Project Coprolite Viromes
+#   make_vf_prevalence_plot.R
+###############################################################################
+
+
+# summaries and layers use exactly the same finite genome observations.
 make.vf.prevalence.plot <- function(data, lifestyle.column, lifestyle.label,
                                      facet.categories = TRUE) {
   data <- data %>% filter(is.finite(vf.orf.prevalence))

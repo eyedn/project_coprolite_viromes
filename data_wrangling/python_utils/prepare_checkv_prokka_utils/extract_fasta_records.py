@@ -3,6 +3,8 @@
 #       Project Coprolite Viromes
 #       extract_fasta_records.py
 ###############################################################################
+
+
 """Select protein FASTA records by exact identifier."""
 
 

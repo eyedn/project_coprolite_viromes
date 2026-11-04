@@ -3,6 +3,8 @@
 #       Project Coprolite Viromes
 #       validate_joins.py
 ###############################################################################
+
+
 """Validate collector keys before any phage rows are summarized."""
 
 from collections import Counter
