@@ -6,7 +6,10 @@
 ###############################################################################
 
 
-cd "$HOME/project_coprolite_viromes" || exit 1
+set -euo pipefail
+
+export VIROME_CODE_DIR="${VIROME_CODE_DIR:-$HOME/project_coprolite_viromes}"
+cd "$VIROME_CODE_DIR" || exit 1
 
 script=$1
 filename=$(basename "$script")

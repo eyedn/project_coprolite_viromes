@@ -6,6 +6,10 @@
 ###############################################################################
 
 
+code_dir="${VIROME_CODE_DIR:-$HOME/project_coprolite_viromes}"
+source "$code_dir/general_bash_functions/slurm.sh"
+
+
 set -euo pipefail
 
 if [ "$#" -ne 3 ]; then
@@ -17,7 +21,8 @@ fi
 origin="$1"
 project_dir="${2%/}"
 num_cores="$3"
-script_dir="$HOME/project_coprolite_viromes"
+validate_cpus "$num_cores" || exit 2
+script_dir="${VIROME_CODE_DIR:-$HOME/project_coprolite_viromes}"
 
 if [ ! -d "${script_dir}" ]; then
     echo "4a_get_checkv_genome_stats: missing code directory: ${script_dir}" >&2
@@ -29,6 +34,17 @@ if [ "$origin" != "all" ]; then
     echo "4a_get_checkv_genome_stats: ORIGIN must be all" >&2
     exit 2
 fi
+
+for file_path in "${script_dir}"/general_bash_functions/*; do
+    source "$file_path"
+done
+activate_environment python
+for input_dir in samples data checkv_input checkv_genomes; do
+    if [[ ! -d $project_dir/$input_dir ]]; then
+        echo "4a: missing input directory: $project_dir/$input_dir" >&2
+        exit 1
+    fi
+done
 
 for version in VFDB_setA VFDB_setB; do
     python3 "${script_dir}/data_wrangling/collect_checkv_genome_stats.py" \

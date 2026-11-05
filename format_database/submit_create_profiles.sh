@@ -1,22 +1,23 @@
-#!/bin/bash
+#!/usr/bin/env bash
+
 ###############################################################################
-#       Aydin Karatas
-#       Project Coprolite Viromes
-#       submit_create_profiles.sh
+#           Aydin Loid Karatas
+#           ---
+#           University of Southern California
+#           Department of Quantitative and Computational Biology
+#           Mooney Lab
+#           ---
+#           submit_create_profiles.sh
 ###############################################################################
 
 
+set -euo pipefail
+export VIROME_CODE_DIR="${VIROME_CODE_DIR:-$HOME/project_coprolite_viromes}"
+source "$VIROME_CODE_DIR/general_bash_functions/slurm.sh"
 profiles_dir=$1
 cores=2
-tot_clusters=$(wc -l < $profiles_dir/clusters.txt)
-qsub \
-    -cwd \
-    -N "create_profiles" \
-    -j y \
-    -l h_rt=24:00:00,h_data=8G \
-    -o $SCRATCH/joblogs/create_profiles/ \
-    -pe shared $cores \
-    -M $USER@mail \
-    -m a \
-    -t 1-$tot_clusters:1 \
-    "${HOME}/project_coprolite_viromes/format_database/create_profiles.sh" $cores $profiles_dir
+tot_clusters=$(manifest_count "$profiles_dir/clusters.txt")
+submit_slurm create_profiles "$SCRATCH/joblogs/create_profiles" \
+    "$tot_clusters" "$cores" 8 FAIL \
+    "$VIROME_CODE_DIR/format_database/create_profiles.sh" \
+    "$cores" "$profiles_dir"

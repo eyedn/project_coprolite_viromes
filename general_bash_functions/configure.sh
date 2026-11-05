@@ -18,7 +18,7 @@ seqtk="$software/seqtk/seqtk"
 
 bowtie2="$software/bowtie2-2.5.1-linux-x86_64/bowtie2"
 
-samtools="$software/samtools-1.18/samtools"
+samtools="$HOME/virome_envs/samtools/bin/samtools"
 
 hmmsearch="$software/hmmer-3.4/src/hmmsearch"
 
@@ -28,7 +28,7 @@ esl_reformat="$software/hmmer-3.4/easel/miniapps/esl-reformat"
 
 megahit="$software/MEGAHIT-1.2.9-Linux-x86_64-static/bin/megahit"
 
-python_env="$HOME/my_py/bin/activate"
+python_env="$HOME/virome_envs/python"
 
 hum_genome_ref="$HOME/references/GRCh38_noalt_as"
 

@@ -6,28 +6,45 @@
 ###############################################################################
 
 
-#$ -cwd
-#$ -N mpa
-#$ -o /u/scratch/a/ayd1n/joblogs/sourcetracker/
-#$ -j y
-#$ -l h_data=8G,h_rt=24:00:00
-#$ -pe shared 16
-
-# to run: qsub -t 1-$(ls -d /u/scratch/b/bwknowle/project_coprolite_viromes_sourcetracker/reads/*_fastq_clean | wc -l) get_biom.sh
-
 set -euo pipefail
-source /u/local/Modules/default/init/modules.sh
-module purge
-ml bowtie2/2.4.2
-ml anaconda3
-conda activate mpa
-
-cd /u/scratch/b/bwknowle/project_coprolite_viromes_sourcetracker
+code_dir="${VIROME_CODE_DIR:-$HOME/project_coprolite_viromes}"
+source "$code_dir/general_bash_functions/slurm.sh"
+source "$code_dir/general_bash_functions/environment.sh"
+source_project=/u/scratch/b/bwknowle/project_coprolite_viromes_sourcetracker
+cd "$source_project"
+shopt -s nullglob
+dirs=(reads/*_fastq_clean)
+if (( ${#dirs[@]} == 0 )); then
+    echo "SourceTracker: no cleaned-read directories in $source_project" >&2
+    exit 1
+fi
+if [[ -z ${SLURM_JOB_ID:-} ]]; then
+    export VIROME_CODE_DIR="$code_dir"
+    submit_slurm mpa "$SCRATCH/joblogs/sourcetracker" "${#dirs[@]}" \
+        16 8 NONE "$code_dir/source_tracking/get_biom.sh" "$@"
+    exit $?
+fi
+validate_cpus 16
+array_index=${SLURM_ARRAY_TASK_ID:-}
+if [[ ! $array_index =~ ^[1-9][0-9]*$ ]] || \
+    (( array_index > ${#dirs[@]} )); then
+    echo "SourceTracker: invalid task index: $array_index" >&2
+    exit 2
+fi
+i="${dirs[$((array_index - 1))]}"
+activate_environment mpa || {
+    echo 'optional mpa environment restoration remains deferred' >&2
+    exit 1
+}
+module load bowtie2/2.4.2 || {
+    echo 'optional SourceTracker profiling requires bowtie2/2.4.2' >&2
+    exit 1
+}
+command -v metaphlan >/dev/null || {
+    echo 'optional SourceTracker profiling requires metaphlan' >&2
+    exit 1
+}
 mkdir -p sourcetracker
-
-# pick the nth directory
-readarray -t dirs < <(ls -d reads/*_fastq_clean)
-i="${dirs[$((SGE_TASK_ID-1))]}"
 
 sample="$(basename "$i")"
 

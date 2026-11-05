@@ -6,7 +6,12 @@
 ###############################################################################
 
 
-cd $HOME/project_coprolite_viromes
+code_dir="${VIROME_CODE_DIR:-$HOME/project_coprolite_viromes}"
+source "$code_dir/general_bash_functions/slurm.sh"
+validate_cpus "${3:-}" || exit 2
+
+
+cd "${VIROME_CODE_DIR:-$HOME/project_coprolite_viromes}" || exit 1
 for FILE in hmm_alignment/bash_functions/* ; do source $FILE ; done
 for FILE in general_bash_functions/* ; do source $FILE ; done
 
@@ -17,8 +22,9 @@ project_dir=$2
 num_cores=$3
 
 # define sample variables
-sample=$(head -n ${SGE_TASK_ID} ${project_dir}/samples/${origin}_samples.txt | \
-		tail -n 1 | cut -d ' ' -f 1)
+sample_record=$(select_record \
+    "${project_dir}/samples/${origin}_samples.txt") || exit 2
+read -r sample accession_ids <<< "$sample_record"
 label="bac_on_phage"
 
 # define directories and files

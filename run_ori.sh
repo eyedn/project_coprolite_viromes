@@ -6,7 +6,10 @@
 ###############################################################################
 
 
-cd $HOME/project_coprolite_viromes
+set -euo pipefail
+
+export VIROME_CODE_DIR="${VIROME_CODE_DIR:-$HOME/project_coprolite_viromes}"
+cd "$VIROME_CODE_DIR"
 for FILE in general_bash_functions/* ; do source $FILE ; done
 
 
@@ -39,7 +42,7 @@ done
 args=("script_name" "origin" "project_dir" "data_per_core" "cores")
 for arg in "${args[@]}"; do
   # if an argument is empty, it may have not been provided to the script
-  if [ -z "${!arg}" ]; then
+  if [ -z "${!arg:-}" ]; then
     echo "ERROR: missing <$arg>."
     echo "Usage Instructions: ./run_ori.sh -s <script_name> -o <origin> -p <project_dir> -d <data_per_core> -c <cores>"
     exit 1
@@ -49,26 +52,19 @@ for arg in "${args[@]}"; do
   fi
 done
 
-# run the submission command on hoffman2
-if [ "$origin" == "all" ] || [[ "$origin" == checkv-* ]]; then
-  total_samples=1
+# validate resources and manifests before submission.
+if [ "$origin" = "all" ] || [[ "$origin" = checkv-* ]]; then
+    total_samples=1
 else
-  declare -i total_samples=$(wc -l < ${project_dir}/samples/${origin}_samples.txt) 
+    total_samples=$(manifest_count \
+        "${project_dir}/samples/${origin}_samples.txt")
 fi
-
-job_name=$(echo $script_name | cut -d '/' -f 2-)
+if [[ ! -f "$script_name" ]]; then
+    echo "missing worker script: $script_name" >&2
+    exit 2
+fi
+job_name="${origin}.$(basename "$script_name" .sh)"
 joblogs_output="$SCRATCH/joblogs/$origin/"
-qsub \
-    -cwd \
-    -N "${origin}.${job_name}" \
-    -o $joblogs_output \
-    -j y \
-    -l h_rt=24:00:00,h_data=${data_per_core}G \
-    -pe shared ${cores} \
-    -M $USER@mail \
-    -m ea \
-    -t 1-${total_samples} \
-    -tc 4 \
-    $script_name "$origin" "$project_dir" "$cores"
-
-# for high memory and i/o tasks, consider -tc 4 \
+submit_slurm "$job_name" "$joblogs_output" "$total_samples" \
+    "$cores" "$data_per_core" END,FAIL \
+    "$script_name" "$origin" "$project_dir" "$cores"

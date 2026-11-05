@@ -8,8 +8,9 @@
 
 set -euo pipefail
 
-source /u/local/Modules/default/init/modules.sh
-module load python
+code_dir="${VIROME_CODE_DIR:-$HOME/project_coprolite_viromes}"
+source "$code_dir/general_bash_functions/environment.sh"
+activate_environment python || exit 1
 
 # run python script to create separate fasta files for each cluster
 raw_fasta="$SCRATCH/references/VFDB_setB_pro_20260923.fas"
@@ -25,7 +26,7 @@ fi
 
 mkdir "$profiles_dir"
 
-python3 VFDB_extract_clusters.py \
+python3 "$code_dir/format_database/VFDB_extract_clusters.py" \
     "$clean_fasta" \
     "$profiles_dir" \
     "$profiles_dir/clusters.txt"

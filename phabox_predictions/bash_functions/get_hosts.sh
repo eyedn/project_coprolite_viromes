@@ -33,7 +33,7 @@ get_hosts() {
     cd $phabox
     python3 Cherry_single.py \
         --contigs $contigs_file \
-        --threads 8 \
+        --threads "$num_cores" \
         --len 100 \
         --rootpth $predict_dir 
     cd $HOME

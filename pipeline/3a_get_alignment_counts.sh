@@ -6,6 +6,10 @@
 ###############################################################################
 
 
+code_dir="${VIROME_CODE_DIR:-$HOME/project_coprolite_viromes}"
+source "$code_dir/general_bash_functions/slurm.sh"
+
+
 set -euo pipefail
 
 if [ "$#" -ne 3 ]; then
@@ -16,7 +20,8 @@ fi
 origin="$1"
 project_dir="${2%/}"
 num_cores="$3"
-script_dir="$HOME/project_coprolite_viromes"
+validate_cpus "$num_cores" || exit 2
+script_dir="${VIROME_CODE_DIR:-$HOME/project_coprolite_viromes}"
 
 if [ ! -d "${script_dir}" ]; then
     echo "3a_get_alignment_counts: missing code directory: ${script_dir}" >&2
@@ -87,26 +92,18 @@ finish() {
 }
 trap finish EXIT
 
-stage_message "hostname=$(hostname) job_id=${JOB_ID:-unavailable} task_id=${SGE_TASK_ID:-unavailable} allocated_slots=${NSLOTS:-unavailable} requested_cores=${num_cores} origin=${origin}"
+stage_message "hostname=$(hostname) job_id=${SLURM_JOB_ID:-unavailable} task_id=${SLURM_ARRAY_TASK_ID:-unavailable} allocated_slots=${SLURM_CPUS_PER_TASK:-unavailable} requested_cores=${num_cores} origin=${origin}"
 stage_message "project_path=${project_dir} code_path=${script_dir}"
 stage_message "effective shell memory limits (soft; includes data, RSS, virtual memory)"
 ulimit -Sa >&2
 stage_message "effective shell memory limits (hard; includes data, RSS, virtual memory)"
 ulimit -Ha >&2
 
-# set up the cluster environment when the Hoffman2 module files are present.
-if [ -d "${script_dir}/general_bash_functions" ]; then
-    for file_path in "${script_dir}"/general_bash_functions/*; do
-        source "${file_path}"
-    done
-fi
-if [ -f /u/local/Modules/default/init/modules.sh ]; then
-    source /u/local/Modules/default/init/modules.sh
-    module load python
-fi
-if [ -n "${python_env:-}" ] && [ -f "${python_env}" ]; then
-    source "${python_env}"
-fi
+# initialize aggregation independently of the submitting shell.
+for file_path in "${script_dir}"/general_bash_functions/*; do
+    source "$file_path"
+done
+activate_environment python
 
 require_directory "${alignment_dir}" "alignment directory"
 require_directory "${annotation_dir}" "genome annotation directory"

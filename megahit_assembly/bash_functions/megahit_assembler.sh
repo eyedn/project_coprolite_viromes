@@ -79,23 +79,23 @@ megahit_assembler() {
         if ! [ "$paired_end_data_1" == "no_data" ] && ! [ "$paired_end_data_2" == "no_data" ] && ! [ "$single_end_data" == "no_data" ]; then
             "$bowtie2" -x "$idx" -1 "$paired_end_data_1" -2 "$paired_end_data_2" -U "$single_end_data" \
                     --very-sensitive -k 1 --no-unal -p "$num_cores" \
-            | "$samtools" view -@ "$num_cores" -b - \
-            | "$samtools" sort -@ "$num_cores" -o "$sorted_bam" -
+            | "$samtools" view -@ "$((num_cores - 1))" -b - \
+            | "$samtools" sort -@ "$((num_cores - 1))" -o "$sorted_bam" -
         elif ! [ "$paired_end_data_1" == "no_data" ] && ! [ "$paired_end_data_2" == "no_data" ]; then
             "$bowtie2" -x "$idx" -1 "$paired_end_data_1" -2 "$paired_end_data_2" \
                     --very-sensitive -k 1 --no-unal -p "$num_cores" \
-            | "$samtools" view -@ "$num_cores" -b - \
-            | "$samtools" sort -@ "$num_cores" -o "$sorted_bam" -
+            | "$samtools" view -@ "$((num_cores - 1))" -b - \
+            | "$samtools" sort -@ "$((num_cores - 1))" -o "$sorted_bam" -
         else
             "$bowtie2" -x "$idx" -U "$single_end_data" \
                     --very-sensitive -k 1 --no-unal -p "$num_cores" \
-            | "$samtools" view -@ "$num_cores" -b - \
-            | "$samtools" sort -@ "$num_cores" -o "$sorted_bam" -
+            | "$samtools" view -@ "$((num_cores - 1))" -b - \
+            | "$samtools" sort -@ "$((num_cores - 1))" -o "$sorted_bam" -
         fi
         "$samtools" index "$sorted_bam"
 
         echo "$(timestamp): adding MD tags (required by PyDamage)"
-        "$samtools" calmd -@ "$num_cores" -b "$sorted_bam" "$contigs_raw" > "$calmd_bam"
+        "$samtools" calmd -@ "$((num_cores - 1))" -b "$sorted_bam" "$contigs_raw" > "$calmd_bam"
         "$samtools" index "$calmd_bam"
     fi
 

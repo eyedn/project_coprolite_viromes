@@ -6,7 +6,14 @@
 ###############################################################################
 
 
-source /u/local/Modules/default/init/modules.sh
+set -euo pipefail
+code_dir="${VIROME_CODE_DIR:-$HOME/project_coprolite_viromes}"
+source "$code_dir/general_bash_functions/environment.sh"
+if [[ -z ${ORF_DIR:-} || ! -x /path/to/cd-hit ]]; then
+    echo 'optional diversity sketch needs ORF_DIR and a configured CD-HIT path' >&2
+    exit 1
+fi
+activate_environment msa
 
 orf_files_pat=
 

@@ -9,12 +9,10 @@
 set -euo pipefail
 
 # keep this — you source your helper funcs
-for FILE in ~/project_coprolite_viromes/general_bash_functions/* ; do source "$FILE" ; done
+for FILE in "${VIROME_CODE_DIR:-$HOME/project_coprolite_viromes}"/general_bash_functions/* ; do source "$FILE" ; done
 
 # environment as before
-source /u/local/Modules/default/init/modules.sh
-module load anaconda3
-conda activate qc
+activate_environment qc || exit 1
 
 usage() {
     cat <<'EOF'
@@ -34,7 +32,7 @@ Notes:
   * Provide reads as any combo, but at least one of R1/R2/SE must be non-"-".
     - Paired-end: R1 and R2 set; SE should be "-"
     - Single-end: SE set; R1 and R2 should be "-"
-  * Use "-" to accept defaults for threads (NSLOTS/16), threshold (0.5), or sample_id (derived from contigs filename).
+  * Use "-" to accept defaults for threads (SLURM_CPUS_PER_TASK/16), threshold (0.5), or sample_id (derived from contigs filename).
   * Output files:
       <output_dir>/<sample_id>_all_contigs.fa.unfiltered
       <output_dir>/<sample_id>_all_contigs.fa
@@ -67,11 +65,13 @@ R1="${R1:-"-"}"; [[ "$R1" == "-" ]] && R1="no_data"
 R2="${R2:-"-"}"; [[ "$R2" == "-" ]] && R2="no_data"
 SE="${SE:-"-"}"; [[ "$SE" == "-" ]] && SE="no_data"
 
-# threads default: prefer NSLOTS if available, else 16
+# threads default to the allocation, or 16 outside Slurm
 threads="${threads_in}"
 if [[ -z "${threads}" || "${threads}" == "-" ]]; then
-    threads="${NSLOTS:-16}"
+    threads="${SLURM_CPUS_PER_TASK:-16}"
 fi
+
+validate_cpus "$threads" || exit 2
 
 # threshold default 0.5
 pydmg_thresh="${pydmg_thresh_in}"
@@ -96,7 +96,7 @@ if [[ ! -s "$contigs" ]]; then
     exit 1
 fi
 
-# ensure log dir exists for SGE
+# retain the established log directory
 mkdir -p "$SCRATCH/joblogs/pydamage_extra/"
 
 # ---------------------------- paths & names ----------------------------------
@@ -116,7 +116,6 @@ mkdir -p "$mapdir" "$pd_dir"
 # --------------------------- tool discovery ----------------------------------
 bt2_build="$software/bowtie2-2.5.1-linux-x86_64/bowtie2-build"
 bowtie2="$software/bowtie2-2.5.1-linux-x86_64/bowtie2"
-samtools="$software/samtools-1.18/samtools"
 pydamage="$(command -v pydamage || true)" 
 
 if [[ ! -x "$bt2_build" || ! -x "$bowtie2" || ! -x "$samtools" || -z "$pydamage" ]]; then
@@ -139,16 +138,16 @@ else
     echo "$(timestamp): aligning reads to contigs (SE/PE aware)"
     if [[ "$R1" != "no_data" && "$R2" != "no_data" && "$SE" != "no_data" ]]; then
         "$bowtie2" -x "$idx" -1 "$R1" -2 "$R2" -U "$SE" --very-sensitive -k 1 --no-unal -p "$threads" \
-        | "$samtools" view -@ "$threads" -b - \
-        | "$samtools" sort -@ "$threads" -o "$sorted_bam" -
+        | "$samtools" view -@ "$((threads - 1))" -b - \
+        | "$samtools" sort -@ "$((threads - 1))" -o "$sorted_bam" -
     elif [[ "$R1" != "no_data" && "$R2" != "no_data" ]]; then
         "$bowtie2" -x "$idx" -1 "$R1" -2 "$R2" --very-sensitive -k 1 --no-unal -p "$threads" \
-        | "$samtools" view -@ "$threads" -b - \
-        | "$samtools" sort -@ "$threads" -o "$sorted_bam" -
+        | "$samtools" view -@ "$((threads - 1))" -b - \
+        | "$samtools" sort -@ "$((threads - 1))" -o "$sorted_bam" -
     elif [[ "$SE" != "no_data" ]]; then
         "$bowtie2" -x "$idx" -U "$SE" --very-sensitive -k 1 --no-unal -p "$threads" \
-        | "$samtools" view -@ "$threads" -b - \
-        | "$samtools" sort -@ "$threads" -o "$sorted_bam" -
+        | "$samtools" view -@ "$((threads - 1))" -b - \
+        | "$samtools" sort -@ "$((threads - 1))" -o "$sorted_bam" -
     else
         echo "ERROR: invalid read combination." >&2
         exit 1
@@ -156,7 +155,7 @@ else
     "$samtools" index "$sorted_bam"
 
     echo "$(timestamp): adding MD tags (samtools calmd)"
-    "$samtools" calmd -@ "$threads" -b "$sorted_bam" "$contigs" > "$calmd_bam"
+    "$samtools" calmd -@ "$((threads - 1))" -b "$sorted_bam" "$contigs" > "$calmd_bam"
     "$samtools" index "$calmd_bam"
 fi
 

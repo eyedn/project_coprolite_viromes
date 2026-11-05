@@ -34,7 +34,7 @@ get_phages() {
     cd $phabox
     python3 PhaMer_single.py \
         --contigs $contigs_file \
-        --threads 8 \
+        --threads "$num_cores" \
         --len 100 \
         --rootpth $predict_dir 
     cd $HOME

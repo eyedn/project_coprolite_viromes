@@ -6,6 +6,10 @@
 ###############################################################################
 
 
+code_dir="${VIROME_CODE_DIR:-$HOME/project_coprolite_viromes}"
+source "$code_dir/general_bash_functions/slurm.sh"
+
+
 set -euo pipefail
 
 if [ "$#" -ne 3 ]; then
@@ -17,8 +21,9 @@ fi
 filter_job="$1"
 project_dir="${2%/}"
 num_cores="$3"
+validate_cpus "$num_cores" || exit 2
 checkv_filter="${filter_job#checkv-}"
-script_dir="$HOME/project_coprolite_viromes"
+script_dir="${VIROME_CODE_DIR:-$HOME/project_coprolite_viromes}"
 
 if [ ! -d "${script_dir}" ]; then
     echo "4_analyze_checkv_genomes: missing code directory: ${script_dir}" >&2
@@ -79,20 +84,11 @@ gzip -cd "$input_fasta" | awk '
     { print }
 ' > "$working_fasta"
 
-if [ -f /u/local/Modules/default/init/modules.sh ]; then
-    source /u/local/Modules/default/init/modules.sh
-    module load anaconda3
-fi
-
-if command -v conda >/dev/null 2>&1; then
-    conda activate phabox
-fi
+activate_environment phabox
 get_lifestyles "$prefix" "$working_fasta" "$prediction_dir" "$num_cores"
 get_families "$prefix" "$working_fasta" "$prediction_dir" "$num_cores"
 
-if command -v conda >/dev/null 2>&1; then
-    conda activate prokka
-fi
+activate_environment prokka
 if [ ! -s "${bacterial_dir}/${prefix}.gff" ]; then
     if [ -d "$bacterial_dir" ]; then
         if [ -n "$(find "$bacterial_dir" -mindepth 1 -print -quit)" ]; then
@@ -128,6 +124,7 @@ if ! checkv_prokka_outputs_complete "$viral_dir" "$prefix"; then
     exit 1
 fi
 
+activate_environment python
 python3 "${script_dir}/data_wrangling/prepare_checkv_prokka.py" \
     "${bacterial_dir}/${prefix}.gff" \
     "${bacterial_dir}/valid_features.csv"

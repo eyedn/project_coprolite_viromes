@@ -6,15 +6,23 @@
 ###############################################################################
 
 
-cd "$HOME/project_coprolite_viromes"
+code_dir="${VIROME_CODE_DIR:-$HOME/project_coprolite_viromes}"
+source "$code_dir/general_bash_functions/slurm.sh"
+validate_cpus "${3:-}" || exit 2
+
+
+cd "${VIROME_CODE_DIR:-$HOME/project_coprolite_viromes}"
 for FILE in download/bash_functions/* ; do source "$FILE" ; done
 for FILE in general_bash_functions/* ; do source "$FILE" ; done
-source "$HOME/project_coprolite_viromes/configure.sh"
+
 
 # env/modules (MetaPhlAn2 will be run via explicit path below)
-source /u/local/Modules/default/init/modules.sh
-module load anaconda3
-conda activate qc
+activate_environment qc || exit 1
+metaphlan_py="$software/MetaPhlAn2/metaphlan2.py"
+if [[ ! -s $metaphlan_py ]]; then
+    echo "optional MetaPhlAn2 script unavailable: $metaphlan_py" >&2
+    exit 1
+fi
 
 # define inputs variables
 origin=$1
@@ -22,10 +30,9 @@ project_dir=$2
 num_cores=$3
 
 # define sample variables
-sample=$(head -n ${SGE_TASK_ID} "${project_dir}/samples/${origin}_samples.txt" | \
-         tail -n 1 | cut -d ' ' -f 1)
-accession_ids=$(head -n ${SGE_TASK_ID} "${project_dir}/samples/${origin}_samples.txt" | \
-               tail -n 1 | cut -d ' ' -f 2-)
+sample_record=$(select_record \
+    "${project_dir}/samples/${origin}_samples.txt") || exit 2
+read -r sample accession_ids <<< "$sample_record"
 
 # guard against empty accession list
 if [[ -z "$accession_ids" ]]; then

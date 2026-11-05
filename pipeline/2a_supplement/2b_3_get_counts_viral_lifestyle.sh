@@ -6,11 +6,14 @@
 ###############################################################################
 
 
-cd $HOME/project_coprolite_viromes
+code_dir="${VIROME_CODE_DIR:-$HOME/project_coprolite_viromes}"
+source "$code_dir/general_bash_functions/slurm.sh"
+validate_cpus "${3:-}" || exit 2
+
+
+cd "${VIROME_CODE_DIR:-$HOME/project_coprolite_viromes}" || exit 1
 for FILE in general_bash_functions/* ; do source $FILE ; done
-source /u/local/Modules/default/init/modules.sh
-module load python
-source $python_env
+activate_environment python || exit 1
 
 
 # define inputs variables
