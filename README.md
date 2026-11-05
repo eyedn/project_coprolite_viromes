@@ -32,10 +32,8 @@ report does not currently consume it. Its supporting scripts are in
 Stages 3 and 4 search **every bacterial-mode Prokka FAA protein**, joining
 exact FAA identifiers to GFF CDS identifiers. Hypothetical proteins, EC-labeled
 proteins, named proteins without EC numbers, and hypothetical proteins with EC
-numbers all enter the search pool. Complete existing Prokka outputs are reused without modifying or recompressing
-them. Stage 2 (`pipeline/2_predict_viral_character.sh`) and its PhaBOX/Prokka
-helper logic are unchanged; this migration begins at VFDB search and
-downstream aggregation.
+numbers all enter the search pool. Complete existing Prokka outputs are
+reused without modifying or recompressing them.
 Duplicates, unmatched FAA/GFF identifiers, invalid coordinates, and unknown
 HMMER targets fail validation. Biological no-phage and zero-FAA stage-3 skips
 and alignment QC exclusions remain in effect.
@@ -100,6 +98,10 @@ for both reference versions and publishes these six files under `data/`:
 * `checkv_genome_vf_stats.csv`
 * `checkv_genome_orfs.csv`
 * `checkv_genome_qc.csv`
+
+Stage 4a also writes `checkv_viral_cds_conservative.csv`, containing every
+conservative viral Prokka CDS. It reads completed stage-4 outputs and refreshes
+the summary and supplemental tables when rerun.
 
 Set A uses `_VFDB_setA.csv` suffixes; set B is unsuffixed. The ORF inventories
 retain sample, contig/genome, ORF ID, coordinates, strand, Prokka product, EC

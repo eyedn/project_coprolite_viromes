@@ -1,13 +1,8 @@
 #!/usr/bin/env bash
-
 ###############################################################################
-#           Aydin Loid Karatas
-#           ---
-#           University of Southern California
-#           Department of Quantitative and Computational Biology
-#           Mooney Lab
-#           ---
-#           slurm.sh
+#       Aydin Karatas
+#       Project Coprolite Viromes
+#       slurm.sh
 ###############################################################################
 
 
@@ -70,7 +65,7 @@ submit_slurm() {
     [[ $memory =~ ^[1-9][0-9]*$ ]] || return 2
     mkdir -p "$log_dir" || return
     sbatch --nodes=1 --ntasks=1 --cpus-per-task="$cpus" \
-        --mem-per-cpu="${memory}G" --time=24:00:00 \
+        --mem-per-cpu="${memory}G" --time=3:00:00 \
         --account="${VIROME_SLURM_ACCOUNT:-pi_bwknowle}" \
         --partition="${VIROME_SLURM_PARTITION:-pi_shared}" \
         --qos="${VIROME_SLURM_QOS:-pi_shared24}" \

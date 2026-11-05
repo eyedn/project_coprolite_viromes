@@ -1,13 +1,8 @@
 #!/usr/bin/env bash
-
 ###############################################################################
-#           Aydin Loid Karatas
-#           ---
-#           University of Southern California
-#           Department of Quantitative and Computational Biology
-#           Mooney Lab
-#           ---
-#           submit_create_profiles.sh
+#       Aydin Karatas
+#       Project Coprolite Viromes
+#       submit_create_profiles.sh
 ###############################################################################
 
 
