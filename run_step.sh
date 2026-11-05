@@ -62,6 +62,10 @@ elif [ "$filename" = "3a_get_alignment_counts.sh" ]; then
     # stage 3a aggregates the full ORF pool: 16 GB per slot, 64 GB total.
     ./run_ori.sh -s "$script" -d 16 -c 4 \
         -p "$SCRATCH/project_coprolite_viromes" -o all
+elif [ "$filename" = "4a_get_checkv_genome_stats.sh" ]; then
+    # stage 4a runs serially: one CPU with 32 GB total memory.
+    ./run_ori.sh -s "$script" -d 32 -c 1 \
+        -p "$SCRATCH/project_coprolite_viromes" -o all
 elif [[ $filename =~ ^[0-9]+a_ ]]; then
     # run auxiliary script not specific to origin
     ./run_ori.sh -s "$script" -d 8 -c 4 -p "$SCRATCH/project_coprolite_viromes" -o all
