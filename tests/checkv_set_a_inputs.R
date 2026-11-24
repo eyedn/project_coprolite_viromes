@@ -21,7 +21,7 @@ for (version in c("VFDB_setA", "VFDB_setB")) {
               row.names = FALSE)
   }
 }
-data_dir <- fixture.dir
+data.dir <- fixture.dir
 # include a version declaration immediately before the paths, if present.
 if (grepl("^bundle <-", report[start - 1L])) start <- start - 1L
 eval(parse(text = report[start:end]))

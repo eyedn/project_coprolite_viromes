@@ -12,20 +12,20 @@ for (path in list.files("analysis/misc", "\\.R$", full.names = TRUE)) {
 source("analysis/misc/validate_vf_pool.R")
 source("analysis/graphing/create_checkv_genome_map.R")
 x <- readLines("analysis/analysis_checkvhits.Rmd")
-data_dir <- "../project_coprolite_viromes_NOT_CODE/data/20261019"
+data.dir <- "../project_coprolite_viromes_NOT_CODE/data/20261019"
 arguments <- commandArgs(trailingOnly = TRUE)
-figs_dir <- if (length(arguments)) arguments[1] else tempfile("three_tracks_")
+figs.dir <- if (length(arguments)) arguments[1] else tempfile("three_tracks_")
 a <- which(grepl("^checkv.input.paths <-", x))
 b <- which(grepl('^  mutate\\(vfdb.version = bundle\\$label', x))[1]
-invisible(capture.output(eval(parse(text = x[a:b]))))
-vf_reference <- read.csv(file.path(data_dir, "VFs.csv"))
-colnames(vf_reference) <- vf_reference[1, ]
-vf_reference <- vf_reference[-1, c("VFID", "VFCID", "VF_Name", "VFcategory")]
-a <- which(grepl("^```\\{r top VF genome maps,", x)) + 1L
+invisible(capture.output(eval(parse(text = x[a:b][!grepl("^```", x[a:b])]))))
+vf.reference <- read.csv(file.path(data.dir, "VFs.csv"))
+colnames(vf.reference) <- vf.reference[1, ]
+vf.reference <- vf.reference[-1, c("VFID", "VFCID", "VF_Name", "VFcategory")]
+a <- which(grepl("^```\\{r top-VF-genome-maps,", x)) + 1L
 b <- a + which(x[a:length(x)] == "```")[1] - 2L
 # suppress printing here; the chunk's SVG export exercises the full render
-pdf(file.path(figs_dir, "chunk.pdf"), width = 20, height = 90)
-invisible(capture.output(eval(parse(text = x[a:b]))))
+pdf(file.path(figs.dir, "chunk.pdf"), width = 20, height = 90)
+invisible(capture.output(eval(parse(text = x[a:b][!grepl("^```", x[a:b])]))))
 dev.off()
 annotations <- vf.genome.maps$annotations
 hits <- filter(annotations, source.annotation.mode == "checkv")
@@ -100,14 +100,14 @@ for (i in seq_len(nrow(vf.genome.maps$selection))) {
   panel$selection <- panel$selection[i, ]
   panel$annotations <- filter(panel$annotations,
                               genome.id == panel$selection$genome.id)
-  ragg::agg_png(file.path(figs_dir, paste0("panel_", i, ".png")),
+  ragg::agg_png(file.path(figs.dir, paste0("panel_", i, ".png")),
                 width = 20, height = 10, units = "in", res = 100)
   print(create.checkv.genome.map(panel))
   dev.off()
 }
 # exact duplicate lookup entries cannot multiply arrows; conflicts must fail
 prepare <- function(lookup) prepare.checkv.genome.maps(
-  vf.plot.data, checkv.metadata, checkv.features, viral.cds, vf_reference,
+  vf.plot.data, checkv.metadata, checkv.features, viral.cds, vf.reference,
   checkv.features = checkv.gene.features, checkv.hmms = lookup
 )
 duplicate <- bind_rows(checkv.hmms, checkv.hmms[1, ])
@@ -128,4 +128,4 @@ stopifnot(!vf.genome.maps$has.checkv,
           !any(vf.genome.maps$annotations$source.annotation.mode == "checkv"))
 cat("PASS: 413 hits (342 viral, 71 microbial), 76 fallbacks, geometry,\n",
     "labels, colors, lookup conflicts, and genome-mismatch fallback\n",
-    "Temporary outputs:", figs_dir, "\n")
+    "Temporary outputs:", figs.dir, "\n")

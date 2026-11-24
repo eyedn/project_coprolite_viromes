@@ -1,6 +1,6 @@
 ###############################################################################
-#   aydin Karatas
-#   project Coprolite Viromes
+#   Aydin Karatas
+#   Project Coprolite Viromes
 #   prepare_checkv_vf_categories.R
 ###############################################################################
 

@@ -11,26 +11,26 @@ for (dir in c("analysis/misc", "analysis/stats")) {
 }
 source("analysis/graphing/create_checkv_genome_map.R")
 x <- readLines("analysis/analysis_checkvhits.Rmd")
-data_dir <- "../project_coprolite_viromes_NOT_CODE/data/20261019"
-figs_dir <- tempfile()
+data.dir <- "../project_coprolite_viromes_NOT_CODE/data/20261019"
+figs.dir <- tempfile()
 a <- which(grepl("^checkv.input.paths <-", x))
 b <- which(grepl("^vf.plot.data <-", x))
 c <- which(grepl('^  mutate\\(vfdb.version = bundle\\$label', x))[1]
-eval(parse(text = x[a:c]))
+eval(parse(text = x[a:c][!grepl("^```", x[a:c])]))
 samples <- prepare.checkv.sample.vf(vf.plot.data)
 cat("PASS: sample prevalence:", nrow(samples), "samples\n")
-vf_reference <- read.csv(file.path(data_dir, "VFs.csv"))
-colnames(vf_reference) <- vf_reference[1, ]
-vf_reference <- vf_reference[-1, c("VFID", "VFCID", "VF_Name", "VFcategory")]
-viral.cds <- read.csv(file.path(data_dir, "checkv_viral_cds_conservative.csv")) %>%
+vf.reference <- read.csv(file.path(data.dir, "VFs.csv"))
+colnames(vf.reference) <- vf.reference[1, ]
+vf.reference <- vf.reference[-1, c("VFID", "VFCID", "VF_Name", "VFcategory")]
+viral.cds <- read.csv(file.path(data.dir, "checkv_viral_cds_conservative.csv")) %>%
   rename(checkv.filter = checkv_filter, genome.id = genome_id,
          ec.number = ec_number)
 for (ranking in c("total", "mapped")) {
   maps <- prepare.checkv.genome.maps(vf.plot.data, checkv.metadata,
-    checkv.features, viral.cds, vf_reference, selection.by = ranking)
+    checkv.features, viral.cds, vf.reference, selection.by = ranking)
   cat("PASS:", ranking, "ranking:", nrow(maps$selection), "genomes\n")
   if (ranking == "total") {
-    hits <- read.delim(file.path(data_dir, "gene_features_selected9.tsv"))
+    hits <- read.delim(file.path(data.dir, "gene_features_selected9.tsv"))
     cat("TSV genomes outside selection:",
         paste(setdiff(hits$contig_id, maps$selection$genome.id), collapse = ","),
         "\n")
@@ -49,8 +49,8 @@ for (ranking in c("total", "mapped")) {
     vf.annotations <- maps$annotations %>%
       filter(source.annotation.mode == "vf", plotted.feature)
     vf.labels <- built$data[[7]]$label
-    expected.names <- vf_reference$VF_Name[
-      match(vf.annotations$vf.id, trimws(vf_reference$VFID))
+    expected.names <- vf.reference$VF_Name[
+      match(vf.annotations$vf.id, trimws(vf.reference$VFID))
     ]
     stopifnot(identical(vf.annotations$vf.name,
                         replace_na(as.character(expected.names), "")))
@@ -76,4 +76,4 @@ for (ranking in c("total", "mapped")) {
     }
   }
 }
-unlink(figs_dir, recursive = TRUE)
+unlink(figs.dir, recursive = TRUE)
