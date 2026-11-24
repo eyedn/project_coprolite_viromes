@@ -5,7 +5,12 @@
 ###############################################################################
 
 
-prepare.checkv.genome.maps <- function(stats, metadata, features, viral.cds) {
+prepare.checkv.genome.maps <- function(stats, metadata, features, viral.cds,
+                                      vf.reference, selection = NULL,
+                                      checkv.features = NULL,
+                                      selection.by = c("total", "mapped"),
+                                      checkv.hmms = NULL) {
+  selection.by <- match.arg(selection.by)
   categories <- c("pal", "pre", "ind")
   keys <- c("checkv.filter", "genome.id")
   feature.columns <- c(
@@ -25,7 +30,7 @@ prepare.checkv.genome.maps <- function(stats, metadata, features, viral.cds) {
       anyDuplicated(stats[keys]) || anyDuplicated(metadata[keys]) ||
       any(stats$checkv.filter != "conservative") ||
       any(metadata$checkv.filter != "conservative") ||
-      any(stats$vfdb_version != "VFDB_setB") ||
+      any(stats$vfdb_version != "VFDB_setA") ||
       any(stats$orf_pool != "all_bacterial_prokka_cds") ||
       any(!stats$category %in% categories) ||
       !is.numeric(stats$qualifying.vf.orfs) ||
@@ -43,26 +48,54 @@ prepare.checkv.genome.maps <- function(stats, metadata, features, viral.cds) {
     stop("Invalid or missing genome lengths for maps")
   }
 
-  # rank the full genome pool, independently of sample-prevalence eligibility.
-  selection <- stats %>%
-    mutate(category = factor(category, levels = categories)) %>%
-    arrange(category, desc(qualifying.vf.orfs), genome.id, .locale = "C") %>%
-    group_by(category) %>%
-    slice_head(n = 3L) %>%
-    mutate(selection.rank = row_number()) %>%
-    ungroup() %>%
+  # rank independently of sample eligibility; mapped ties use genome IDs.
+  mapped <- prepare.checkv.vf.categories(features, vf.reference)
+  mapped.counts <- mapped$features %>%
+    filter(vf.category != "Unmapped VF category") %>%
+    count(across(all_of(keys)), name = "mapped.vf.orfs")
+  candidates <- stats %>% left_join(mapped.counts, by = keys) %>%
+    mutate(mapped.vf.orfs = replace_na(mapped.vf.orfs, 0L))
+  if (is.null(selection)) {
+    selection <- candidates %>%
+      filter(selection.by == "total" | mapped.vf.orfs > 0L) %>%
+      mutate(category = factor(category, levels = categories),
+             ranking.count = if (selection.by == "mapped") mapped.vf.orfs
+                             else qualifying.vf.orfs) %>%
+      arrange(category, desc(ranking.count), genome.id, .locale = "C") %>%
+      group_by(category) %>% slice_head(n = 3L) %>%
+      mutate(selection.rank = row_number()) %>% ungroup() %>%
+      select(all_of(keys), selection.rank)
+  }
+  if (!all(c(keys, "selection.rank") %in% names(selection)) ||
+      anyNA(selection[c(keys, "selection.rank")]) ||
+      anyDuplicated(selection[keys]) ||
+      nrow(anti_join(selection, stats, by = keys)) > 0L) {
+    stop("Invalid explicit genome-map selection")
+  }
+  selection <- selection %>% select(all_of(keys), selection.rank) %>%
+    left_join(candidates, by = keys) %>%
     left_join(metadata %>% select(all_of(keys), genome.length), by = keys) %>%
     transmute(category = as.character(category), selection.rank, genome.id,
-              genome.length, qualifying.vf.orfs, checkv.filter,
-              vfdb.version = vfdb_version)
+              genome.length, qualifying.vf.orfs, mapped.vf.orfs, checkv.filter,
+              vfdb.version = vfdb_version) %>%
+    arrange(match(category, categories), selection.rank)
   if (nrow(selection) != 9L ||
       !identical(as.integer(table(factor(selection$category,
-                                        levels = categories))), rep(3L, 3))) {
+                                        levels = categories))), rep(3L, 3)) ||
+      anyDuplicated(selection[c("category", "selection.rank")]) ||
+      any(!selection$selection.rank %in% 1:3)) {
     stop("Genome maps require exactly three genomes per category")
   }
 
-  # validate source keys and geometry before restricting features to selections.
-  vf <- features %>% filter(annotation == "vf")
+  # validate source keys and geometry before restricting features to selections
+  vf <- mapped$features
+  vf$vf.name <- if ("VF_Name" %in% names(vf.reference)) {
+    trimws(as.character(vf.reference$VF_Name[
+      match(vf$vf.id, trimws(as.character(vf.reference$VFID)))
+    ]))
+  } else {
+    rep("", nrow(vf))
+  }
   for (table in list(viral.cds, vf)) {
     if (anyNA(table[c(keys, "feature_id", "start", "end", "strand")]) ||
         any(!nzchar(table$feature_id)) ||
@@ -91,7 +124,7 @@ prepare.checkv.genome.maps <- function(stats, metadata, features, viral.cds) {
     stop("Genome-map VF calls must satisfy the qualifying-hit thresholds")
   }
 
-  # the supplemental source must recover every existing filtered viral feature.
+  # the supplemental source must recover every existing filtered viral feature
   filtered.viral <- features %>% filter(annotation == "viral") %>%
     select(all_of(feature.columns))
   if (nrow(anti_join(filtered.viral, viral.cds,
@@ -110,38 +143,141 @@ prepare.checkv.genome.maps <- function(stats, metadata, features, viral.cds) {
     stop("Missing complete viral-CDS input for a selected genome")
   }
 
-  # never join feature IDs across annotation runs; overlapping calls stay rows.
+  # preserve the CheckV source columns; only nonblank database hits are drawn.
+  checkv <- NULL
+  if (!is.null(checkv.features)) {
+    required <- c("contig_id", "gene_num", "start", "end", "strand", "gc",
+                  "hmm_cat", "hmm_db", "hmm_name", "evalue", "score")
+    if (!all(required %in% names(checkv.features))) {
+      stop("Missing CheckV gene feature columns")
+    }
+    if (anyNA(checkv.features[c("contig_id", "gene_num")]) ||
+        anyDuplicated(checkv.features[c("contig_id", "gene_num")]) ||
+        any(!checkv.features$contig_id %in% selection$genome.id)) {
+      stop("Invalid CheckV genome/gene-number keys or genome membership")
+    }
+    checkv <- checkv.features %>%
+      filter(!is.na(hmm_db), nzchar(trimws(hmm_db)), trimws(hmm_db) != "NA")
+    if (anyNA(checkv[c("contig_id", "gene_num", "strand")]) ||
+        anyDuplicated(checkv[c("contig_id", "gene_num")]) ||
+        any(!checkv$contig_id %in% selection$genome.id) ||
+        !is.numeric(checkv$gene_num) ||
+        any(!is.finite(checkv$gene_num) | checkv$gene_num < 1 |
+            checkv$gene_num != floor(checkv$gene_num)) ||
+        any(!checkv$strand %in% c(1, -1))) {
+      stop("Invalid CheckV genome/gene-number keys or strand")
+    }
+    numeric.columns <- c("start", "end", "evalue", "score")
+    if (nrow(checkv) > 0L &&
+        (!all(vapply(checkv[numeric.columns], is.numeric, logical(1))) ||
+         anyNA(checkv[numeric.columns]) ||
+         any(!is.finite(as.matrix(checkv[numeric.columns]))) ||
+         any(checkv$evalue < 0))) {
+      stop("Invalid CheckV numeric coordinates, scores, or E-values")
+    }
+    # join descriptions once per HMM key, preserving every source hit
+    if (is.null(checkv.hmms) ||
+        !all(c("database", "hmm", "desc", "category") %in%
+             names(checkv.hmms))) {
+      stop("Missing CheckV HMM lookup columns")
+    }
+    lookup <- checkv.hmms %>%
+      select(database, hmm, desc, hmm.category = category) %>% distinct()
+    if (anyNA(lookup[c("database", "hmm", "hmm.category")]) ||
+        any(!lookup$hmm.category %in% c("viral", "microbial"))) {
+      stop("Invalid CheckV HMM lookup keys or categories")
+    }
+    if (anyDuplicated(lookup[c("database", "hmm")])) {
+      stop("Conflicting HMM lookup keys (database, hmm)")
+    }
+    checkv <- checkv %>% left_join(
+      lookup, by = c("hmm_db" = "database", "hmm_name" = "hmm"),
+      relationship = "many-to-one"
+    )
+    if (anyNA(checkv$hmm.category)) {
+      stop("CheckV HMM hits are missing lookup categories")
+    }
+    checkv <- checkv %>%
+      rename(genome.id = contig_id) %>%
+      left_join(selection %>% select(genome.id, genome.length),
+                by = "genome.id")
+    if (any(checkv$start < 1 | checkv$end < checkv$start |
+            checkv$end > checkv$genome.length |
+            checkv$start != floor(checkv$start) |
+            checkv$end != floor(checkv$end))) {
+      stop("CheckV coordinates exceed selected genome bounds")
+    }
+    checkv <- checkv %>% select(-genome.length) %>%
+      mutate(checkv.filter = "conservative",
+             feature_id = paste0("checkv_gene_", gene_num),
+             strand = if_else(strand == 1, "+", "-"),
+             source.annotation.mode = "checkv", product = "", ec.number = "",
+             vf.id = "", vf.description = "", vf.category = "")
+  }
+
+  # never join feature IDs across annotation runs; overlapping calls stay rows
   annotations <- bind_rows(
     viral.cds %>% select(all_of(feature.columns)) %>%
       mutate(source.annotation.mode = "viral", vf.id = "",
-             vf.description = ""),
-    vf %>% select(all_of(feature.columns), vf.id, vf_description) %>%
+             vf.description = "", vf.category = "", desc = NA_character_,
+             hmm.category = NA_character_, hmm_name = NA_character_),
+    vf %>% select(all_of(feature.columns), vf.id, vf_description,
+                  vf.name, vf.category) %>%
       rename(vf.description = vf_description) %>%
-      mutate(source.annotation.mode = "vf")
+      mutate(source.annotation.mode = "vf"),
+    checkv
   ) %>%
     inner_join(selection, by = keys) %>%
-    mutate(across(c(product, ec.number, vf.id, vf.description),
+    mutate(across(c(product, ec.number, vf.id, vf.name, vf.description),
                   ~ replace_na(as.character(.x), ""))) %>%
     arrange(match(category, categories), selection.rank,
             source.annotation.mode, start, end, feature_id, .locale = "C") %>%
     group_by(genome.id, source.annotation.mode) %>%
     mutate(annotation.id = paste0(
       category, selection.rank, ".",
-      if_else(source.annotation.mode == "viral", "V", "F"),
+      case_when(source.annotation.mode == "checkv" ~ "C",
+                source.annotation.mode == "viral" ~ "V", TRUE ~ "F"),
       sprintf("%03d", row_number())
     )) %>%
     ungroup() %>%
-    mutate(color.class = case_when(
-      source.annotation.mode == "vf" ~ "VF call",
-      ec.number != "" ~ "Viral ORF with EC",
+    mutate(plotted.feature = source.annotation.mode %in% c("checkv", "vf") |
+             nzchar(trimws(ec.number)),
+           color.class = case_when(
+      source.annotation.mode == "checkv" ~ "CheckV HMM-hit ORF",
+      source.annotation.mode == "vf" ~ "Qualifying VF ORF",
+      nzchar(trimws(ec.number)) ~ "Viral ORF with EC",
       TRUE ~ "Viral ORF without EC"
+    ), plot.label = case_when(
+      source.annotation.mode == "checkv" ~ paste0(
+        stringr::str_replace_all(stringr::str_wrap(if_else(
+          is.na(desc) | !nzchar(trimws(desc)),
+          paste(hmm_name, "(no descriptive label)"), desc
+        ), 28), "(\\S{28})(?=\\S)", "\\1\n"), "\n", hmm.category
+      ),
+      source.annotation.mode == "viral" ~ paste0(
+        annotation.id,
+        if_else(nzchar(trimws(product)),
+                paste0("\n", stringr::str_wrap(product, 28)), ""),
+        "\nEC ", ec.number
+      ),
+      TRUE ~ paste0(
+        annotation.id,
+        if_else(nzchar(trimws(vf.name)),
+                paste0("\n", stringr::str_wrap(vf.name, 28)), ""),
+        "\n", stringr::str_wrap(vf.category, 24)
+      )
     )) %>%
     select(category, selection.rank, genome.id, annotation.id,
            source.annotation.mode, source.feature.id = feature_id,
            start, end, strand, color.class, product, ec.number,
-           vf.id, vf.description)
+           vf.id, vf.name, vf.description, vf.category, plotted.feature,
+           plot.label, desc, hmm.category,
+           any_of(c("gene_num", "hmm_cat", "hmm_db", "hmm_name", "evalue",
+                    "score", "gc")))
   if (anyDuplicated(annotations$annotation.id)) {
     stop("Genome-map annotation IDs are not unique")
   }
-  return(list(selection = selection, annotations = annotations))
+  return(list(selection = selection, annotations = annotations,
+              palette = mapped$palette, has.checkv = !is.null(checkv.features),
+              selection.by = selection.by))
 }

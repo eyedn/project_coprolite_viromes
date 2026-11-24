@@ -20,9 +20,9 @@ prepare.checkv.sample.vf <- function(data) {
   if (any(data$checkv.filter != "conservative")) {
     stop("Sample prevalence requires conservative trimming only")
   }
-  if (any(data$vfdb_version != "VFDB_setB") ||
+  if (any(data$vfdb_version != "VFDB_setA") ||
       any(data$orf_pool != "all_bacterial_prokka_cds")) {
-    stop("Sample prevalence requires full-pool VFDB set B provenance")
+    stop("Sample prevalence requires full-pool VFDB set A provenance")
   }
   counts <- data[c("total.bacterial.orfs", "qualifying.vf.orfs")]
   if (any(!vapply(counts, is.numeric, logical(1))) ||

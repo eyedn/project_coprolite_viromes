@@ -216,9 +216,9 @@ kruskal.test(vf_hit_downsampled$value, vf_hit_downsampled$Var2)
 ## Complete CheckV genome analysis
 
 The complete-genome tables use `checkv_filter` plus `genome_id` as their
-key. The report analyzes regenerated full-pool VFDB set B using the
-unsuffixed inputs below and conservative trimming only. Every table must
-carry full-pool set B provenance.
+key. The report analyzes regenerated full-pool VFDB set A using the
+set-A-suffixed inputs below and conservative trimming only. Every table must
+carry full-pool set A provenance.
 
 ### Version-specific CheckV summaries
 
@@ -236,18 +236,18 @@ zero-hit samples remain zero. The contig exclusions `pal.ENG_LG4560.69` and
 `pal.AUT_2612` also apply here. Stages 4 and 4a require no rerun.
 
 ```{r versioned complete CheckV analysis, results='asis'}
-# use regenerated set B tables and validate their provenance.
+# use regenerated set A tables and validate their provenance.
 checkv.input.paths <- file.path(data_dir, c(
-  metadata = "checkv_genome_metadata.csv",
-  features = "checkv_genome_features.csv",
-  vf.hits = "checkv_genome_vf_hits.csv",
-  vf.stats = "checkv_genome_vf_stats.csv",
-  qc = "checkv_genome_qc.csv"
+  metadata = "checkv_genome_metadata_VFDB_setA.csv",
+  features = "checkv_genome_features_VFDB_setA.csv",
+  vf.hits = "checkv_genome_vf_hits_VFDB_setA.csv",
+  vf.stats = "checkv_genome_vf_stats_VFDB_setA.csv",
+  qc = "checkv_genome_qc_VFDB_setA.csv"
 ))
 names(checkv.input.paths) <- c(
   "metadata", "features", "vf.hits", "vf.stats", "qc"
 )
-bundle <- list(tag = "VFDB_setB", label = "VFDB set B")
+bundle <- list(tag = "VFDB_setA", label = "VFDB set A")
 checkv.required.columns <- list(
   metadata = c(
     "checkv_filter", "genome_id", "checkv_contig_id", "category",
@@ -542,7 +542,7 @@ for (group.column in c("category", "origin")) {
       shape = 21, fill = "grey70", color = "black", alpha = 0.55, size = 2
     ) +
     labs(
-      title = "Sample VF ORF prevalence: VFDB set B (conservative trimming)",
+      title = "Sample VF ORF prevalence: VFDB set A (conservative trimming)",
       x = if (group.column == "category") "Sample group" else "Sample origin",
       y = "Qualifying VFDB-hit ORFs / all bacterial-mode Prokka ORFs"
     ) +
@@ -593,7 +593,7 @@ for (summary.name in names(vf.sample.bootstraps)) {
     cats_order = group.order,
     plot.title = paste(
       "Bootstrap median sample VF prevalence:", summary.name,
-      "\nVFDB set B (conservative trimming)"
+      "\nVFDB set A (conservative trimming)"
     ),
     x.title = if (summary.name == "country") "Sample origin" else "Sample group",
     y.title = "Qualifying VFDB-hit ORFs / all bacterial-mode Prokka ORFs"
@@ -653,7 +653,10 @@ Each bar counts all conservative-trimmed genomes in one category and CheckV
 lifestyle group. VF-present genomes have at least one qualifying VFDB-hit ORF;
 all other genomes are VF-absent. These descriptive genome counts do not apply
 the sample-level eligibility filters above. Unknown lifestyle assignments are
-excluded and reported below.
+excluded and reported below; `virulent` is normalized to `lytic`. Within each
+sample category, All pools the Lytic and Temperate genomes. Blue segments show
+VF-present genomes, red segments show VF-absent genomes, and labels give raw
+genome counts, including zeros.
 
 ```{r genome VF presence absence, results='asis', fig.width=10, fig.height=7}
 # count each validated genome once using its CheckV-table lifestyle.
@@ -674,11 +677,12 @@ if (any(!vf.genome.data$category %in% analysis.categories)) {
 # complete both statuses; empty bars cannot be interpreted as proportions.
 vf.genome.counts <- vf.genome.data %>%
   filter(lifestyle %in% c("lytic", "temperate")) %>%
+  { bind_rows(., mutate(., lifestyle = "all")) } %>%
   mutate(
     category = factor(category, levels = analysis.categories),
     lifestyle = factor(
-      lifestyle, levels = c("lytic", "temperate"),
-      labels = c("Lytic", "Temperate")
+      lifestyle, levels = c("all", "lytic", "temperate"),
+      labels = c("All", "Lytic", "Temperate")
     ),
     vf.status = factor(
       if_else(qualifying.vf.orfs > 0L, "present", "absent"),
@@ -707,6 +711,7 @@ vf.genome.counts <- vf.genome.counts %>%
     fill.key = factor(
       paste(lifestyle, vf.status),
       levels = c(
+        "All present", "All absent",
         "Lytic present", "Lytic absent", "Temperate present",
         "Temperate absent"
       )
@@ -714,7 +719,7 @@ vf.genome.counts <- vf.genome.counts %>%
     bar.x = as.numeric(lifestyle),
     count.label = paste0("n = ", format(segment.count, trim = TRUE)),
     label.color = if_else(
-      lifestyle == "Lytic" & segment.count > 0L, "white", "black"
+      lifestyle %in% c("All", "Lytic") & segment.count > 0L, "white", "black"
     ),
     checkv.filter = conservative.filter,
     vfdb_version = bundle$tag,
@@ -746,8 +751,8 @@ vf.genome.presence.plot <- ggplot(vf.genome.counts) +
   ) +
   facet_grid(~ category, switch = "x", drop = FALSE) +
   scale_x_continuous(
-    breaks = c(1, 2), labels = c("Lytic", "Temperate"),
-    limits = c(0.5, 2.5), expand = expansion(mult = 0)
+    breaks = c(1, 2, 3), labels = c("All", "Lytic", "Temperate"),
+    limits = c(0.5, 3.5), expand = expansion(mult = 0)
   ) +
   scale_y_continuous(
     breaks = seq(0, 1, 0.25), labels = scales::label_percent(),
@@ -755,16 +760,19 @@ vf.genome.presence.plot <- ggplot(vf.genome.counts) +
   ) +
   scale_fill_manual(
     values = c(
-      "Lytic present" = "#08519C", "Lytic absent" = "#CB181D",
+      "All present" = "#08306B", "All absent" = "#99000D",
+      "Lytic present" = "#3182BD", "Lytic absent" = "#EF3B2C",
       "Temperate present" = "#9ECAE1", "Temperate absent" = "#FCAE91"
     ),
-    drop = FALSE
+    drop = FALSE,
+    labels = c("All VF-present", "All VF-absent", "Lytic VF-present",
+               "Lytic VF-absent", "Temperate VF-present", "Temperate VF-absent")
   ) +
   scale_color_identity() +
   labs(
     x = NULL, y = "Proportion of genomes", fill = NULL,
     title = "Genome VF presence/absence by CheckV lifestyle",
-    subtitle = "VFDB set B; conservative trimming"
+    subtitle = "VFDB set A; conservative trimming"
   ) +
   theme_bw() +
   theme(
@@ -773,7 +781,7 @@ vf.genome.presence.plot <- ggplot(vf.genome.counts) +
     panel.grid.major.x = element_blank(),
     panel.grid.minor = element_blank(),
     legend.position = "bottom"
-  )
+  ) + guides(fill = guide_legend(nrow = 3, byrow = TRUE))
 
 # export the descriptive counts and plot with full-pool provenance.
 vf.genome.output.stem <- paste0(
@@ -797,6 +805,170 @@ print(vf.genome.presence.plot)
 ```
 
 
+### VF-category composition among VF-positive genomes
+
+These bars describe **composition among VF-positive genomes**, rather than
+genome prevalence. Every qualifying VF ORF contributes once to its VF category;
+each segment is divided by all qualifying VF ORFs in that bar. All pools Lytic
+and Temperate genomes, excluding the unknown lifestyles reported above.
+The local VF reference supplies category names; unmatched VF IDs remain in the
+denominator as **Unmapped VF category** (gray). Category colors are shared with
+both genome-map layouts. Groups without VF-positive genomes are explicitly
+marked and have zero counts and zero proportions in the exported table.
+
+```{r VF category composition, results='asis', fig.width=12, fig.height=8}
+# read the same two-header reference format used by the contig report
+vf_reference <- read.csv(file.path(data_dir, "VFs.csv"), header = TRUE)
+colnames(vf_reference) <- vf_reference[1, ]
+vf_reference <- vf_reference[-1, c("VFID", "VFCID", "VF_Name", "VFcategory")]
+vf.category.data <- prepare.checkv.vf.categories(checkv.features, vf_reference)
+vf.category.colors <- vf.category.data$palette
+vf.category.features <- vf.category.data$features
+vf.category.tag <- paste0("_", bundle$tag, "_", conservative.filter)
+
+# retain and export unmatched identifiers across the full conservative pool
+vf.category.unmapped <- vf.category.features %>%
+  filter(vf.category == "Unmapped VF category") %>%
+  group_by(vf.id) %>%
+  summarise(qualifying.vf.orfs = n(), genomes = n_distinct(genome.id),
+            .groups = "drop") %>%
+  mutate(checkv.filter = conservative.filter, vfdb_version = bundle$tag,
+         orf_pool = "all_bacterial_prokka_cds", vf.reference = "VFs.csv")
+write.csv(
+  vf.category.unmapped,
+  file.path(checkv.figs.dir, paste0("vf_unmapped_category_ids",
+                                  vf.category.tag, ".csv")), row.names = FALSE
+)
+cat("\n\nUnmapped VF ORFs in the full conservative pool: ",
+    sum(vf.category.unmapped$qualifying.vf.orfs), " of ",
+    nrow(vf.category.features), ".\n\n", sep = "")
+
+vf.composition <- prepare.checkv.vf.composition(
+  vf.plot.data, vf.category.features
+) %>%
+  mutate(vf.category = factor(vf.category, levels = names(vf.category.colors)),
+         checkv.filter = conservative.filter, vfdb_version = bundle$tag,
+         orf_pool = "all_bacterial_prokka_cds", vf.reference = "VFs.csv",
+         population = "VF-positive genomes with recognized CheckV lifestyle")
+vf.composition.empty <- vf.composition %>%
+  distinct(category, lifestyle, vf.positive.genomes) %>%
+  filter(vf.positive.genomes == 0L)
+vf.composition.plot <- ggplot(
+  vf.composition, aes(x = lifestyle, y = proportion, fill = vf.category)
+) +
+  geom_col(width = 0.72, position = position_stack(reverse = TRUE)) +
+  geom_text(
+    data = vf.composition.empty,
+    aes(x = lifestyle, y = 0.5, label = "No VF-positive\ngenomes"),
+    inherit.aes = FALSE, size = 3.2
+  ) +
+  facet_grid(~ category, switch = "x", drop = FALSE) +
+  scale_x_discrete(drop = FALSE) +
+  scale_y_continuous(limits = c(0, 1), labels = scales::label_percent(),
+                     expand = expansion(mult = c(0, 0.02))) +
+  scale_fill_manual(values = vf.category.colors, drop = FALSE,
+                     labels = function(x) stringr::str_wrap(x, 28)) +
+  labs(x = NULL, y = "Proportion of qualifying VF ORFs", fill = "VF category",
+       title = "VF-category composition among VF-positive genomes",
+       subtitle = "VFDB set A; conservative trimming; All = Lytic + Temperate") +
+  theme_bw() +
+  theme(strip.placement = "outside", strip.background = element_blank(),
+        panel.grid.major.x = element_blank(), panel.grid.minor = element_blank(),
+        legend.position = "bottom") +
+  guides(fill = guide_legend(ncol = 4, byrow = TRUE))
+vf.composition.stem <- paste0("vf_category_composition_by_category_lifestyle",
+                               vf.category.tag)
+write.csv(vf.composition, file.path(checkv.figs.dir,
+                                   paste0(vf.composition.stem, ".csv")),
+          row.names = FALSE)
+ggsave(file.path(checkv.figs.dir, paste0(vf.composition.stem, ".svg")),
+       plot = vf.composition.plot, width = 12, height = 8)
+print(vf.composition.plot)
+```
+
+
+### Mapped-only VF-category composition and full-pool counts
+
+Mapped VF ORFs have a nonblank category in `VFs.csv`. These additional bars
+exclude unmapped calls from both numerator and denominator. All pools Lytic
+and Temperate genomes; unknown lifestyles are excluded from plotted bars.
+Bars with no mapped VF ORFs are explicitly marked.
+
+The two count summaries retain every reference category and zero-count group.
+**Full pool** includes every conservative-trimmed genome, including unknown
+lifestyles. **All**, **Lytic**, and **Temperate** use the plotted population;
+**Unknown** reports the excluded genomes and ORFs. These strata overlap:
+Full pool = All + Unknown, and All = Lytic + Temperate. Columns distinguish
+ORF counts from genome counts, including genomes with no qualifying VF calls.
+
+```{r mapped VF composition and counts, results='asis', fig.width=12, fig.height=8}
+vf.mapped.composition <- prepare.checkv.vf.composition(
+  vf.plot.data, vf.category.features,
+  category.names = names(vf.category.colors), mapped.only = TRUE
+) %>%
+  mutate(vf.category = factor(vf.category, levels = names(vf.category.colors)),
+         checkv.filter = conservative.filter, vfdb_version = bundle$tag,
+         orf_pool = "all_bacterial_prokka_cds", vf.reference = "VFs.csv")
+vf.mapped.empty <- vf.mapped.composition %>%
+  distinct(category, lifestyle, total.vf.orfs) %>% filter(total.vf.orfs == 0L)
+vf.mapped.sums <- vf.mapped.composition %>%
+  group_by(category, lifestyle) %>%
+  summarise(total = first(total.vf.orfs), proportion = sum(proportion),
+            .groups = "drop")
+if (any(abs(vf.mapped.sums$proportion[vf.mapped.sums$total > 0] - 1) > 1e-10)) {
+  stop("Mapped-only VF proportions do not sum to one")
+}
+vf.mapped.plot <- ggplot(
+  vf.mapped.composition, aes(x = lifestyle, y = proportion, fill = vf.category)
+) +
+  geom_col(width = 0.72, position = position_stack(reverse = TRUE)) +
+  geom_text(data = vf.mapped.empty,
+            aes(x = lifestyle, y = 0.5, label = "No mapped\nVF ORFs"),
+            inherit.aes = FALSE, size = 3.2) +
+  facet_grid(~ category, switch = "x", drop = FALSE) +
+  scale_x_discrete(drop = FALSE) +
+  scale_y_continuous(limits = c(0, 1), labels = scales::label_percent(),
+                     expand = expansion(mult = c(0, 0.02))) +
+  scale_fill_manual(
+    values = vf.category.colors,
+    breaks = setdiff(names(vf.category.colors), "Unmapped VF category"),
+    drop = FALSE, labels = function(x) stringr::str_wrap(x, 28)
+  ) +
+  labs(x = NULL, y = "Proportion of mapped qualifying VF ORFs",
+       fill = "VF category", title = "Mapped-only VF-category composition",
+       subtitle = "VFDB set A; conservative trimming; All = Lytic + Temperate") +
+  theme_bw() +
+  theme(strip.placement = "outside", strip.background = element_blank(),
+        panel.grid.major.x = element_blank(), panel.grid.minor = element_blank(),
+        legend.position = "bottom") +
+  guides(fill = guide_legend(ncol = 4, byrow = TRUE))
+vf.mapped.stem <- paste0("vf_mapped_category_composition_by_category_lifestyle",
+                          vf.category.tag)
+write.csv(vf.mapped.composition,
+          file.path(checkv.figs.dir, paste0(vf.mapped.stem, ".csv")),
+          row.names = FALSE)
+ggsave(file.path(checkv.figs.dir, paste0(vf.mapped.stem, ".svg")),
+       plot = vf.mapped.plot, width = 12, height = 8)
+print(vf.mapped.plot)
+
+vf.summaries <- prepare.checkv.vf.summaries(
+  vf.plot.data, vf.category.features, names(vf.category.colors)
+)
+for (summary.name in names(vf.summaries)) {
+  summary.table <- vf.summaries[[summary.name]] %>%
+    mutate(checkv.filter = conservative.filter, vfdb_version = bundle$tag,
+           orf_pool = "all_bacterial_prokka_cds", vf.reference = "VFs.csv")
+  write.csv(summary.table, file.path(checkv.figs.dir, paste0(
+    "vf_", gsub("\\.", "_", summary.name), vf.category.tag, ".csv"
+  )), row.names = FALSE)
+  cat("\n\n", if (summary.name == "category.counts") {
+    "VF-category ORF counts"
+  } else "Genome and VF ORF totals", "\n\n")
+  print(knitr::kable(summary.table))
+}
+```
+
+
 ### Annotated maps of the top VF-bearing genomes
 
 These maps rank the full conservative-trimmed genome pool by qualifying
@@ -807,22 +979,39 @@ minimum-denominator filters do not apply to this selection.
 The supplemental `checkv_viral_cds_conservative.csv`, produced by stage 4a
 from the existing viral Prokka GFF, contains **all** viral CDS, including
 hypothetical proteins and proteins without EC numbers. VF calls come from the
-separate bacterial-mode Prokka annotation and validated full-pool VFDB set B
+separate bacterial-mode Prokka annotation and validated full-pool VFDB set A
 search. Overlapping calls from these two prediction runs remain separate
 features; matching feature IDs across runs does not imply matching ORFs.
+`gene_features_selected9.tsv` adds CheckV HMM-hit ORFs at their supplied
+coordinates when its genome IDs match the selected nine genomes. If they do
+not match, the CheckV track is omitted and only viral and VF genes are shown.
+Every nonblank, nonmissing `hmm_db` is included without an extra
+score or E-value threshold; literal `NA` is treated as missing. CheckV hits
+are purple, labeled with wrapped `desc` from `checkv_hmms.tsv`, followed by
+`viral` or `microbial` on the next line. Missing descriptions use the HMM name
+and `(no descriptive label)`, followed by the category. Lookup keys are
+`hmm_db` to `database` and `hmm_name` to `hmm`; conflicting keys are an error.
+The three tracks run from CheckV to viral EC-bearing ORFs to VF calls,
+top to bottom, with separate label bands.
 
 Arrows retain original base-pair coordinates and point according to strand.
 Each panel has its own scale covering position 1 through the full genome
-length. Gray denotes viral CDS without EC annotations, blue denotes viral CDS
-with EC annotations, and red denotes qualifying VF calls. Labels identify all
-EC-bearing viral CDS and all VF calls, including features too narrow to contain
-text. Annotation IDs use category and selected-genome rank, followed by `V`
-(viral) or `F` (VF) and a coordinate-ordered index. They are deterministic for
-the selected genomes and shared by both figures and the annotation tables.
+length. Only viral CDS with nonblank EC annotations are drawn, in blue with
+labels showing annotation ID, protein product, and EC number. Every qualifying
+VF call is drawn regardless of EC,
+colored red, including unmapped calls, and labeled with
+annotation ID, `VF_Name`, and category on successive lines. Labels include
+features too narrow to contain text.
+Complete tables retain undrawn viral CDS and mark each row's plotted-feature
+status. Annotation IDs use category and selected-genome rank, followed by `V`
+(viral), `C` (CheckV), or `F` (VF) and a coordinate-ordered index. They are
+deterministic for
+the selected genomes and retained in the annotation tables. Purple labels omit
+annotation IDs; the tables retain HMM descriptions and categories.
 Products and original VF descriptions are reproduced without inferring a
 function for hypothetical proteins.
 
-```{r top VF genome maps, results='asis', fig.width=15, fig.height=27}
+```{r top VF genome maps, results='asis', fig.width=20, fig.height=90}
 # read the complete viral-CDS supplement; existing filtered exports stay intact.
 viral.cds.path <- file.path(data_dir, "checkv_viral_cds_conservative.csv")
 if (!file.exists(viral.cds.path)) {
@@ -839,17 +1028,40 @@ viral.cds <- read.csv(
 ) %>%
   rename(checkv.filter = checkv_filter, genome.id = genome_id,
          ec.number = ec_number)
-vf.genome.maps <- prepare.checkv.genome.maps(
-  vf.plot.data, checkv.metadata, checkv.features, viral.cds
+checkv.gene.features <- read.delim(
+  file.path(data_dir, "gene_features_selected9.tsv"), check.names = FALSE,
+  na.strings = c("NA", ""), colClasses = c(contig_id = "character")
 )
+# select genomes before checking whether the optional CheckV track matches.
+vf.genome.maps <- prepare.checkv.genome.maps(
+  vf.plot.data, checkv.metadata, checkv.features, viral.cds, vf_reference
+)
+if (setequal(checkv.gene.features$contig_id,
+             vf.genome.maps$selection$genome.id)) {
+  checkv.hmms <- read.delim(
+    file.path(data_dir, "checkv_hmms.tsv"), check.names = FALSE,
+    na.strings = c("NA", ""), colClasses = "character"
+  )
+  vf.genome.maps <- prepare.checkv.genome.maps(
+    vf.plot.data, checkv.metadata, checkv.features, viral.cds, vf_reference,
+    selection = vf.genome.maps$selection,
+    checkv.features = checkv.gene.features, checkv.hmms = checkv.hmms
+  )
+} else {
+  cat("\n\nCheckV annotation genomes do not match the selected genomes. ",
+      "Omitting the CheckV track; showing viral and VF genes only.\n\n",
+      sep = "")
+}
+cat("\n\nPlotted CheckV HMM-hit ORFs: ",
+    sum(vf.genome.maps$annotations$source.annotation.mode == "checkv"),
+    " across ", nrow(vf.genome.maps$selection), " selected genomes.\n\n", sep = "")
 vf.top.genome.selection <- vf.genome.maps$selection
 vf.top.genome.annotations <- vf.genome.maps$annotations
 vf.top.genome.separate <- create.checkv.genome.map(
   vf.genome.maps, "separate_tracks"
 )
-vf.top.genome.overlay <- create.checkv.genome.map(vf.genome.maps, "overlay")
 
-# export both views and their common selection and complete annotation tables.
+# export the three-track map, selection, and complete annotation table
 vf.map.tag <- paste0("_", bundle$tag, "_", conservative.filter)
 write.csv(
   vf.top.genome.selection,
@@ -866,17 +1078,11 @@ write.csv(
 ggsave(
   file.path(checkv.figs.dir, paste0("vf_top_genome_maps_separate_tracks",
                                   vf.map.tag, ".svg")),
-  plot = vf.top.genome.separate, width = 15, height = 27
-)
-ggsave(
-  file.path(checkv.figs.dir, paste0("vf_top_genome_maps_overlay",
-                                  vf.map.tag, ".svg")),
-  plot = vf.top.genome.overlay, width = 15, height = 27
+  plot = vf.top.genome.separate, width = 20, height = 90, limitsize = FALSE
 )
 print(knitr::kable(vf.top.genome.selection, row.names = FALSE))
 cat("\n\n")
 print(vf.top.genome.separate)
-print(vf.top.genome.overlay)
 
 # print every plotted feature, keeping each genome's table together.
 for (genome in vf.top.genome.selection$genome.id) {
