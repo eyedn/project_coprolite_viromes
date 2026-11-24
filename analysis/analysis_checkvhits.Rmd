@@ -14,9 +14,6 @@ ENG are excluded from every analysis and graph.
 ## Analysis setup
 
 ```{r setup, include=FALSE}
-# Aydin Karatas
-# Project Coprolite Viromes
-
 BASE.DIR <- "~/Documents/ucla/research/project_coprolite_viromes/analysis/"
 knitr::opts_chunk$set(root.dir = BASE.DIR)
 
@@ -493,14 +490,18 @@ modern genomes per group without replacement, including zero-hit genomes.
 All 30 paleo lytic and 5 paleo temperate genomes remain fixed. All pools the
 35 genomes before calculating mapped-only proportions. Empty denominators
 yield zeros in every category, including in means and percentile intervals;
-mean stacks may therefore total less than one.
+mean category percentages may therefore sum to less than 100%.
 
-The first graph shows iteration 1 with seed 123, followed by the mean stacked
-composition. The violins show the modern iteration-level proportions in the
-same gray, diamond-median, blue-interval style as the contig report. Within
-each VF category, positions run pal, pre, ind from left to right. Blue lines
-show the 2.5th–97.5th percentiles, including zero draws. Paleo values are fixed
-observed points without intervals. Constant modern distributions are points.
+The three grouped bar plots show means, means with 95% downsampling percentile
+intervals, and the same means and intervals on a `log10(percent + 1)` axis.
+VF categories run along x, with adjacent pal, pre, and ind bars and separate
+All, Lytic, and Temperate rows. Bar heights are the fixed paleo composition
+and the arithmetic mean of modern iteration proportions. The intervals are
+the central 95% of modern downsampling outcomes (2.5th–97.5th percentiles),
+including zero draws; paleo has no interval. The first two plots use linear
+0–100% axes. The third converts proportions to percentages before transforming
+the axis, retains zeros, and labels ticks in original percentages. All three
+plots use identical underlying means and interval endpoints.
 
 ```{r downsample-checkv-categories, fig.width=20, fig.height=12}
 vf.downsampling <- downsample.checkv.vf(
@@ -511,17 +512,14 @@ export.vf.category.tables(
   vf.downsampling, checkv.figs.dir,
   "checkv_vf_category_downsampling_VFDB_setA_conservative"
 )
-for (layout in c("example", "stacked", "violin")) {
+for (layout in c("means", "means_ci", "means_ci_log10")) {
   plot <- create.vf.downsampling(
-    vf.downsampling$summary, vf.category.colors, "mapped_only", layout,
-    iterations = vf.downsampling$iterations
+    vf.downsampling$summary, vf.category.colors, "mapped_only", layout
   )
-  layout.tag <- if (layout == "example") "example_iteration1" else layout
-  stem <- paste("checkv_vf_category_downsampling", layout.tag, "mapped_only",
+  stem <- paste("checkv_vf_category_downsampling", layout, "mapped_only",
                  "VFDB_setA_conservative", sep = "_")
   ggsave(file.path(checkv.figs.dir, paste0(stem, ".svg")), plot,
-         width = if (layout == "violin") 20 else 14,
-         height = if (layout == "violin") 12 else 10)
+         width = 20, height = 12)
   print(plot)
 }
 ```

@@ -103,14 +103,18 @@ for (version in unique(a$iterations$mapping)) {
             summary$lower == unname(quantile(values, .025)),
             summary$upper == unname(quantile(values, .975)),
             summary$empty.draws == sum(values == 0))
-  for (layout in c("stacked", "violin", "example")) {
-    plot <- create.vf.downsampling(a$summary, mapped$palette, version, layout,
-                                     iterations = a$iterations)
+  for (layout in c("means", "means_ci", "means_ci_log10")) {
+    plot <- create.vf.downsampling(a$summary, mapped$palette, version, layout)
     built <- ggplot_build(plot)
-    stopifnot(identical(plot$scales$get_scales("y")$limits, c(0, 1)))
-    if (layout == "violin") {
-      stopifnot(nrow(built$data[[3]]) ==
-                  nrow(filter(a$summary, mapping == version, category != "pal")))
+    expected <- filter(a$summary, mapping == version)
+    transform <- if (layout == "means_ci_log10") {
+      function(x) log10(100 * x + 1)
+    } else function(x) 100 * x
+    stopifnot(isTRUE(all.equal(built$data[[1]]$y,
+                                transform(expected$mean))))
+    if (layout != "means") {
+      stopifnot(nrow(built$data[[2]]) ==
+                  nrow(filter(expected, category != "pal")))
     }
   }
 }

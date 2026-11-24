@@ -16,9 +16,6 @@ from the input tables.
 ## Analysis setup
 
 ```{r setup, include=FALSE}
-# Aydin Karatas
-# Project Coprolite Viromes
-
 BASE.DIR <- "~/Documents/ucla/research/project_coprolite_viromes/analysis/"
 knitr::opts_chunk$set(root.dir = BASE.DIR)
 

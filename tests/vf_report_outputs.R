@@ -8,9 +8,13 @@
 suppressPackageStartupMessages(library(tidyverse))
 args <- commandArgs(trailingOnly = TRUE)
 stopifnot(length(args) %in% c(1L, 2L))
-shared.root <- length(args) == 2L && args[2] == "shared"
+mode <- if (length(args) == 2L) args[2] else "both"
+stopifnot(mode %in% c("both", "shared", "checkv"))
+shared.root <- mode == "shared"
 root <- normalizePath(args[1], mustWork = TRUE)
-checkv.dir <- if (shared.root) file.path(root, "checkv") else {
+checkv.dir <- if (mode == "checkv") {
+  file.path(root, "figures", "checkv")
+} else if (shared.root) file.path(root, "checkv") else {
   file.path(root, "checkv", "figures", "checkv")
 }
 contig.dir <- if (shared.root) file.path(root, "VFDB_setA") else {
@@ -51,7 +55,10 @@ stopifnot(all(pooled$expected == pooled$category.orfs))
 paleo.temperate <- filter(summary, category == "pal", lifestyle == "Temperate")
 stopifnot(all(paleo.temperate$mean == 0),
           all(paleo.temperate$empty.draws == 1000L),
-          length(list.files(checkv.dir, "downsampling_.*\\.svg$")) == 3L,
+          setequal(list.files(checkv.dir, "downsampling_.*\\.svg$"),
+            paste0("checkv_vf_category_downsampling_",
+              c("means", "means_ci", "means_ci_log10"),
+              "_mapped_only_VFDB_setA_conservative.svg")),
           identical(unique(draws$mapping), "mapped_only"),
           !"Unmapped VF category" %in% draws$vf.category,
           !any(grepl("(^|[._-])(BEL|ENG)([._-]|$)", selections$genome.id)))
@@ -76,26 +83,29 @@ for (name in c("vf_category_counts", "vf_genome_totals")) {
 }
 
 # each of the eight contig layouts has complete, bounded category proportions
-files <- list.files(contig.dir, "^contig_vf_composition_.*_counts.csv$",
-                     full.names = TRUE)
-stopifnot(length(files) == 8L,
-          length(list.files(contig.dir, "^contig_vf_composition_.*\\.svg$")) == 8L)
-compositions <- lapply(files, read.csv)
-for (data in compositions) {
-  totals <- data %>% group_by(group, lifestyle) %>%
-    summarise(count = sum(category.orfs), total = first(total.vf.orfs),
-              proportion = sum(proportion), .groups = "drop")
-  stopifnot(!any(data$group %in% c("BEL", "ENG")),
-            all(totals$count == totals$total),
-            all(abs(totals$proportion - if_else(totals$total > 0, 1, 0)) < 1e-12),
-            all(data$vfdb_version == "VFDB_setA"))
-  if (unique(data$mapping) == "mapped_only") {
-    stopifnot(!"Unmapped VF category" %in% data$vf.category)
+if (mode != "checkv") {
+  files <- list.files(contig.dir, "^contig_vf_composition_.*_counts.csv$",
+                       full.names = TRUE)
+  stopifnot(length(files) == 8L,
+            length(list.files(contig.dir, "^contig_vf_composition_.*\\.svg$")) == 8L)
+  compositions <- lapply(files, read.csv)
+  for (data in compositions) {
+    totals <- data %>% group_by(group, lifestyle) %>%
+      summarise(count = sum(category.orfs), total = first(total.vf.orfs),
+                proportion = sum(proportion), .groups = "drop")
+    stopifnot(!any(data$group %in% c("BEL", "ENG")),
+              all(totals$count == totals$total),
+              all(abs(totals$proportion - if_else(totals$total > 0, 1, 0)) < 1e-12),
+              all(data$vfdb_version == "VFDB_setA"))
+    if (unique(data$mapping) == "mapped_only") {
+      stopifnot(!"Unmapped VF category" %in% data$vf.category)
+    }
   }
 }
 
 # sample tests normalize pooled mapped counts and preserve zero-total omissions
-for (type in c("contig", "checkv")) {
+types <- if (mode == "checkv") "checkv" else c("contig", "checkv")
+for (type in types) {
   directory <- if (type == "contig") contig.dir else checkv.dir
   stem <- paste0(type, "_sample_vf_category_differential_VFDB_setA",
                    if (type == "checkv") "_conservative" else "")
@@ -113,7 +123,9 @@ for (type in c("contig", "checkv")) {
             isTRUE(all.equal(tests$kruskal.q.bh,
                               p.adjust(tests$kruskal.p.raw, "BH"))))
 }
-html.path <- if (shared.root) file.path(root, "analysis_checkvhits.html") else {
+html.path <- if (shared.root || mode == "checkv") {
+  file.path(root, "analysis_checkvhits.html")
+} else {
   file.path(root, "checkv", "analysis_checkvhits.html")
 }
 html <- readLines(html.path, warn = FALSE)
