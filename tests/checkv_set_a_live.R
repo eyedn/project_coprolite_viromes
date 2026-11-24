@@ -19,9 +19,15 @@ c <- which(grepl('^  mutate\\(vfdb.version = bundle\\$label', x))[1]
 eval(parse(text = x[a:c][!grepl("^```", x[a:c])]))
 samples <- prepare.checkv.sample.vf(vf.plot.data)
 cat("PASS: sample prevalence:", nrow(samples), "samples\n")
-vf.reference <- read.csv(file.path(data.dir, "VFs.csv"))
-colnames(vf.reference) <- vf.reference[1, ]
-vf.reference <- vf.reference[-1, c("VFID", "VFCID", "VF_Name", "VFcategory")]
+# use the same excluded-origin, mapped-only population as the report
+config.start <- which(startsWith(x, "EXCLUDED.ORIGINS <-"))
+config.end <- config.start + which(x[config.start:length(x)] == ")")[1] - 1L
+eval(parse(text = x[config.start:config.end]))
+ref.start <- which(startsWith(x, "```{r prepare-vf-reference-categories}")) + 1L
+ref.end <- ref.start + which(x[ref.start:length(x)] == "```")[1] - 2L
+eval(parse(text = x[ref.start:ref.end]))
+stopifnot(!any(vf.plot.data$origin %in% EXCLUDED.ORIGINS),
+          !"Unmapped VF category" %in% vf.category.features$vf.category)
 viral.cds <- read.csv(file.path(data.dir, "checkv_viral_cds_conservative.csv")) %>%
   rename(checkv.filter = checkv_filter, genome.id = genome_id,
          ec.number = ec_number)

@@ -26,6 +26,10 @@ vf.reference <- vf.meta.data
 colnames(vf.reference) <- vf.reference[1, ]
 vf.reference <- vf.reference[-1, c("VFID", "VFCID", "VF_Name", "VFcategory")]
 report <- readLines("analysis/analysis_contigs.Rmd")
+config.start <- which(startsWith(report, "EXCLUDED.ORIGINS <-"))
+config.end <- config.start +
+  which(report[config.start:length(report)] == ")")[1] - 1L
+eval(parse(text = report[config.start:config.end]))
 pdf(NULL)
 for (label in c("gene-vf-differential", "plot-source-tracker-results",
                  "plot-mixing-proportions-from-sourcetracker")) {

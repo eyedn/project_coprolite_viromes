@@ -58,6 +58,10 @@ for (directory in c("lifestyle", "vf", "sourcetracker")) {
              showWarnings = FALSE)
 }
 MAX.ITER <- 1000
+EXCLUDED.ORIGINS <- c("BEL", "ENG")
+EXCLUDED.SAMPLE.PATTERN <- paste0(
+  "(^|[._-])(", paste(EXCLUDED.ORIGINS, collapse = "|"), ")([._-]|$)"
+)
 MIN_TOTAL_ORFS <- 5L
 SUBSET.TOP <- 100
 ```
@@ -111,7 +115,7 @@ lifestyle.counts <- read.csv(
   row.names = 1
   )
 lifestyle.counts <- lifestyle.counts %>% select(
-  -matches("^[^.]+\\.(BEL|ENG)_"), -any_of("pal.AUT_2612")
+  -matches(EXCLUDED.SAMPLE.PATTERN), -any_of("pal.AUT_2612")
   )
 # derive total counts, the unadjusted ratio, a +1 pseudocount ratio for
 # zero-safe comparison, and the temperate fraction.
@@ -364,14 +368,15 @@ This analysis uses one independently regenerated inventory and pooled
 sample summary, using the set A inputs loaded above. These bacterial-mode
 calls are on predicted phage contigs; hits are sequence-similarity signals.
 Annotation status does not restrict the search pool. The eight category
-composition plots pool all recognized lytic/temperate contigs without sample
-exclusions or an ORF cutoff. Mapped-inclusive bars retain unmapped calls in
+composition plots pool recognized lytic/temperate contigs after excluding
+BEL and ENG, without further sample exclusions or an ORF cutoff.
+Mapped-inclusive bars retain unmapped calls in
 gray; mapped-only bars exclude them from both numerator and denominator.
 The exported counts include zeros and report unknown-lifestyle exclusions.
 
 The new category differential analysis pools mapped VF ORFs within biological
-samples across all lifestyles. It excludes `pal.ENG_LG4560.69` and
-`pal.AUT_2612`, applies no minimum-ORF cutoff, and reports samples with zero
+samples across all lifestyles. BEL and ENG are excluded throughout the
+report. This analysis also excludes `pal.AUT_2612`, applies no minimum-ORF cutoff, and reports samples with zero
 mapped totals as omitted. Tests use `log10(CPM + 1)`, category-wise
 Kruskal–Wallis tests, and Dunn tests when the raw p-value is below 0.05.
 BH correction is applied across Kruskal–Wallis tests, within each category's
@@ -399,18 +404,24 @@ phage.vf.stats <- data.table::fread(
   data.table = FALSE
 )
 validate.vf.pool(phage.vf.stats, vfdb.version)
-phage.vf.plot.data <- prepare.phage.vf.plot.data(phage.vf.stats) %>%
+phage.vf.plot.data <- phage.vf.stats %>%
+  filter(!origin %in% EXCLUDED.ORIGINS) %>%
+  prepare.phage.vf.plot.data() %>%
   select(category, origin, lifestyle, vf.orf.prevalence, vf.contig.coverage)
 sample.vf.coverage <- pool.phage.vf.coverage(
   data = phage.vf.stats,
-  exclusions = c("pal.ENG_LG4560.69", "pal.BEL_SRS510175")
+  exclusions = unique(c(
+    "pal.ENG_LG4560.69", "pal.BEL_SRS510175",
+    phage.vf.stats$sample[phage.vf.stats$origin %in% EXCLUDED.ORIGINS]
+  ))
 )
 ```
 
 ```{r contig-category-composition-and-tests, results='asis', fig.width=17, fig.height=8}
 cat("### Contig VF-category composition and sample differential tests\n\n")
 run.contig.category.analysis(
-  vfdb.input.paths[["orfs"]], phage.vf.stats, vf.reference, version.figs.dir
+  vfdb.input.paths[["orfs"]], phage.vf.stats, vf.reference, version.figs.dir,
+  excluded.origins = EXCLUDED.ORIGINS
 )
 rm(phage.vf.stats)
 invisible(gc())
@@ -508,7 +519,8 @@ if (anyDuplicated(sample.vf.stats$sample)) {
   stop("Duplicate sample VFDB summaries")
 }
 sample.vf.stats <- sample.vf.stats %>%
-  filter(!sample %in% c("pal.ENG_LG4560.69", "pal.AUT_2612"))
+  filter(!origin %in% EXCLUDED.ORIGINS,
+         !sample %in% c("pal.ENG_LG4560.69", "pal.AUT_2612"))
 vf.counts.long <- read.vf.inventory.counts(
   vfdb.input.paths[["orfs"]], vfdb.version, sample.vf.stats$sample
 )
@@ -850,7 +862,7 @@ vf.aln.boot.res.by.country <- get_row_median(
   data = vf.contig.hits,
   num_iter = MAX.ITER,
   row_num = 3,
-  cats = c("AUT", "AWC", "BEL", "BMS", "ZAP", "ZAF",
+  cats = c("AUT", "AWC", "BMS", "ZAP", "ZAF",
            "CHN", "DNK", "ESP", "USA",
            "FJI", "MEX", "MDG", "TZA", "NPL", "PER")
   )
@@ -984,10 +996,12 @@ more strongly represented.
 # deviations.
 mixing.props <- read.table(
   file = paste0(data.dir, "/sourcetracker_output/mixing_proportions.txt"),
-  header = 1, sep = "\t")
+  header = 1, sep = "\t") %>%
+  filter(!str_detect(SampleID, EXCLUDED.SAMPLE.PATTERN))
 mixing.sds <- read.table(
   file = paste0(data.dir, "/sourcetracker_output/mixing_proportions_stds.txt"),
-  header = 1, sep = "\t")
+  header = 1, sep = "\t") %>%
+  filter(!str_detect(SampleID, EXCLUDED.SAMPLE.PATTERN))
 mixing.props
 mixing.sds
 ```

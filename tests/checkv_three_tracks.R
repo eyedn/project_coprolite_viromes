@@ -18,9 +18,15 @@ figs.dir <- if (length(arguments)) arguments[1] else tempfile("three_tracks_")
 a <- which(grepl("^checkv.input.paths <-", x))
 b <- which(grepl('^  mutate\\(vfdb.version = bundle\\$label', x))[1]
 invisible(capture.output(eval(parse(text = x[a:b][!grepl("^```", x[a:b])]))))
-vf.reference <- read.csv(file.path(data.dir, "VFs.csv"))
-colnames(vf.reference) <- vf.reference[1, ]
-vf.reference <- vf.reference[-1, c("VFID", "VFCID", "VF_Name", "VFcategory")]
+# use the same excluded-origin, mapped-only population as the report
+config.start <- which(startsWith(x, "EXCLUDED.ORIGINS <-"))
+config.end <- config.start + which(x[config.start:length(x)] == ")")[1] - 1L
+eval(parse(text = x[config.start:config.end]))
+ref.start <- which(startsWith(x, "```{r prepare-vf-reference-categories}")) + 1L
+ref.end <- ref.start + which(x[ref.start:length(x)] == "```")[1] - 2L
+eval(parse(text = x[ref.start:ref.end]))
+stopifnot(!any(vf.plot.data$origin %in% EXCLUDED.ORIGINS),
+          !"Unmapped VF category" %in% vf.category.features$vf.category)
 a <- which(grepl("^```\\{r top-VF-genome-maps,", x)) + 1L
 b <- a + which(x[a:length(x)] == "```")[1] - 2L
 # suppress printing here; the chunk's SVG export exercises the full render

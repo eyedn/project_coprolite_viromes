@@ -51,7 +51,14 @@ stopifnot(all(pooled$expected == pooled$category.orfs))
 paleo.temperate <- filter(summary, category == "pal", lifestyle == "Temperate")
 stopifnot(all(paleo.temperate$mean == 0),
           all(paleo.temperate$empty.draws == 1000L),
-          length(list.files(checkv.dir, "downsampling_.*\\.svg$")) == 4L)
+          length(list.files(checkv.dir, "downsampling_.*\\.svg$")) == 3L,
+          identical(unique(draws$mapping), "mapped_only"),
+          !"Unmapped VF category" %in% draws$vf.category,
+          !any(grepl("(^|[._-])(BEL|ENG)([._-]|$)", selections$genome.id)))
+example <- read.table.export(checkv.dir, paste0(stem, "_example"))
+stopifnot(all(example$iteration == 1L),
+          nrow(example) == nrow(filter(draws, iteration == 1L)),
+          !any(grepl("inclusive|grouped", list.files(checkv.dir))))
 
 # retained presence counts and count summaries retain the same genome pool
 presence <- read.table.export(checkv.dir,
@@ -78,7 +85,8 @@ for (data in compositions) {
   totals <- data %>% group_by(group, lifestyle) %>%
     summarise(count = sum(category.orfs), total = first(total.vf.orfs),
               proportion = sum(proportion), .groups = "drop")
-  stopifnot(all(totals$count == totals$total),
+  stopifnot(!any(data$group %in% c("BEL", "ENG")),
+            all(totals$count == totals$total),
             all(abs(totals$proportion - if_else(totals$total > 0, 1, 0)) < 1e-12),
             all(data$vfdb_version == "VFDB_setA"))
   if (unique(data$mapping) == "mapped_only") {
@@ -109,6 +117,24 @@ html.path <- if (shared.root) file.path(root, "analysis_checkvhits.html") else {
   file.path(root, "checkv", "analysis_checkvhits.html")
 }
 html <- readLines(html.path, warn = FALSE)
-stopifnot(!any(grepl("Historical selected-network|lifestyle agreement|violin",
+stopifnot(!any(grepl("Historical selected-network|lifestyle agreement",
                      html, ignore.case = TRUE)))
+
+# inspect every exported graph and sample-bearing table for excluded origins
+excluded.pattern <- "(^|[^A-Za-z])(BEL|ENG)([^A-Za-z]|$)"
+graphs <- list.files(root, "\\.svg$", recursive = TRUE, full.names = TRUE)
+stopifnot(length(graphs) > 0L)
+for (path in graphs) {
+  stopifnot(!any(grepl(excluded.pattern, readLines(path, warn = FALSE))))
+}
+tables <- list.files(root, "\\.csv$", recursive = TRUE, full.names = TRUE)
+for (path in tables) {
+  data <- read.csv(path, check.names = FALSE)
+  stopifnot(!any(grepl(excluded.pattern, names(data))))
+  columns <- intersect(names(data),
+    c("origin", "sample", "sample.id", "genome.id", "genome_id", "SampleID"))
+  for (column in columns) {
+    stopifnot(!any(grepl(excluded.pattern, data[[column]])))
+  }
+}
 cat("PASS: live output sizes, zeros, denominators, percentiles, retained outputs\n")

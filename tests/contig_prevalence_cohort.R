@@ -19,6 +19,9 @@ check.cohort <- function(lifestyle, stats) {
   env$data.dir <- fixture.dir
   env$MIN_TOTAL_ORFS <- 5L
   env$MAX.ITER <- 1000L
+  start <- which(startsWith(report, "EXCLUDED.ORIGINS <-"))
+  end <- start + which(report[start:length(report)] == ")")[1] - 1L
+  eval(parse(text = report[start:end]), env)
   start <- which(startsWith(report, "lifestyle.counts <- read.csv("))
   end <- which(startsWith(report, "# bootstrap group and country medians")) - 1L
   eval(parse(text = report[start:end]), env)

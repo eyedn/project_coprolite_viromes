@@ -20,8 +20,13 @@ export.vf.category.tables <- function(tables, directory, stem) {
 }
 
 
-run.contig.category.analysis <- function(path, stats, reference, directory) {
+run.contig.category.analysis <- function(path, stats, reference, directory,
+                                          excluded.origins = character()) {
   data <- read.contig.vf.categories(path, stats, reference)
+  # apply report-wide exclusions after reconciling the complete source pool
+  data$units <- data$units %>% filter(!origin %in% excluded.origins)
+  data$features <- data$features %>% filter(!origin %in% excluded.origins)
+  data$excluded <- data$excluded %>% filter(!origin %in% excluded.origins)
   export.vf.category.tables(list(excluded.unknown.lifestyle = data$excluded),
                              directory, "contig_composition_VFDB_setA")
   for (mapped.only in c(FALSE, TRUE)) {

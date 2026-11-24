@@ -9,7 +9,8 @@
 downsample.checkv.vf <- function(stats, vf, category.names,
                                   iterations = 1000L, seed = 123L,
                                   lytic = 30L, temperate = 5L,
-                                  paleo.lytic = 30L, paleo.temperate = 5L) {
+                                  paleo.lytic = 30L, paleo.temperate = 5L,
+                                  mapped.only = FALSE) {
   if (iterations < 1L || iterations != as.integer(iterations)) {
     stop("Iterations must be a positive integer")
   }
@@ -59,7 +60,10 @@ downsample.checkv.vf <- function(stats, vf, category.names,
                relationship = "many-to-many") %>%
     count(iteration, category, lifestyle, vf.category, name = "category.orfs")
   results <- list()
-  for (mapping in c("mapped_inclusive", "mapped_only")) {
+  mappings <- if (mapped.only) "mapped_only" else {
+    c("mapped_inclusive", "mapped_only")
+  }
+  for (mapping in mappings) {
     categories <- if (mapping == "mapped_only") {
       setdiff(category.names, "Unmapped VF category")
     } else category.names
@@ -80,10 +84,12 @@ downsample.checkv.vf <- function(stats, vf, category.names,
                               c("All", "Lytic", "Temperate")),
            vf.category = factor(vf.category, category.names))
   summary <- draws %>% group_by(mapping, category, lifestyle, vf.category) %>%
-    summarise(mean = mean(proportion), lower = quantile(proportion, .025),
+    summarise(mean = mean(proportion), median = median(proportion),
+              lower = quantile(proportion, .025),
               upper = quantile(proportion, .975),
               mean.category.orfs = mean(category.orfs),
               empty.draws = sum(total.vf.orfs == 0), iterations = n(),
               .groups = "drop")
-  list(selections = selections, iterations = draws, summary = summary)
+  list(selections = selections, iterations = draws, summary = summary,
+       example = filter(draws, iteration == 1L))
 }
